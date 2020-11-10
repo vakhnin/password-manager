@@ -1,7 +1,9 @@
-import hashlib
+
 import getpass
-import re
+import hashlib
+
 import os
+import re
 import pyperclip
 import encryption
 
@@ -96,6 +98,7 @@ def reg_user():
             print("User successfully registered. Now you can log in")
             break
 
+from my_app.model_X.main import Object
 
 # This function extracts passwords table from database
 def get_passwords(username, password):
