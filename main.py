@@ -98,8 +98,6 @@ def reg_user():
             print("User successfully registered. Now you can log in")
             break
 
-from my_app.model_X.main import Object
-
 # This function extracts passwords table from database
 def get_passwords(username, password):
     os.chdir("databases" + os.sep + username)
