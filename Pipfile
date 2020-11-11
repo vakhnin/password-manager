@@ -9,6 +9,7 @@ verify_ssl = true
 pycryptodomex = "*"
 click = "*"
 pycryptodome = "*"
+pyperclip = "*"
 
 [requires]
 python_version = "3.8"

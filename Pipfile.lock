@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "1c99ad8ff03d6db329124ef4b34567e25d4e49b8449163f64d1600ee0e5846e8"
+            "sha256": "94dbabc7daf3b12c2f62a5c2a189bbc36080ab1ac122723d9d38fed6d37a5dfd"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -105,6 +105,13 @@
             ],
             "index": "pypi",
             "version": "==3.9.9"
+        },
+        "pyperclip": {
+            "hashes": [
+                "sha256:9abef1e79ce635eb62309ecae02dfb5a3eb952fa7d6dce09c1aef063f81424d3"
+            ],
+            "index": "pypi",
+            "version": "==1.8.1"
         }
     },
     "develop": {}
