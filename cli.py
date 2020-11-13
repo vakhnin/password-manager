@@ -31,16 +31,17 @@ def get_passwords(username, password):
 
 @click.command()
 @click.argument('command')
-@click.option('-u', '--username')
-@click.option("--username", prompt="Username", help="Provide your username")
+@click.option('-u', '--user')
+@click.option("--user", prompt="Username", help="Provide your username",
+              default=lambda: os.environ.get('USERNAME'))
 @click.option('-p', '--password')
 @click.option('--password', prompt=True, hide_input=True)
-def main(command, username, password):
+def main(command, user, password):
     """
     Функция выбора команды
     """
-    if command == 'show': # Отображение всех сохраненных логинов
-        passwords_table = get_passwords(username, password)
+    if command == 'show':  # Отображение всех сохраненных логинов
+        passwords_table = get_passwords(user, password)
         if not passwords_table:
             print("!!!Something went wrong. Database is corrupted or not exists!!!")
         for login in passwords_table.keys():
