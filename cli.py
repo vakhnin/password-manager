@@ -58,7 +58,7 @@ def show(user, password):
 @click.option("--login", prompt="Login", help="Provide login")
 def get(user, password, login):
     """
-    get logins
+    get password by login
     """
     click.echo('Command: get')
 
@@ -73,7 +73,7 @@ def get(user, password, login):
 @click.option("--login", prompt="Login", help="Provide login")
 def delete(user, password, login):
     """
-    delete logins
+    delete login and password
     """
     click.echo('Command: delete')
 
