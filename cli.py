@@ -9,12 +9,14 @@ def cli(ctx):
     pass
 
 
+user_argument = click.option('--user', '-u', prompt="Username", help="Provide your username",
+                             default=lambda: os.environ.get('USERNAME'))
+password_argument = click.option('--password', '-p', prompt=True, hide_input=True)
+
+
 @cli.command()
-@click.option('-u', '--user')
-@click.option("--user", prompt="Username", help="Provide your username",
-              default=lambda: os.environ.get('USERNAME'))
-@click.option('-p', '--password')
-@click.option('--password', prompt=True, hide_input=True)
+@user_argument
+@password_argument
 def useradd(user, password):
     """
     add user
@@ -23,11 +25,8 @@ def useradd(user, password):
 
 
 @cli.command()
-@click.option('-u', '--user')
-@click.option("--user", prompt="Username", help="Provide your username",
-              default=lambda: os.environ.get('USERNAME'))
-@click.option('-p', '--password')
-@click.option('--password', prompt=True, hide_input=True)
+@user_argument
+@password_argument
 def deluser(user, password):
     """
     delete user
@@ -36,11 +35,8 @@ def deluser(user, password):
 
 
 @cli.command()
-@click.option('-u', '--user')
-@click.option("--user", prompt="Username", help="Provide your username",
-              default=lambda: os.environ.get('USERNAME'))
-@click.option('-p', '--password')
-@click.option('--password', prompt=True, hide_input=True)
+@user_argument
+@password_argument
 def show(user, password):
     """
     show logins
@@ -49,13 +45,9 @@ def show(user, password):
 
 
 @cli.command()
-@click.option('-u', '--user')
-@click.option("--user", prompt="Username", help="Provide your username",
-              default=lambda: os.environ.get('USERNAME'))
-@click.option('-p', '--password')
-@click.option('--password', prompt=True, hide_input=True)
-@click.option('-l', '--login')
-@click.option("--login", prompt="Login", help="Provide login")
+@user_argument
+@password_argument
+@click.option('-l', "--login", prompt="Login", help="Provide login")
 def get(user, password, login):
     """
     get password by login
@@ -64,13 +56,9 @@ def get(user, password, login):
 
 
 @cli.command()
-@click.option('-u', '--user')
-@click.option("--user", prompt="Username", help="Provide your username",
-              default=lambda: os.environ.get('USERNAME'))
-@click.option('-p', '--password')
-@click.option('--password', prompt=True, hide_input=True)
-@click.option('-l', '--login')
-@click.option("--login", prompt="Login", help="Provide login")
+@user_argument
+@password_argument
+@click.option('-l', "--login", prompt="Login", help="Provide login")
 def delete(user, password, login):
     """
     delete login and password
@@ -79,15 +67,10 @@ def delete(user, password, login):
 
 
 @cli.command()
-@click.option('-u', '--user')
-@click.option("--user", prompt="Username", help="Provide your username",
-              default=lambda: os.environ.get('USERNAME'))
-@click.option('-p', '--password')
-@click.option('--password', prompt=True, hide_input=True)
-@click.option('-l', '--login')
-@click.option("--login", prompt="Login", help="Provide login")
-@click.option('-ps', '--password-for-safe')
-@click.option('--password-for-safe', prompt=True, hide_input=True)
+@user_argument
+@password_argument
+@click.option('-l', "--login", prompt="Login", help="Provide login")
+@click.option('-ps', '--password-for-safe', prompt=True, hide_input=True)
 def add(user, password, login, password_for_safe):
     """
     add login and password
