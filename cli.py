@@ -2,7 +2,7 @@
 import click
 import os
 
-from database_setup import User, create_session
+from database import User, create_session
 from main import get_hash
 
 
