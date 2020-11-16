@@ -2,6 +2,11 @@
 import click
 import os
 
+from sqlalchemy.orm import mapper
+from sqlalchemy.orm import sessionmaker
+
+from database_setup import users_table, User, create_session
+
 
 @click.group()
 @click.pass_context
@@ -12,6 +17,21 @@ def cli(ctx):
 user_argument = click.option('--user', '-u', prompt="Username", help="Provide your username",
                              default=lambda: os.environ.get('USERNAME'))
 password_argument = click.option('--password', '-p', prompt=True, hide_input=True)
+
+# from sqlalchemy import create_engine
+# engine = create_engine('sqlite:///db.sqlite', echo=False)
+# Session = sessionmaker(bind=engine)
+# session = Session()
+
+session, _ = create_session()
+
+mapper(User, users_table)
+# user = User("user1", "qweasdzxc")
+
+print(session.query(User).filter(User.user == 'user1').all())
+
+# session.add(user)
+session.commit()
 
 
 @cli.command()
