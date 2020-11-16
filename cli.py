@@ -2,10 +2,7 @@
 import click
 import os
 
-from sqlalchemy.orm import mapper
-from sqlalchemy.orm import sessionmaker
-
-from database_setup import users_table, User, create_session
+from database_setup import User, create_session
 
 
 @click.group()
@@ -18,21 +15,6 @@ user_argument = click.option('--user', '-u', prompt="Username", help="Provide yo
                              default=lambda: os.environ.get('USERNAME'))
 password_argument = click.option('--password', '-p', prompt=True, hide_input=True)
 
-# from sqlalchemy import create_engine
-# engine = create_engine('sqlite:///db.sqlite', echo=False)
-# Session = sessionmaker(bind=engine)
-# session = Session()
-
-session, _ = create_session()
-
-mapper(User, users_table)
-# user = User("user1", "qweasdzxc")
-
-print(session.query(User).filter(User.user == 'user1').all())
-
-# session.add(user)
-session.commit()
-
 
 @cli.command()
 @user_argument
@@ -41,7 +23,17 @@ def useradd(user, password):
     """
     add user
     """
-    click.echo('Command: useradd')
+    session, _ = create_session()
+
+    if len(session.query(User).filter(User.user == user).all()):
+        print(f'User named "{user}" already exists')
+        print('New user not created')
+    else:
+        user_for_add = User(user, password)
+        session.add(user_for_add)
+        print(f'User named "{user}" created')
+
+    session.commit()
 
 
 @cli.command()
@@ -51,7 +43,22 @@ def deluser(user, password):
     """
     delete user
     """
-    click.echo('Command: deluser ')
+    session, _ = create_session()
+
+    if not len(session.query(User).filter(User.user == user)
+                       .filter(User.password == password).all()):
+        print('Incorrect login or password')
+        session.commit()
+        return
+
+    if len(session.query(User).filter(User.user == user).all()):
+        session.query(User).filter(User.user == user).delete()
+        print(f'User named "{user}" deleted')
+    else:
+        print(f'User named "{user}" does not exist')
+        print('User not deleted')
+
+    session.commit()
 
 
 @cli.command()
