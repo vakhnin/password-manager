@@ -3,6 +3,7 @@ import click
 import os
 
 from database_setup import User, create_session
+from main import get_hash
 
 
 @click.group()
@@ -29,7 +30,8 @@ def useradd(user, password):
         print(f'User named "{user}" already exists')
         print('New user not created')
     else:
-        user_for_add = User(user, password)
+        pass_hash = get_hash((user + password).encode("utf-8"))
+        user_for_add = User(user, pass_hash)
         session.add(user_for_add)
         print(f'User named "{user}" created')
 
@@ -45,8 +47,9 @@ def deluser(user, password):
     """
     session, _ = create_session()
 
+    pass_hash = get_hash((user + password).encode("utf-8"))
     if not len(session.query(User).filter(User.user == user)
-                       .filter(User.password == password).all()):
+                       .filter(User.password == pass_hash).all()):
         print('Incorrect login or password')
         session.commit()
         return
