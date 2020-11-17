@@ -1,10 +1,11 @@
 
 import getpass
 import hashlib
-
 import os
 import re
+
 import pyperclip
+
 import encryption
 
 

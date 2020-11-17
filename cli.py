@@ -1,6 +1,7 @@
 # cli.py
-import click
 import os
+
+import click
 
 import database_manager.models
 

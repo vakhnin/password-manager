@@ -1,10 +1,11 @@
 import os.path
-from main import get_hash
 
-from sqlalchemy import create_engine
-from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
+from sqlalchemy import (Column, ForeignKey, Integer, MetaData, String, Table,
+                        create_engine)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+
+from main import get_hash
 
 
 class SQLAlchemyManager:
