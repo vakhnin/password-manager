@@ -2,7 +2,7 @@
 import click
 import os
 
-from database import User, create_session
+from database_manager.models import User, create_session
 from main import get_hash
 
 
@@ -24,7 +24,7 @@ def useradd(user, password):
     """
     add user
     """
-    session, _ = create_session()
+    session = create_session()
 
     if len(session.query(User).filter(User.user == user).all()):
         print(f'User named "{user}" already exists')
@@ -45,7 +45,7 @@ def deluser(user, password):
     """
     delete user
     """
-    session, _ = create_session()
+    session = create_session()
 
     pass_hash = get_hash((user + password).encode("utf-8"))
     if not len(session.query(User).filter(User.user == user)
