@@ -2,8 +2,7 @@
 import click
 import os
 
-from database_manager.models import User, create_session
-from main import get_hash
+import database_manager.models
 
 
 @click.group()
@@ -22,20 +21,16 @@ password_argument = click.option('--password', '-p', prompt=True, hide_input=Tru
 @password_argument
 def useradd(user, password):
     """
-    add user
+    add user command
     """
-    session = create_session()
+    session = database_manager.models.create_session()
 
-    if len(session.query(User).filter(User.user == user).all()):
+    if database_manager.models.check_user(session, user):
         print(f'User named "{user}" already exists')
         print('New user not created')
     else:
-        pass_hash = get_hash((user + password).encode("utf-8"))
-        user_for_add = User(user, pass_hash)
-        session.add(user_for_add)
+        database_manager.models.add_user(session, user, password)
         print(f'User named "{user}" created')
-
-    session.commit()
 
 
 @cli.command()
@@ -43,25 +38,20 @@ def useradd(user, password):
 @password_argument
 def deluser(user, password):
     """
-    delete user
+    delete user command
     """
-    session = create_session()
+    session = database_manager.models.create_session()
 
-    pass_hash = get_hash((user + password).encode("utf-8"))
-    if not len(session.query(User).filter(User.user == user)
-                       .filter(User.password == pass_hash).all()):
+    if not database_manager.models.check_user_password(session, user, password):
         print('Incorrect login or password')
-        session.commit()
         return
 
-    if len(session.query(User).filter(User.user == user).all()):
-        session.query(User).filter(User.user == user).delete()
+    if database_manager.models.check_user(session, user):
+        database_manager.models.del_user(session, user)
         print(f'User named "{user}" deleted')
     else:
         print(f'User named "{user}" does not exist')
         print('User not deleted')
-
-    session.commit()
 
 
 @cli.command()
@@ -69,7 +59,7 @@ def deluser(user, password):
 @password_argument
 def show(user, password):
     """
-    show logins
+    show logins command
     """
     click.echo('Command: show')
 
@@ -80,7 +70,7 @@ def show(user, password):
 @click.option('-l', "--login", prompt="Login", help="Provide login")
 def get(user, password, login):
     """
-    get password by login
+    get password by login command
     """
     click.echo('Command: get')
 
@@ -91,7 +81,7 @@ def get(user, password, login):
 @click.option('-l', "--login", prompt="Login", help="Provide login")
 def delete(user, password, login):
     """
-    delete login and password
+    delete login and password command
     """
     click.echo('Command: delete')
 
@@ -103,7 +93,7 @@ def delete(user, password, login):
 @click.option('-ps', '--password-for-safe', prompt=True, hide_input=True)
 def add(user, password, login, password_for_safe):
     """
-    add login and password
+    add login and password command
     """
     click.echo('Command: add')
 

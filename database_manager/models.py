@@ -1,4 +1,6 @@
 import os.path
+from main import get_hash
+
 from sqlalchemy import create_engine
 from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
@@ -30,6 +32,44 @@ def create_session():
         Base.metadata.create_all(engine)
 
     return sessionmaker(bind=engine)()
+
+
+def check_user(session, user):
+    """
+    check user existence in BD
+    """
+    if len(session.query(User).filter(User.user == user).all()):
+        return True
+    return False
+
+
+def check_user_password(session, user, password):
+    """
+    check user and password in BD
+    """
+    pass_hash = get_hash((user + password).encode("utf-8"))
+    if len(session.query(User).filter(User.user == user)
+                   .filter(User.password == pass_hash).all()):
+        return True
+    return False
+
+
+def add_user(session, user, password):
+    """
+    add user to BD
+    """
+    pass_hash = get_hash((user + password).encode("utf-8"))
+    user_for_add = User(user, pass_hash)
+    session.add(user_for_add)
+    session.commit()
+
+
+def del_user(session, user):
+    """
+    delete user from BD
+    """
+    session.query(User).filter(User.user == user).delete()
+    session.commit()
 
 
 Base = declarative_base()
