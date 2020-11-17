@@ -10,6 +10,7 @@ pycryptodomex = "*"
 click = "*"
 pycryptodome = "*"
 pyperclip = "*"
+sqlalchemy = "*"
 
 [requires]
 python_version = "3.8"
