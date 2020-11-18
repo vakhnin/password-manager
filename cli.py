@@ -3,7 +3,9 @@ import os
 
 import click
 
-import database_manager.models
+from database_manager.models import SQLAlchemyManager
+
+FILE_DB = 'db.sqlite'
 
 
 @click.group()
@@ -24,13 +26,13 @@ def useradd(user, password):
     """
     add user command
     """
-    session = database_manager.models.create_session()
+    user_obj = SQLAlchemyManager(FILE_DB, user)
 
-    if database_manager.models.check_user(session, user):
+    if user_obj.check_user():
         print(f'User named "{user}" already exists')
         print('New user not created')
     else:
-        database_manager.models.add_user(session, user, password)
+        user_obj.add_user(password)
         print(f'User named "{user}" created')
 
 
@@ -41,14 +43,14 @@ def deluser(user, password):
     """
     delete user command
     """
-    session = database_manager.models.create_session()
+    user_obj = SQLAlchemyManager(FILE_DB, user)
 
-    if not database_manager.models.check_user_password(session, user, password):
+    if not user_obj.check_user_password(password):
         print('Incorrect login or password')
         return
 
-    if database_manager.models.check_user(session, user):
-        database_manager.models.del_user(session, user)
+    if user_obj.check_user():
+        user_obj.del_user()
         print(f'User named "{user}" deleted')
     else:
         print(f'User named "{user}" does not exist')
