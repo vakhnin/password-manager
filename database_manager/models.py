@@ -1,5 +1,3 @@
-import os.path
-
 from sqlalchemy import (Column, ForeignKey, Integer, MetaData, String, Table,
                         create_engine)
 from sqlalchemy.ext.declarative import declarative_base
@@ -27,6 +25,13 @@ class User(Base):
         return f'<User({self.user}, {self.password})>'
 
 
+class Unit(Base):
+    __tablename__ = 'units'
+    user_id = Column(Integer, primary_key=True)
+    login = Column(String, nullable=False, primary_key=True)
+    password = Column(String)
+
+
 class SQLAlchemyManager:
     """Менеджер управления БД, предположительно будет отвечать за установление
     коннектов с базой, CRUD(Create, Read, Update, Delete) по хранящимся юнитам"""
@@ -50,14 +55,10 @@ class SQLAlchemyManager:
         """Инициализация класса при вызове с поднятием текущей сессии"""
         self._user = user
         self._file_db = file_db
-        file_db_exists = False
-        if os.path.isfile(self.file_db):
-            file_db_exists = True
 
         engine = create_engine(f'sqlite:///{self.file_db}', echo=False)
 
-        if not file_db_exists:
-            Base.metadata.create_all(engine)
+        Base.metadata.create_all(engine)
 
         self._session = sessionmaker(bind=engine)()
 
