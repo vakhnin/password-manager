@@ -1,4 +1,4 @@
-from sqlalchemy import (Column, ForeignKey, Integer, MetaData, String, Table,
+from sqlalchemy import (Column, ForeignKey, Integer, MetaData, String, PrimaryKeyConstraint,
                         create_engine)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -15,7 +15,7 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     user = Column(String, nullable=False, unique=True,
                   sqlite_on_conflict_unique='FAIL')
-    password = Column(String)
+    password = Column(String, nullable=False)
 
     def __init__(self, user, password):
         self.user = user
@@ -27,9 +27,13 @@ class User(Base):
 
 class Unit(Base):
     __tablename__ = 'units'
-    user_id = Column(Integer, primary_key=True)
-    login = Column(String, nullable=False, primary_key=True)
-    password = Column(String)
+    user_id = Column(Integer,
+                     ForeignKey('users.id',
+                                ondelete="CASCADE"),
+                     nullable=False)
+    login = Column(String, nullable=False)
+    password = Column(String, nullable=False)
+    tmp = PrimaryKeyConstraint(user_id, login)
 
 
 class SQLAlchemyManager:
