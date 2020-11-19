@@ -31,16 +31,16 @@ class Unit(Base):
     login = Column(String, nullable=False)
     password = Column(String, nullable=False)
     PrimaryKeyConstraint(user_id, login)
-    user = relationship("User", backref="logins")
+    user = relationship("User", backref="logins", cascade="all, delete")
 
 
 class UnitManager:
     _session = None
     _user = None
 
-    def __init__(self, session, user_id):
+    def __init__(self, session, user):
         self._session = session
-        self._user = user_id
+        self._user = user
 
     def add_item(self, login, password_for_login):
         user = self._session.query(User).filter(User.user == self._user).first()

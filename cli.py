@@ -2,6 +2,7 @@
 import os
 
 import click
+from sqlalchemy.orm.exc import FlushError
 
 from database_manager.models import SQLAlchemyManager, FILE_DB
 
@@ -102,14 +103,10 @@ def add(user, password, login, password_for_login):
         print('Incorrect login or password')
         return
 
-    # if manager_obj.check_user():
-    #     print(f'User named "{user}" already exists')
-    #     print('New user not created')
-    # else:
-    #     manager_obj.add_user(password)
-    #     print(f'User named "{user}" created')
-
-    manager_obj.unit_obj.add_item(login, password_for_login)
+    try:
+        manager_obj.unit_obj.add_item(login, password_for_login)
+    except FlushError:
+        print(f'Error: login "{login}" already exists')
 
 
 if __name__ == '__main__':
