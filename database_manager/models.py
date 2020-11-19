@@ -44,11 +44,6 @@ class Unit(Base):
 class UnitManager:
     _session = None
     _user_id = None
-    # _login = None
-    #
-    # @property
-    # def login(self):
-    #     return self._login
 
     def __init__(self, session, user_id):
         self._session = session
@@ -67,7 +62,7 @@ class SQLAlchemyManager:
     _file_db = ''
     _user = None
     _session = None
-    _unit_obj = None
+    unit_obj = None
 
     @property
     def user(self):
@@ -99,8 +94,8 @@ class SQLAlchemyManager:
 
         self._session = sessionmaker(bind=engine)()
 
-        self._unit_obj = UnitManager(self._session,
-                                     self._get_id_by_user(user))
+        self.unit_obj = UnitManager(self._session,
+                                    self._get_id_by_user(user))
 
     def check_user(self):
         """

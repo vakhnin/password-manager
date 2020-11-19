@@ -24,13 +24,13 @@ def useradd(user, password):
     """
     add user command
     """
-    user_obj = SQLAlchemyManager(FILE_DB, user)
+    manager_obj = SQLAlchemyManager(FILE_DB, user)
 
-    if user_obj.check_user():
+    if manager_obj.check_user():
         print(f'User named "{user}" already exists')
         print('New user not created')
     else:
-        user_obj.add_user(password)
+        manager_obj.add_user(password)
         print(f'User named "{user}" created')
 
 
@@ -41,14 +41,14 @@ def deluser(user, password):
     """
     delete user command
     """
-    user_obj = SQLAlchemyManager(FILE_DB, user)
+    manager_obj = SQLAlchemyManager(FILE_DB, user)
 
-    if not user_obj.check_user_password(password):
+    if not manager_obj.check_user_password(password):
         print('Incorrect login or password')
         return
 
-    if user_obj.check_user():
-        user_obj.del_user()
+    if manager_obj.check_user():
+        manager_obj.del_user()
         print(f'User named "{user}" deleted')
     else:
         print(f'User named "{user}" does not exist')
@@ -96,7 +96,20 @@ def add(user, password, login, password_for_login):
     """
     add login and password command
     """
-    click.echo('Command: add')
+    manager_obj = SQLAlchemyManager(FILE_DB, user)
+
+    if not manager_obj.check_user_password(password):
+        print('Incorrect login or password')
+        return
+
+    # if manager_obj.check_user():
+    #     print(f'User named "{user}" already exists')
+    #     print('New user not created')
+    # else:
+    #     manager_obj.add_user(password)
+    #     print(f'User named "{user}" created')
+
+    manager_obj.unit_obj.add_item(login, password_for_login)
 
 
 if __name__ == '__main__':
