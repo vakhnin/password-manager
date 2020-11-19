@@ -3,9 +3,7 @@ import os
 
 import click
 
-from database_manager.models import SQLAlchemyManager
-
-FILE_DB = 'db.sqlite'
+from database_manager.models import SQLAlchemyManager, FILE_DB
 
 
 @click.group()
@@ -93,8 +91,8 @@ def delete(user, password, login):
 @user_argument
 @password_argument
 @click.option('-l', "--login", prompt="Login", help="Provide login")
-@click.option('-ps', '--password-for-safe', prompt=True, hide_input=True)
-def add(user, password, login, password_for_safe):
+@click.option('-pl', '--password-for-login', prompt=True, hide_input=True)
+def add(user, password, login, password_for_login):
     """
     add login and password command
     """

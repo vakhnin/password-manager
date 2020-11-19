@@ -33,7 +33,32 @@ class Unit(Base):
                      nullable=False)
     login = Column(String, nullable=False)
     password = Column(String, nullable=False)
-    tmp = PrimaryKeyConstraint(user_id, login)
+    PrimaryKeyConstraint(user_id, login)
+
+    def __init__(self, user_id, login, password_for_login):
+        self.user_id = user_id
+        self.login = login
+        self.password = password_for_login
+
+
+class UnitManager:
+    _session = None
+    _user_id = None
+    # _login = None
+    #
+    # @property
+    # def login(self):
+    #     return self._login
+
+    def __init__(self, session, user_id):
+        self._session = session
+        self._user_id = user_id
+
+    def add_item(self, login, password_for_login):
+        print(11111)
+        unit_for_add = Unit(self._user_id, login, password_for_login)
+        self._session.add(unit_for_add)
+        self._session.commit()
 
 
 class SQLAlchemyManager:
@@ -42,6 +67,7 @@ class SQLAlchemyManager:
     _file_db = ''
     _user = None
     _session = None
+    _unit_obj = None
 
     @property
     def user(self):
@@ -55,6 +81,13 @@ class SQLAlchemyManager:
     def session(self):
         return self._session
 
+    def _get_id_by_user(self, user):
+        """Получаем id по имени пользоваетля"""
+        result = self.session.query(User).filter(User.user == self.user).first()
+        if result:
+            return result.id
+        return None
+
     def __init__(self, file_db=FILE_DB, user=None):
         """Инициализация класса при вызове с поднятием текущей сессии"""
         self._user = user
@@ -65,6 +98,9 @@ class SQLAlchemyManager:
         Base.metadata.create_all(engine)
 
         self._session = sessionmaker(bind=engine)()
+
+        self._unit_obj = UnitManager(self._session,
+                                     self._get_id_by_user(user))
 
     def check_user(self):
         """
