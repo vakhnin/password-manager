@@ -1,7 +1,7 @@
 from sqlalchemy import (Column, ForeignKey, Integer, String, PrimaryKeyConstraint,
                         create_engine)
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, relationship
 
 from main import get_hash
 
@@ -21,9 +21,6 @@ class User(Base):
         self.user = user
         self.password = password
 
-    def __repr__(self):
-        return f'<User({self.user}, {self.password})>'
-
 
 class Unit(Base):
     __tablename__ = 'units'
@@ -34,24 +31,20 @@ class Unit(Base):
     login = Column(String, nullable=False)
     password = Column(String, nullable=False)
     PrimaryKeyConstraint(user_id, login)
-
-    def __init__(self, user_id, login, password_for_login):
-        self.user_id = user_id
-        self.login = login
-        self.password = password_for_login
+    user = relationship("User", backref="logins")
 
 
 class UnitManager:
     _session = None
-    _user_id = None
+    _user = None
 
     def __init__(self, session, user_id):
         self._session = session
-        self._user_id = user_id
+        self._user = user_id
 
     def add_item(self, login, password_for_login):
-        unit_for_add = Unit(self._user_id, login, password_for_login)
-        self._session.add(unit_for_add)
+        user = self._session.query(User).filter(User.user == self._user).first()
+        user.logins.append(Unit(login=login, password=password_for_login))
         self._session.commit()
 
 
@@ -75,13 +68,6 @@ class SQLAlchemyManager:
     def session(self):
         return self._session
 
-    def _get_id_by_user(self, user):
-        """Получаем id по имени пользоваетля"""
-        result = self.session.query(User).filter(User.user == user).first()
-        if result:
-            return result.id
-        return None
-
     def __init__(self, file_db=FILE_DB, user=None):
         """Инициализация класса при вызове с поднятием текущей сессии"""
         self._user = user
@@ -93,8 +79,7 @@ class SQLAlchemyManager:
 
         self._session = sessionmaker(bind=engine)()
 
-        self.unit_obj = UnitManager(self._session,
-                                    self._get_id_by_user(user))
+        self.unit_obj = UnitManager(self._session, self.user)
 
     def check_user(self):
         """
