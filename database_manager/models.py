@@ -1,4 +1,4 @@
-from sqlalchemy import (Column, ForeignKey, Integer, MetaData, String, PrimaryKeyConstraint,
+from sqlalchemy import (Column, ForeignKey, Integer, String, PrimaryKeyConstraint,
                         create_engine)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -50,7 +50,6 @@ class UnitManager:
         self._user_id = user_id
 
     def add_item(self, login, password_for_login):
-        print(11111)
         unit_for_add = Unit(self._user_id, login, password_for_login)
         self._session.add(unit_for_add)
         self._session.commit()
@@ -78,7 +77,7 @@ class SQLAlchemyManager:
 
     def _get_id_by_user(self, user):
         """Получаем id по имени пользоваетля"""
-        result = self.session.query(User).filter(User.user == self.user).first()
+        result = self.session.query(User).filter(User.user == user).first()
         if result:
             return result.id
         return None
@@ -101,7 +100,7 @@ class SQLAlchemyManager:
         """
         check user existence in BD
         """
-        if len(self.session.query(User).filter(User.user == self.user).all()):
+        if self.session.query(User).filter(User.user == self.user).first():
             return True
         return False
 
@@ -110,8 +109,8 @@ class SQLAlchemyManager:
         check user and password in BD
         """
         pass_hash = get_hash((self.user + password).encode("utf-8"))
-        if len(self.session.query(User).filter(User.user == self.user)
-                       .filter(User.password == pass_hash).all()):
+        if self.session.query(User).filter(User.user == self.user)\
+                .filter(User.password == pass_hash).first():
             return True
         return False
 
