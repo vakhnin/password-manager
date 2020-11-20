@@ -63,7 +63,15 @@ def show(user, password):
     """
     show logins command
     """
-    click.echo('Command: show')
+    manager_obj = SQLAlchemyManager(FILE_DB, user)
+
+    if not manager_obj.check_user_password(password):
+        print('Incorrect login or password')
+        return
+
+    logins = manager_obj.unit_obj.all_logins()
+    for login in logins:
+        print(login)
 
 
 @cli.command()

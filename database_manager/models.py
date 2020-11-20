@@ -42,6 +42,14 @@ class UnitManager:
         self._session = session
         self._user = user
 
+    def all_logins(self):
+        """Отображение всех логинов"""
+        logins_list = []
+        user = self._session.query(User).filter(User.user == self._user).first()
+        for unit in user.logins:
+            logins_list.append(unit.login)
+        return logins_list
+
     def add_item(self, login, password_for_login):
         user = self._session.query(User).filter(User.user == self._user).first()
         user.logins.append(Unit(login=login, password=password_for_login))
