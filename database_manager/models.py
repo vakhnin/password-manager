@@ -16,6 +16,9 @@ class User(Base):
     user = Column(String, nullable=False, unique=True,
                   sqlite_on_conflict_unique='FAIL')
     password = Column(String, nullable=False)
+    logins = relationship("Unit",
+                          back_populates="user",
+                          cascade="all, delete-orphan")
 
     def __init__(self, user, password):
         self.user = user
@@ -31,7 +34,7 @@ class Unit(Base):
     login = Column(String, nullable=False)
     password = Column(String, nullable=False)
     PrimaryKeyConstraint(user_id, login)
-    user = relationship(User, backref=backref("logins", cascade="all,delete-orphan"))
+    user = relationship("User", back_populates="logins")
 
 
 class UnitManager:
