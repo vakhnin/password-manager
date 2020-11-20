@@ -111,10 +111,11 @@ def add(user, password, login, password_for_login):
         print('Incorrect login or password')
         return
 
-    try:
-        manager_obj.unit_obj.add_item(login, password_for_login)
-    except FlushError:
+    if manager_obj.unit_obj.check_login(login):
         print(f'Error: login "{login}" already exists')
+    else:
+        manager_obj.unit_obj.add_item(login, password_for_login)
+        print(f' login "{login}" added')
 
 
 if __name__ == '__main__':

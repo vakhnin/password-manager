@@ -50,6 +50,9 @@ class UnitManager:
             logins_list.append(unit.login)
         return logins_list
 
+    def check_login(self, login):
+        return login in self.all_logins()
+
     def add_item(self, login, password_for_login):
         user = self._session.query(User).filter(User.user == self._user).first()
         user.logins.append(Unit(login=login, password=password_for_login))
