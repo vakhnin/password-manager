@@ -3,7 +3,6 @@ import os
 
 import click
 import pyperclip
-from sqlalchemy.orm.exc import FlushError
 
 from database_manager.models import SQLAlchemyManager, FILE_DB
 
@@ -104,7 +103,17 @@ def delete(user, password, login):
     """
     delete login and password command
     """
-    click.echo('Command: delete')
+    manager_obj = SQLAlchemyManager(FILE_DB, user)
+
+    if not manager_obj.check_user_password(password):
+        print('Incorrect login or password')
+        return
+
+    if manager_obj.unit_obj.check_login(login):
+        manager_obj.unit_obj.delete_unit(login)
+        print(f' login "{login}" deleted')
+    else:
+        print(f'Error: login "{login}" not exists')
 
 
 @cli.command()

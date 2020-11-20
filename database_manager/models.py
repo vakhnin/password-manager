@@ -1,7 +1,7 @@
 from sqlalchemy import (Column, ForeignKey, Integer, String, PrimaryKeyConstraint,
                         create_engine)
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import sessionmaker, relationship, backref
 
 from main import get_hash
 
@@ -31,7 +31,7 @@ class Unit(Base):
     login = Column(String, nullable=False)
     password = Column(String, nullable=False)
     PrimaryKeyConstraint(user_id, login)
-    user = relationship("User", backref="logins", cascade="all, delete")
+    user = relationship(User, backref=backref("logins", cascade="all,delete-orphan"))
 
 
 class UnitManager:
@@ -64,6 +64,14 @@ class UnitManager:
             if unit.login == login:
                 return unit.password
         return None
+
+    def delete_unit(self, login):
+        user = self._session.query(User).filter(User.user == self._user).first()
+        for unit in user.logins:
+            if unit.login == login:
+                user.logins.remove(unit)
+                self._session.commit()
+                return
 
 
 class SQLAlchemyManager:
