@@ -28,8 +28,7 @@ def useradd(user, password):
     manager_obj = SQLAlchemyManager(FILE_DB, user)
 
     if manager_obj.check_user():
-        print(f'User named "{user}" already exists')
-        print('New user not created')
+        print(f'Error: User named "{user}" already exists')
     else:
         manager_obj.add_user(password)
         print(f'User named "{user}" created')
@@ -45,15 +44,11 @@ def deluser(user, password):
     manager_obj = SQLAlchemyManager(FILE_DB, user)
 
     if not manager_obj.check_user_password(password):
-        print('Incorrect login or password')
+        print('Error: incorrect login or password')
         return
 
-    if manager_obj.check_user():
-        manager_obj.del_user()
-        print(f'User named "{user}" deleted')
-    else:
-        print(f'User named "{user}" does not exist')
-        print('User not deleted')
+    manager_obj.del_user()
+    print(f'User named "{user}" deleted')
 
 
 @cli.command()
@@ -66,7 +61,7 @@ def show(user, password):
     manager_obj = SQLAlchemyManager(FILE_DB, user)
 
     if not manager_obj.check_user_password(password):
-        print('Incorrect login or password')
+        print('Error: incorrect login or password')
         return
 
     logins = manager_obj.unit_obj.all_logins()
@@ -85,7 +80,7 @@ def get(user, password, login):
     manager_obj = SQLAlchemyManager(FILE_DB, user)
 
     if not manager_obj.check_user_password(password):
-        print('Incorrect login or password')
+        print('Error: incorrect login or password')
         return
 
     if manager_obj.unit_obj.check_login(login):
@@ -106,7 +101,7 @@ def delete(user, password, login):
     manager_obj = SQLAlchemyManager(FILE_DB, user)
 
     if not manager_obj.check_user_password(password):
-        print('Incorrect login or password')
+        print('Error: incorrect login or password')
         return
 
     if manager_obj.unit_obj.check_login(login):
@@ -128,7 +123,7 @@ def add(user, password, login, password_for_login):
     manager_obj = SQLAlchemyManager(FILE_DB, user)
 
     if not manager_obj.check_user_password(password):
-        print('Incorrect login or password')
+        print('Error: incorrect login or password')
         return
 
     if manager_obj.unit_obj.check_login(login):
