@@ -58,6 +58,13 @@ class UnitManager:
         user.logins.append(Unit(login=login, password=password_for_login))
         self._session.commit()
 
+    def get_password(self, login):
+        user = self._session.query(User).filter(User.user == self._user).first()
+        for unit in user.logins:
+            if unit.login == login:
+                return unit.password
+        return None
+
 
 class SQLAlchemyManager:
     """Менеджер управления БД, предположительно будет отвечать за установление

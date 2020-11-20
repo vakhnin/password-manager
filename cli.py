@@ -2,6 +2,7 @@
 import os
 
 import click
+import pyperclip
 from sqlalchemy.orm.exc import FlushError
 
 from database_manager.models import SQLAlchemyManager, FILE_DB
@@ -82,7 +83,17 @@ def get(user, password, login):
     """
     get password by login command
     """
-    click.echo('Command: get')
+    manager_obj = SQLAlchemyManager(FILE_DB, user)
+
+    if not manager_obj.check_user_password(password):
+        print('Incorrect login or password')
+        return
+
+    if manager_obj.unit_obj.check_login(login):
+        pyperclip.copy(manager_obj.unit_obj.get_password(login))
+        print(f'Password is placed on the clipboard')
+    else:
+        print(f'Error: login "{login}" not exists')
 
 
 @cli.command()
