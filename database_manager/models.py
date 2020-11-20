@@ -56,7 +56,7 @@ class UnitManager:
     def check_login(self, login):
         return login in self.all_logins()
 
-    def add_item(self, login, password_for_login):
+    def add_unit(self, login, password_for_login):
         user = self._session.query(User).filter(User.user == self._user).first()
         user.logins.append(Unit(login=login, password=password_for_login))
         self._session.commit()
@@ -141,5 +141,8 @@ class SQLAlchemyManager:
         """
         delete user from BD
         """
-        self.session.query(User).filter(User.user == self.user).delete()
+        self.session.query(User)\
+            .filter(User.user == self.user).first().logins = []
+        self.session.query(User) \
+            .filter(User.user == self.user).delete()
         self.session.commit()

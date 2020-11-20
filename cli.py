@@ -134,7 +134,7 @@ def add(user, password, login, password_for_login):
     if manager_obj.unit_obj.check_login(login):
         print(f'Error: login "{login}" already exists')
     else:
-        manager_obj.unit_obj.add_item(login, password_for_login)
+        manager_obj.unit_obj.add_unit(login, password_for_login)
         print(f' login "{login}" added')
 
 
