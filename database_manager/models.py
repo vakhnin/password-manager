@@ -11,6 +11,7 @@ Base = declarative_base()
 
 
 class User(Base):
+    """Определение таблицы users"""
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     user = Column(String, nullable=False, unique=True,
@@ -26,6 +27,7 @@ class User(Base):
 
 
 class Unit(Base):
+    """Определение таблицы units"""
     __tablename__ = 'units'
     user_id = Column(Integer,
                      ForeignKey('users.id',
@@ -38,6 +40,7 @@ class Unit(Base):
 
 
 class UnitManager:
+    """Класс работы с unit"""
     _session = None
     _user = None
 
@@ -54,14 +57,17 @@ class UnitManager:
         return logins_list
 
     def check_login(self, login):
+        """Проверка существования логина"""
         return login in self.all_logins()
 
     def add_unit(self, login, password_for_login):
+        """Добавление unit"""
         user = self._session.query(User).filter(User.user == self._user).first()
         user.logins.append(Unit(login=login, password=password_for_login))
         self._session.commit()
 
     def get_password(self, login):
+        """Получение пароля"""
         user = self._session.query(User).filter(User.user == self._user).first()
         for unit in user.logins:
             if unit.login == login:
@@ -69,6 +75,7 @@ class UnitManager:
         return None
 
     def delete_unit(self, login):
+        """Удаление unit"""
         user = self._session.query(User).filter(User.user == self._user).first()
         for unit in user.logins:
             if unit.login == login:
@@ -104,6 +111,7 @@ class SQLAlchemyManager:
 
         engine = create_engine(f'sqlite:///{self.file_db}', echo=False)
 
+        # Создание файла БД, если его нет, обновление таблиц, при изменении
         Base.metadata.create_all(engine)
 
         self._session = sessionmaker(bind=engine)()
