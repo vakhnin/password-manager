@@ -1,7 +1,7 @@
 import random
 import unittest
 
-import encryption
+from encryption_manager.models import AESCipher
 
 PASSWORDCHARS = '+-/*!&$#?=@<>abcdefghijklnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'
 STRCHARS = ' abcdefghijklnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'
@@ -18,7 +18,7 @@ class TestEncryption(unittest.TestCase):
         password = 'D&EXHb(48v'
         str_for_test = 'String for test!!!111'
 
-        cipher = encryption.AESCipher(password)
+        cipher = AESCipher(password)
 
         encrypted = cipher.encrypt(str_for_test)
         result = cipher.decrypt(encrypted)
@@ -42,7 +42,7 @@ class TestEncryption(unittest.TestCase):
             for i in range(100):
                 str_for_test += random.choice(STRCHARS)
 
-            cipher = encryption.AESCipher(password)
+            cipher = AESCipher(password)
 
             encrypted = cipher.encrypt(str_for_test)
             result = cipher.decrypt(encrypted)
