@@ -1,7 +1,7 @@
-import unittest
-from main import get_hash
 import hashlib
+import unittest
 
+from main import get_hash
 
 
 class Test_get_hash(unittest.TestCase):
