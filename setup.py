@@ -1,9 +1,14 @@
-from cx_Freeze import Executable, setup
+from setuptools import setup
 
 setup(
-    name="SOS",
-    version="0.1",
-    description="Save our secrets",
-    executables=[Executable("main.py")],
-    options={"build_exe": {"include_msvcr": True}}
+    name='SOS',
+    version='0.1',
+    py_modules=['cli'],
+    install_requires=[
+        'Click',
+    ],
+    entry_points='''
+        [console_scripts]
+        SOS=cli:cli
+    ''',
 )
