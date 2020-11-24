@@ -1,3 +1,5 @@
+import os
+
 from sqlalchemy import (Column, ForeignKey, Integer, PrimaryKeyConstraint,
                         String, create_engine)
 from sqlalchemy.ext.declarative import declarative_base
@@ -5,7 +7,12 @@ from sqlalchemy.orm import relationship, sessionmaker
 
 from main import get_hash
 
-FILE_DB = 'db.sqlite'
+DIR_DB = 'databases'
+DIR_UNITS_DBS = DIR_DB + os.sep + 'units'
+FILE_USERS_DB = os.path.join(DIR_DB, 'users.sqlite')
+
+if not os.path.exists(DIR_UNITS_DBS):
+    os.makedirs(DIR_UNITS_DBS)
 
 Base = declarative_base()
 
@@ -17,9 +24,10 @@ class User(Base):
     user = Column(String, nullable=False, unique=True,
                   sqlite_on_conflict_unique='FAIL')
     password = Column(String, nullable=False)
-    logins = relationship("Unit",
-                          back_populates="user",
-                          cascade="all, delete-orphan")
+
+    # logins = relationship("Unit",
+    #                       back_populates="user",
+    #                       cascade="all, delete-orphan")
 
     def __init__(self, user, password):
         self.user = user
@@ -29,14 +37,15 @@ class User(Base):
 class Unit(Base):
     """Определение таблицы units"""
     __tablename__ = 'units'
-    user_id = Column(Integer,
-                     ForeignKey('users.id',
-                                ondelete="CASCADE"),
-                     nullable=False)
-    login = Column(String, nullable=False)
+    id = Column(Integer, primary_key=True)
+    # user_id = Column(Integer,
+    #                  ForeignKey('users.id',
+    #                             ondelete="CASCADE"),
+    #                  nullable=False)
+    login = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
-    PrimaryKeyConstraint(user_id, login)
-    user = relationship("User", back_populates="logins")
+    # PrimaryKeyConstraint(user_id, login)
+    # user = relationship("User", back_populates="logins")
 
 
 class UserManager:
@@ -61,7 +70,7 @@ class UserManager:
         check user and password in BD
         """
         pass_hash = get_hash((self._user + password).encode("utf-8"))
-        if self._session.query(User).filter(User.user == self._user)\
+        if self._session.query(User).filter(User.user == self._user) \
                 .filter(User.password == pass_hash).first():
             return True
         return False
@@ -76,13 +85,12 @@ class UserManager:
         self._session.commit()
 
     def del_user(self):
-        """
+        """DIR_UNITS_DBS + os.sep + user + ".sqlite"
         delete user from BD
         """
-        self._session.query(User)\
-            .filter(User.user == self._user).first().logins = []
         self._session.query(User) \
             .filter(User.user == self._user).delete()
+        os.remove(DIR_UNITS_DBS + os.sep + self._user + ".sqlite")
         self._session.commit()
 
 
@@ -134,8 +142,9 @@ class UnitManager:
 class SQLAlchemyManager:
     """Менеджер управления БД, предположительно будет отвечать за установление
     коннектов с базой, CRUD(Create, Read, Update, Delete) по хранящимся юнитам"""
-    _file_db = ''
-    _session = None
+    _file_user_db = ''
+    _session_for_user = None
+    _session_for_item = None
 
     _user = None
 
@@ -143,28 +152,46 @@ class SQLAlchemyManager:
     unit_obj = None
 
     @property
-    def file_db(self):
-        return self._file_db
+    def file_user_db(self):
+        return self._file_user_db
 
     @property
-    def session(self):
-        return self._session
+    def session_for_user(self):
+        return self._session_for_user
+
+    @property
+    def session_for_item(self):
+        return self._session_for_item
 
     @property
     def user(self):
         return self._user
 
-    def __init__(self, file_db=FILE_DB, user=None):
+    def __init__(self, file_db=FILE_USERS_DB, user=None, password=None):
         """Инициализация класса при вызове с поднятием текущей сессии"""
         self._user = user
-        self._file_db = file_db
+        self._file_user_db = file_db
 
-        engine = create_engine(f'sqlite:///{self.file_db}', echo=False)
+        # Инициализация User
+        engine = create_engine(f'sqlite:///{self.file_user_db}', echo=False)
 
         # Создание файла БД, если его нет, обновление таблиц, при изменении
-        Base.metadata.create_all(engine)
+        Base.metadata.create_all(engine,
+                                 tables=[Base.metadata.tables["users"]])
 
-        self._session = sessionmaker(bind=engine)()
+        self._session_for_user = sessionmaker(bind=engine)()
 
-        self.user_obj = UserManager(self.session, self.user)
-        self.unit_obj = UnitManager(self.session, self.user)
+        self.user_obj = UserManager(self.session_for_user, self.user)
+
+        # Инициализация Items
+        engine = create_engine(
+            f'sqlite:///{DIR_UNITS_DBS + os.sep + user + ".sqlite"}',
+            echo=False)
+
+        # Создание файла БД, если его нет, обновление таблиц, при изменении
+        Base.metadata.create_all(engine,
+                                 tables=[Base.metadata.tables["units"]])
+
+        self._session_for_item = sessionmaker(bind=engine)()
+
+        self.unit_obj = UnitManager(self.session_for_user, self.user)
