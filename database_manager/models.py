@@ -44,12 +44,27 @@ class Unit(Base):
     #                  nullable=False)
     login = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
+    category_id = Column(ForeignKey('categories.id', ondelete="CASCADE"))
+    category = relationship("Category", back_populates="categories")
     # PrimaryKeyConstraint(user_id, login)
     # user = relationship("User", back_populates="logins")
 
     def __init__(self, login, password):
         self.login = login
         self.password = password
+
+
+class Category(Base):
+    """Определение таблицы units"""
+    __tablename__ = 'categories'
+    id = Column(Integer, primary_key=True)
+    category = Column(String, unique=True)
+    categories = relationship("Unit",
+                              back_populates="category",
+                              cascade="all, delete-orphan")
+
+    def __init__(self, category):
+        self.category = category
 
 
 class UserManager:
@@ -121,10 +136,20 @@ class UnitManager:
         return self._session.query(Unit).filter(Unit.login == login).first()
         # return login in self.all_logins()
 
-    def add_unit(self, login, password_for_login):
+    def get_category(self, category):
+        """Выдаем категорию, если есть, иначе создаем"""
+        category_obj = self._session.query(Category)\
+            .filter(Category.category == category).first()
+        if category_obj:
+            return category_obj
+        else:
+            return Category(category=category)
+
+    def add_unit(self, login, password_for_login, category=None):
         """Добавление unit"""
         unit_for_add = Unit(login, password_for_login)
         self._session.add(unit_for_add)
+        unit_for_add.category = self.get_category(category)
         # user = self._session.query(User).filter(User.user == self._user).first()
         # user.logins.append(Unit(login=login, password=password_for_login))
         self._session.commit()
@@ -201,7 +226,10 @@ class SQLAlchemyManager:
 
         # Создание файла БД, если его нет, обновление таблиц, при изменении
         Base.metadata.create_all(engine,
-                                 tables=[Base.metadata.tables["units"]])
+                                 tables=[
+                                     Base.metadata.tables["units"],
+                                     Base.metadata.tables["categories"]
+                                 ])
 
         self._session_for_unit = sessionmaker(bind=engine)()
 

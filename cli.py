@@ -116,7 +116,8 @@ def delete(user, password, login):
 @password_argument
 @click.option('-l', "--login", prompt="Login", help="Provide login")
 @click.option('-pl', '--password-for-login', prompt=True, hide_input=True)
-def add(user, password, login, password_for_login):
+@click.option('-c', "--category", default=None, required=False)
+def add(user, password, login, password_for_login, category):
     """
     add login and password command
     """
@@ -129,7 +130,7 @@ def add(user, password, login, password_for_login):
     if manager_obj.unit_obj.check_login(login):
         print(f'Error: login "{login}" already exists')
     else:
-        manager_obj.unit_obj.add_unit(login, password_for_login)
+        manager_obj.unit_obj.add_unit(login, password_for_login, category)
         print(f' login "{login}" added')
 
 
