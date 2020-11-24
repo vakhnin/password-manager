@@ -47,6 +47,10 @@ class Unit(Base):
     # PrimaryKeyConstraint(user_id, login)
     # user = relationship("User", back_populates="logins")
 
+    def __init__(self, login, password):
+        self.login = login
+        self.password = password
+
 
 class UserManager:
     """Класс работы с unit"""
@@ -106,19 +110,23 @@ class UnitManager:
     def all_logins(self):
         """Отображение всех логинов"""
         logins_list = []
-        user = self._session.query(User).filter(User.user == self._user).first()
-        for unit in user.logins:
+        # user = self._session.query(User).filter(User.user == self._user).first()
+        units = self._session.query(Unit).all()
+        for unit in units:
             logins_list.append(unit.login)
         return logins_list
 
     def check_login(self, login):
         """Проверка существования логина"""
-        return login in self.all_logins()
+        return self._session.query(Unit).filter(Unit.login == login).first()
+        # return login in self.all_logins()
 
     def add_unit(self, login, password_for_login):
         """Добавление unit"""
-        user = self._session.query(User).filter(User.user == self._user).first()
-        user.logins.append(Unit(login=login, password=password_for_login))
+        unit_for_add = Unit(login, password_for_login)
+        self._session.add(unit_for_add)
+        # user = self._session.query(User).filter(User.user == self._user).first()
+        # user.logins.append(Unit(login=login, password=password_for_login))
         self._session.commit()
 
     def get_password(self, login):
@@ -131,12 +139,15 @@ class UnitManager:
 
     def delete_unit(self, login):
         """Удаление unit"""
-        user = self._session.query(User).filter(User.user == self._user).first()
-        for unit in user.logins:
-            if unit.login == login:
-                user.logins.remove(unit)
-                self._session.commit()
-                return
+        self._session.query(Unit) \
+            .filter(Unit.login == login).delete()
+        self._session.commit()
+        # user = self._session.query(User).filter(User.user == self._user).first()
+        # for unit in user.logins:
+        #     if unit.login == login:
+        #         user.logins.remove(unit)
+        #         self._session.commit()
+        #         return
 
 
 class SQLAlchemyManager:
@@ -144,7 +155,7 @@ class SQLAlchemyManager:
     коннектов с базой, CRUD(Create, Read, Update, Delete) по хранящимся юнитам"""
     _file_user_db = ''
     _session_for_user = None
-    _session_for_item = None
+    _session_for_unit = None
 
     _user = None
 
@@ -160,8 +171,8 @@ class SQLAlchemyManager:
         return self._session_for_user
 
     @property
-    def session_for_item(self):
-        return self._session_for_item
+    def session_for_unit(self):
+        return self._session_for_unit
 
     @property
     def user(self):
@@ -192,6 +203,6 @@ class SQLAlchemyManager:
         Base.metadata.create_all(engine,
                                  tables=[Base.metadata.tables["units"]])
 
-        self._session_for_item = sessionmaker(bind=engine)()
+        self._session_for_unit = sessionmaker(bind=engine)()
 
-        self.unit_obj = UnitManager(self.session_for_user, self.user)
+        self.unit_obj = UnitManager(self.session_for_unit, self.user)
