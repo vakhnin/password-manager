@@ -1,6 +1,6 @@
 import os
 
-from sqlalchemy import (Column, ForeignKey, Integer, PrimaryKeyConstraint,
+from sqlalchemy import (Column, ForeignKey, Integer,
                         String, create_engine)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
@@ -25,10 +25,6 @@ class User(Base):
                   sqlite_on_conflict_unique='FAIL')
     password = Column(String, nullable=False)
 
-    # logins = relationship("Unit",
-    #                       back_populates="user",
-    #                       cascade="all, delete-orphan")
-
     def __init__(self, user, password):
         self.user = user
         self.password = password
@@ -38,16 +34,10 @@ class Unit(Base):
     """Определение таблицы units"""
     __tablename__ = 'units'
     id = Column(Integer, primary_key=True)
-    # user_id = Column(Integer,
-    #                  ForeignKey('users.id',
-    #                             ondelete="CASCADE"),
-    #                  nullable=False)
     login = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     category_id = Column(ForeignKey('categories.id', ondelete="CASCADE"))
     category = relationship("Category", back_populates="units")
-    # PrimaryKeyConstraint(user_id, login)
-    # user = relationship("User", back_populates="logins")
 
     def __init__(self, login, password):
         self.login = login
@@ -104,7 +94,7 @@ class UserManager:
         self._session.commit()
 
     def del_user(self):
-        """DIR_UNITS_DBS + os.sep + user + ".sqlite"
+        """
         delete user from BD
         """
         self._session.query(User) \
@@ -167,8 +157,6 @@ class UnitManager:
         unit_for_add = Unit(login, password_for_login)
         self._session.add(unit_for_add)
         unit_for_add.category = self.get_category(category)
-        # user = self._session.query(User).filter(User.user == self._user).first()
-        # user.logins.append(Unit(login=login, password=password_for_login))
         self._session.commit()
 
     def get_password(self, login):
@@ -184,12 +172,6 @@ class UnitManager:
         self._session.query(Unit) \
             .filter(Unit.login == login).delete()
         self._session.commit()
-        # user = self._session.query(User).filter(User.user == self._user).first()
-        # for unit in user.logins:
-        #     if unit.login == login:
-        #         user.logins.remove(unit)
-        #         self._session.commit()
-        #         return
 
 
 class SQLAlchemyManager:

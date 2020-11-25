@@ -10,6 +10,9 @@ from database_manager.models import FILE_USERS_DB, SQLAlchemyManager
 @click.group()
 @click.pass_context
 def cli(ctx):
+    """
+    Use "SOS [COMMAND]" --help for more information
+    """
     pass
 
 
