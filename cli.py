@@ -54,7 +54,10 @@ def deluser(user, password):
 @cli.command()
 @user_argument
 @password_argument
-def show(user, password):
+@click.option('-c', "--category", help='"default" for default category, '
+                                       'skip for all logins, optional',
+              default=None, required=False)
+def show(user, password, category):
     """
     show logins command
     """
@@ -64,7 +67,7 @@ def show(user, password):
         print('Error: incorrect login or password')
         return
 
-    logins = manager_obj.unit_obj.all_logins()
+    logins = manager_obj.unit_obj.get_logins(category)
     for login in logins:
         print(login)
 
@@ -116,7 +119,8 @@ def delete(user, password, login):
 @password_argument
 @click.option('-l', "--login", prompt="Login", help="Provide login")
 @click.option('-pl', '--password-for-login', prompt=True, hide_input=True)
-@click.option('-c', "--category", default=None, required=False)
+@click.option('-c', "--category", help='"default" or skip for default category, optional',
+              default=None, required=False)
 def add(user, password, login, password_for_login, category):
     """
     add login and password command
@@ -130,6 +134,7 @@ def add(user, password, login, password_for_login, category):
     if manager_obj.unit_obj.check_login(login):
         print(f'Error: login "{login}" already exists')
     else:
+        category = None if category == 'default' else category
         manager_obj.unit_obj.add_unit(login, password_for_login, category)
         print(f' login "{login}" added')
 

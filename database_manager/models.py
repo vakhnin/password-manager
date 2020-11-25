@@ -45,7 +45,7 @@ class Unit(Base):
     login = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     category_id = Column(ForeignKey('categories.id', ondelete="CASCADE"))
-    category = relationship("Category", back_populates="categories")
+    category = relationship("Category", back_populates="units")
     # PrimaryKeyConstraint(user_id, login)
     # user = relationship("User", back_populates="logins")
 
@@ -58,10 +58,10 @@ class Category(Base):
     """Определение таблицы units"""
     __tablename__ = 'categories'
     id = Column(Integer, primary_key=True)
-    category = Column(String, unique=True)
-    categories = relationship("Unit",
-                              back_populates="category",
-                              cascade="all, delete-orphan")
+    category = Column(String, unique=True, nullable=True)
+    units = relationship("Unit",
+                         back_populates="category",
+                         cascade="all, delete-orphan")
 
     def __init__(self, category):
         self.category = category
@@ -122,14 +122,31 @@ class UnitManager:
         self._session = session
         self._user = user
 
-    def all_logins(self):
-        """Отображение всех логинов"""
+    def get_logins(self, category):
+        """Выдача логинов"""
         logins_list = []
-        # user = self._session.query(User).filter(User.user == self._user).first()
-        units = self._session.query(Unit).all()
-        for unit in units:
-            logins_list.append(unit.login)
-        return logins_list
+        if category == 'default':
+            category = self._session.query(Category).filter(Category.category == None).first()
+            if category:
+                for unit in category.units:
+                    logins_list.append(unit.login)
+                return logins_list
+            else:
+                return []
+        elif category:
+            category = self._session.query(Category)\
+                .filter(Category.category == category).first()
+            if category:
+                for unit in category.units:
+                    logins_list.append(unit.login)
+                return logins_list
+            else:
+                return []
+        else:
+            units = self._session.query(Unit).all()
+            for unit in units:
+                logins_list.append(unit.login)
+            return logins_list
 
     def check_login(self, login):
         """Проверка существования логина"""
