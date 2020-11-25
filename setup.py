@@ -1,3 +1,5 @@
+# Установка приложения:
+# $ pipenv install -e .
 from setuptools import setup
 
 setup(

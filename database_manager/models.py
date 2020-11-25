@@ -1,7 +1,7 @@
-from sqlalchemy import (Column, ForeignKey, Integer, String, PrimaryKeyConstraint,
-                        create_engine)
+from sqlalchemy import (Column, ForeignKey, Integer, PrimaryKeyConstraint,
+                        String, create_engine)
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship, backref
+from sqlalchemy.orm import relationship, sessionmaker
 
 from main import get_hash
 
@@ -37,6 +37,53 @@ class Unit(Base):
     password = Column(String, nullable=False)
     PrimaryKeyConstraint(user_id, login)
     user = relationship("User", back_populates="logins")
+
+
+class UserManager:
+    """Класс работы с unit"""
+    _session = None
+    _user = None
+
+    def __init__(self, session, user):
+        self._session = session
+        self._user = user
+
+    def check_user(self):
+        """
+        check user existence in BD
+        """
+        if self._session.query(User).filter(User.user == self._user).first():
+            return True
+        return False
+
+    def check_user_password(self, password):
+        """
+        check user and password in BD
+        """
+        pass_hash = get_hash((self._user + password).encode("utf-8"))
+        if self._session.query(User).filter(User.user == self._user)\
+                .filter(User.password == pass_hash).first():
+            return True
+        return False
+
+    def add_user(self, password):
+        """
+        add user to BD
+        """
+        pass_hash = get_hash((self._user + password).encode("utf-8"))
+        user_for_add = User(self._user, pass_hash)
+        self._session.add(user_for_add)
+        self._session.commit()
+
+    def del_user(self):
+        """
+        delete user from BD
+        """
+        self._session.query(User)\
+            .filter(User.user == self._user).first().logins = []
+        self._session.query(User) \
+            .filter(User.user == self._user).delete()
+        self._session.commit()
 
 
 class UnitManager:
@@ -88,13 +135,12 @@ class SQLAlchemyManager:
     """Менеджер управления БД, предположительно будет отвечать за установление
     коннектов с базой, CRUD(Create, Read, Update, Delete) по хранящимся юнитам"""
     _file_db = ''
-    _user = None
     _session = None
-    unit_obj = None
 
-    @property
-    def user(self):
-        return self._user
+    _user = None
+
+    user_obj = None
+    unit_obj = None
 
     @property
     def file_db(self):
@@ -103,6 +149,10 @@ class SQLAlchemyManager:
     @property
     def session(self):
         return self._session
+
+    @property
+    def user(self):
+        return self._user
 
     def __init__(self, file_db=FILE_DB, user=None):
         """Инициализация класса при вызове с поднятием текущей сессии"""
@@ -116,41 +166,5 @@ class SQLAlchemyManager:
 
         self._session = sessionmaker(bind=engine)()
 
-        self.unit_obj = UnitManager(self._session, self.user)
-
-    def check_user(self):
-        """
-        check user existence in BD
-        """
-        if self.session.query(User).filter(User.user == self.user).first():
-            return True
-        return False
-
-    def check_user_password(self, password):
-        """
-        check user and password in BD
-        """
-        pass_hash = get_hash((self.user + password).encode("utf-8"))
-        if self.session.query(User).filter(User.user == self.user)\
-                .filter(User.password == pass_hash).first():
-            return True
-        return False
-
-    def add_user(self, password):
-        """
-        add user to BD
-        """
-        pass_hash = get_hash((self.user + password).encode("utf-8"))
-        user_for_add = User(self.user, pass_hash)
-        self.session.add(user_for_add)
-        self.session.commit()
-
-    def del_user(self):
-        """
-        delete user from BD
-        """
-        self.session.query(User)\
-            .filter(User.user == self.user).first().logins = []
-        self.session.query(User) \
-            .filter(User.user == self.user).delete()
-        self.session.commit()
+        self.user_obj = UserManager(self.session, self.user)
+        self.unit_obj = UnitManager(self.session, self.user)
