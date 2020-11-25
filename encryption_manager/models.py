@@ -5,6 +5,17 @@ from Crypto import Random
 from Crypto.Cipher import AES
 
 
+def get_hash(password):
+    """
+    This function calculates the hash of the given string
+    """
+    try:
+        check_hash = hashlib.sha256()
+        check_hash.update(password)
+        return check_hash.hexdigest()
+    except UnicodeDecodeError:
+        print("Password contains unexpected symbols (note that russian lang is not supported)")
+
 class AESCipher(object):
     """
     A classical AES Cipher. Can use any size of data and any size of password thanks to padding.

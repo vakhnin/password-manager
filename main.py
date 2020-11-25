@@ -21,13 +21,13 @@ import pyperclip
 
 
 # This function calculates the hash of the given string
-def get_hash(password):
-    try:
-        check_hash = hashlib.sha256()
-        check_hash.update(password)
-        return check_hash.hexdigest()
-    except UnicodeDecodeError:
-        print("Password contains unexpected symbols (note that russian lang is not supported)")
+# def get_hash(password):
+    # try:
+        # check_hash = hashlib.sha256()
+        # check_hash.update(password)
+        # return check_hash.hexdigest()
+    # except UnicodeDecodeError:
+        # print("Password contains unexpected symbols (note that russian lang is not supported)")
 
 
 # # The log in menu
