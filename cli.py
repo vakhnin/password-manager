@@ -11,7 +11,7 @@ from database_manager.models import FILE_USERS_DB, SQLAlchemyManager
 @click.pass_context
 def cli(ctx):
     """
-    Use "SOS [COMMAND]" --help for more information
+    Use "SOS [COMMAND] --help" for more information
     """
     pass
 
@@ -124,7 +124,9 @@ def delete(user, password, login):
 @click.option('-pl', '--password-for-login', prompt=True, hide_input=True)
 @click.option('-c', "--category", help='"default" or skip for default category, optional',
               default=None, required=False)
-def add(user, password, login, password_for_login, category):
+@click.option('-ur', "--url", help='url, optional', default=None, required=False)
+@click.option('-a', "--alias", help='alias, optional', default=None, required=False)
+def add(user, password, login, password_for_login, category, url, alias):
     """
     add login and password command
     """
@@ -138,7 +140,8 @@ def add(user, password, login, password_for_login, category):
         print(f'Error: login "{login}" already exists')
     else:
         category = None if category == 'default' else category
-        manager_obj.unit_obj.add_unit(login, password_for_login, category)
+        manager_obj.unit_obj\
+            .add_unit(login, password_for_login, category, url, alias)
         print(f' login "{login}" added')
 
 

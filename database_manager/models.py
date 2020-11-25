@@ -36,12 +36,16 @@ class Unit(Base):
     id = Column(Integer, primary_key=True)
     login = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
+    url = Column(String)
+    alias = Column(String)
     category_id = Column(ForeignKey('categories.id', ondelete="CASCADE"))
     category = relationship("Category", back_populates="units")
 
-    def __init__(self, login, password):
+    def __init__(self, login, password, url=None, alias=None):
         self.login = login
         self.password = password
+        self.url = url
+        self.alias = alias
 
 
 class Category(Base):
@@ -152,9 +156,9 @@ class UnitManager:
         else:
             return Category(category=category)
 
-    def add_unit(self, login, password_for_login, category=None):
+    def add_unit(self, login, password_for_login, category=None, url=None, alias=None):
         """Добавление unit"""
-        unit_for_add = Unit(login, password_for_login)
+        unit_for_add = Unit(login, password_for_login, url, alias)
         self._session.add(unit_for_add)
         unit_for_add.category = self.get_category(category)
         self._session.commit()
