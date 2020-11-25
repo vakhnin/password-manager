@@ -18,7 +18,8 @@ def cli(ctx):
 
 user_argument = click.option('--user', '-u', prompt="Username", help="Provide your username",
                              default=lambda: os.environ.get('USERNAME'))
-password_argument = click.option('--password', '-p', prompt=True, hide_input=True)
+password_argument = click.option('--password', '-p', help="Provide your password",
+                                 prompt=True, hide_input=True)
 
 
 @cli.command()
@@ -121,7 +122,7 @@ def delete(user, password, login):
 @user_argument
 @password_argument
 @click.option('-l', "--login", prompt="Login", help="Provide login")
-@click.option('-pl', '--password-for-login', prompt=True, hide_input=True)
+@click.option('-pl', '--password-for-login', prompt=True, help="Provide password for login", hide_input=True)
 @click.option('-c', "--category", help='"default" or skip for default category, optional',
               default=None, required=False)
 @click.option('-ur', "--url", help='url, optional', default=None, required=False)
