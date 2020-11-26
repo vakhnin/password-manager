@@ -124,6 +124,7 @@ class UnitManager:
             if category:
                 for unit in category.units:
                     logins_list.append(unit.login)
+                logins_list.sort()
                 return logins_list
             else:
                 return []
@@ -133,6 +134,7 @@ class UnitManager:
             if category:
                 for unit in category.units:
                     logins_list.append(unit.login)
+                logins_list.sort()
                 return logins_list
             else:
                 return []
@@ -140,6 +142,7 @@ class UnitManager:
             units = self._session.query(Unit).all()
             for unit in units:
                 logins_list.append(unit.login)
+            logins_list.sort()
             return logins_list
 
     def check_login(self, login):
