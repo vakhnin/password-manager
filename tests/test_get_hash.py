@@ -1,7 +1,6 @@
 import hashlib
 import unittest
 
-# from main import get_hash
 from encryption_manager.models import get_hash
 
 class Test_get_hash(unittest.TestCase):
