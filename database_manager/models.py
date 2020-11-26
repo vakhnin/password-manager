@@ -222,6 +222,10 @@ class SQLAlchemyManager:
 
         self.user_obj = UserManager(self.session_for_user, self.user)
 
+        # Если пользователя еще не существует, не создаем файл с его БД
+        if not self.user_obj.check_user():
+            return
+
         # Инициализация Items
         engine = create_engine(
             f'sqlite:///{DIR_UNITS_DBS + os.sep + user + ".sqlite"}',
