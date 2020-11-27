@@ -40,7 +40,7 @@ class Unit(Base):
 
 
 class UserManager:
-    """Класс работы с unit"""
+    """Класс работы с user"""
     _session = None
     _user = None
 
@@ -73,6 +73,17 @@ class UserManager:
         pass_hash = get_hash((self._user + password).encode("utf-8"))
         user_for_add = User(self._user, pass_hash)
         self._session.add(user_for_add)
+        self._session.commit()
+
+    def update_user(self, password, newuser, newpassword = None):
+        """
+        rename user to newuser
+        """
+        if newpassword is not None:
+            password = newpassword
+        pass_hash = get_hash((newuser + password).encode("utf-8"))
+        self._session.query(User) \
+            .filter(User.user == self._user).update({"user": newuser, "password": pass_hash})
         self._session.commit()
 
     def del_user(self):

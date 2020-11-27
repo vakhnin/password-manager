@@ -133,5 +133,28 @@ def add(user, password, login, password_for_login):
         print(f' login "{login}" added')
 
 
+@cli.command()
+@user_argument
+@password_argument
+@click.option('-l', '--newusername', prompt="NewUsername", help="Provide new username")
+@click.option('-pl', '--password-for-newusername', prompt=False, hide_input=True)
+def userupd(user, password, newusername, password_for_newusername):
+    """
+    update username and password command
+    """
+    manager_obj = SQLAlchemyManager(FILE_DB, user)
+
+    if not manager_obj.user_obj.check_user_password(password):
+        print('Error: incorrect login or password')
+        return
+
+    manager_obj_new = SQLAlchemyManager(FILE_DB, newusername)
+
+    if manager_obj_new.user_obj.check_user():
+        print(f'Error: User named "{newusername}" already exists')
+    else:
+        manager_obj.user_obj.update_user(password, newusername, password_for_newusername)
+
+
 if __name__ == '__main__':
     cli()
