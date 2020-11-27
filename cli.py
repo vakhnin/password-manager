@@ -37,6 +37,29 @@ def useradd(user, password):
 @cli.command()
 @user_argument
 @password_argument
+@click.option('-l', '--newusername', prompt="NewUsername", help="Provide new username")
+@click.option('-pl', '--password-for-newusername', prompt=False, hide_input=True)
+def userupd(user, password, newusername, password_for_newusername):
+    """
+    update username (and password) command
+    """
+    manager_obj = SQLAlchemyManager(FILE_DB, user)
+
+    if not manager_obj.user_obj.check_user_password(password):
+        print('Error: incorrect login or password')
+        return
+
+    manager_obj_new = SQLAlchemyManager(FILE_DB, newusername)
+
+    if manager_obj_new.user_obj.check_user():
+        print(f'Error: User named "{newusername}" already exists')
+    else:
+        manager_obj.user_obj.update_user(password, newusername, password_for_newusername)
+
+
+@cli.command()
+@user_argument
+@password_argument
 def deluser(user, password):
     """
     delete user command
@@ -49,6 +72,18 @@ def deluser(user, password):
 
     manager_obj.user_obj.del_user()
     print(f'User named "{user}" deleted')
+
+
+@cli.command()
+def whousers():
+    """
+    show users command
+    """
+    manager_obj = SQLAlchemyManager(FILE_DB)
+
+    logins = manager_obj.user_obj.all_users()
+    for login in logins:
+        print(login)
 
 
 @cli.command()
@@ -131,29 +166,6 @@ def add(user, password, login, password_for_login):
     else:
         manager_obj.unit_obj.add_unit(login, password_for_login)
         print(f' login "{login}" added')
-
-
-@cli.command()
-@user_argument
-@password_argument
-@click.option('-l', '--newusername', prompt="NewUsername", help="Provide new username")
-@click.option('-pl', '--password-for-newusername', prompt=False, hide_input=True)
-def userupd(user, password, newusername, password_for_newusername):
-    """
-    update username and password command
-    """
-    manager_obj = SQLAlchemyManager(FILE_DB, user)
-
-    if not manager_obj.user_obj.check_user_password(password):
-        print('Error: incorrect login or password')
-        return
-
-    manager_obj_new = SQLAlchemyManager(FILE_DB, newusername)
-
-    if manager_obj_new.user_obj.check_user():
-        print(f'Error: User named "{newusername}" already exists')
-    else:
-        manager_obj.user_obj.update_user(password, newusername, password_for_newusername)
 
 
 if __name__ == '__main__':

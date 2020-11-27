@@ -77,7 +77,7 @@ class UserManager:
 
     def update_user(self, password, newuser, newpassword = None):
         """
-        rename user to newuser
+        update username (and password) in BD
         """
         if newpassword is not None:
             password = newpassword
@@ -95,6 +95,16 @@ class UserManager:
         self._session.query(User) \
             .filter(User.user == self._user).delete()
         self._session.commit()
+
+    def all_users(self):
+        """
+        list of users
+        """
+        users_list = []
+        users = self._session.query(User).all()
+        for user in users:
+            users_list.append(user.user)
+        return users_list
 
 
 class UnitManager:
