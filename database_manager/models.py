@@ -3,7 +3,7 @@ from sqlalchemy import (Column, ForeignKey, Integer, PrimaryKeyConstraint,
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 
-from main import get_hash
+from encryption_manager.models import get_hash
 
 FILE_DB = 'db.sqlite'
 
