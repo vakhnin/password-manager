@@ -70,11 +70,15 @@ class UserManager:
         self._session = session
         self._user = user
 
-    def check_user(self):
+    def check_user(self, user=None):
         """
         check user existence in BD
         """
-        if self._session.query(User).filter(User.user == self._user).first():
+        user_tmp = self._user
+        if user:
+            user_tmp =user
+
+        if self._session.query(User).filter(User.user == user_tmp).first():
             return True
         return False
 
@@ -97,7 +101,7 @@ class UserManager:
         self._session.add(user_for_add)
         self._session.commit()
 
-    def update_user(self, password, newuser, newpassword = None):
+    def update_user(self, password, newuser, newpassword=None):
         """
         update username (and password) in BD
         """
@@ -125,6 +129,7 @@ class UserManager:
         users = self._session.query(User).all()
         for user in users:
             users_list.append(user.user)
+        users_list.sort()
         return users_list
 
 

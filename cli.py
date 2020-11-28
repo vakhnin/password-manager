@@ -47,15 +47,13 @@ def userupd(user, password, newusername, password_for_newusername):
     """
     update username (and password) command
     """
-    manager_obj = SQLAlchemyManager(FILE_DB, user)
+    manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, password)
 
     if not manager_obj.user_obj.check_user_password(password):
         print('Error: incorrect login or password')
         return
 
-    manager_obj_new = SQLAlchemyManager(FILE_DB, newusername)
-
-    if manager_obj_new.user_obj.check_user():
+    if manager_obj.user_obj.check_user(newusername):
         print(f'Error: User named "{newusername}" already exists')
     else:
         manager_obj.user_obj.update_user(password, newusername, password_for_newusername)
@@ -83,11 +81,11 @@ def whousers():
     """
     show users command
     """
-    manager_obj = SQLAlchemyManager(FILE_DB)
+    manager_obj = SQLAlchemyManager(FILE_USERS_DB)
 
-    logins = manager_obj.user_obj.all_users()
-    for login in logins:
-        print(login)
+    users = manager_obj.user_obj.all_users()
+    for user in users:
+        print(user)
 
 
 @cli.command()
