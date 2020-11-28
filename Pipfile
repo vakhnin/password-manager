@@ -10,6 +10,12 @@ pycryptodomex = "*"
 click = "*"
 pycryptodome = "*"
 pyperclip = "*"
+sqlalchemy = "*"
+flake8 = "*"
+flake8-isort = "*"
+flake8-quotes = "*"
+isort = "*"
+sos = {editable = true, path = "."}
 
 [requires]
 python_version = "3.8"
