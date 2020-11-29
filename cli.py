@@ -8,12 +8,21 @@ from database_manager.models import FILE_USERS_DB, SQLAlchemyManager
 
 
 @click.group()
+@click.option('-a/-not-alias', help='print or not alias')
+@click.option('-c/-not-category', help='print or not category')
+@click.option('-u/-not-url', help='print or not url')
 @click.pass_context
-def cli(ctx):
+def cli(ctx, a, c, u):
     """
     Use "SOS [COMMAND] --help" for more information
     """
-    pass
+    ctx.obj = {
+        'FLAGS': {
+            'alias': a,
+            'category': c,
+            'url': u
+        }
+    }
 
 
 user_argument = click.option('--user', '-u', prompt="Username", help="Provide your username",

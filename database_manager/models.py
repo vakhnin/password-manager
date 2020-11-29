@@ -76,7 +76,7 @@ class UserManager:
         """
         user_tmp = self._user
         if user:
-            user_tmp =user
+            user_tmp = user
 
         if self._session.query(User).filter(User.user == user_tmp).first():
             return True
