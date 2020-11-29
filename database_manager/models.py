@@ -1,11 +1,18 @@
-from sqlalchemy import (Column, ForeignKey, Integer, PrimaryKeyConstraint,
+import os
+
+from sqlalchemy import (Column, ForeignKey, Integer,
                         String, create_engine)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 
 from encryption_manager.models import get_hash
 
-FILE_DB = 'db.sqlite'
+DIR_DB = 'databases'
+DIR_UNITS_DBS = DIR_DB + os.sep + 'units'
+FILE_USERS_DB = os.path.join(DIR_DB, 'users.sqlite')
+
+if not os.path.exists(DIR_UNITS_DBS):
+    os.makedirs(DIR_UNITS_DBS)
 
 Base = declarative_base()
 
@@ -17,9 +24,6 @@ class User(Base):
     user = Column(String, nullable=False, unique=True,
                   sqlite_on_conflict_unique='FAIL')
     password = Column(String, nullable=False)
-    logins = relationship("Unit",
-                          back_populates="user",
-                          cascade="all, delete-orphan")
 
     def __init__(self, user, password):
         self.user = user
@@ -29,14 +33,32 @@ class User(Base):
 class Unit(Base):
     """Определение таблицы units"""
     __tablename__ = 'units'
-    user_id = Column(Integer,
-                     ForeignKey('users.id',
-                                ondelete="CASCADE"),
-                     nullable=False)
-    login = Column(String, nullable=False)
+    id = Column(Integer, primary_key=True)
+    login = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
-    PrimaryKeyConstraint(user_id, login)
-    user = relationship("User", back_populates="logins")
+    url = Column(String)
+    alias = Column(String)
+    category_id = Column(ForeignKey('categories.id', ondelete="CASCADE"))
+    category = relationship("Category", back_populates="units")
+
+    def __init__(self, login, password, url=None, alias=None):
+        self.login = login
+        self.password = password
+        self.url = url
+        self.alias = alias
+
+
+class Category(Base):
+    """Определение таблицы units"""
+    __tablename__ = 'categories'
+    id = Column(Integer, primary_key=True)
+    category = Column(String, unique=True, nullable=True)
+    units = relationship("Unit",
+                         back_populates="category",
+                         cascade="all, delete-orphan")
+
+    def __init__(self, category):
+        self.category = category
 
 
 class UserManager:
@@ -48,11 +70,15 @@ class UserManager:
         self._session = session
         self._user = user
 
-    def check_user(self):
+    def check_user(self, user=None):
         """
         check user existence in BD
         """
-        if self._session.query(User).filter(User.user == self._user).first():
+        user_tmp = self._user
+        if user:
+            user_tmp =user
+
+        if self._session.query(User).filter(User.user == user_tmp).first():
             return True
         return False
 
@@ -61,7 +87,7 @@ class UserManager:
         check user and password in BD
         """
         pass_hash = get_hash((self._user + password).encode("utf-8"))
-        if self._session.query(User).filter(User.user == self._user)\
+        if self._session.query(User).filter(User.user == self._user) \
                 .filter(User.password == pass_hash).first():
             return True
         return False
@@ -75,7 +101,7 @@ class UserManager:
         self._session.add(user_for_add)
         self._session.commit()
 
-    def update_user(self, password, newuser, newpassword = None):
+    def update_user(self, password, newuser, newpassword=None):
         """
         update username (and password) in BD
         """
@@ -90,10 +116,9 @@ class UserManager:
         """
         delete user from BD
         """
-        self._session.query(User)\
-            .filter(User.user == self._user).first().logins = []
         self._session.query(User) \
             .filter(User.user == self._user).delete()
+        os.remove(DIR_UNITS_DBS + os.sep + self._user + ".sqlite")
         self._session.commit()
 
     def all_users(self):
@@ -104,6 +129,7 @@ class UserManager:
         users = self._session.query(User).all()
         for user in users:
             users_list.append(user.user)
+        users_list.sort()
         return users_list
 
 
@@ -116,22 +142,54 @@ class UnitManager:
         self._session = session
         self._user = user
 
-    def all_logins(self):
-        """Отображение всех логинов"""
+    def get_logins(self, category):
+        """Выдача логинов"""
         logins_list = []
-        user = self._session.query(User).filter(User.user == self._user).first()
-        for unit in user.logins:
-            logins_list.append(unit.login)
-        return logins_list
+        if category == 'default':
+            category = self._session.query(Category).filter(Category.category == None).first()
+            if category:
+                for unit in category.units:
+                    logins_list.append(unit.login)
+                logins_list.sort()
+                return logins_list
+            else:
+                return []
+        elif category:
+            category = self._session.query(Category)\
+                .filter(Category.category == category).first()
+            if category:
+                for unit in category.units:
+                    logins_list.append(unit.login)
+                logins_list.sort()
+                return logins_list
+            else:
+                return []
+        else:
+            units = self._session.query(Unit).all()
+            for unit in units:
+                logins_list.append(unit.login)
+            logins_list.sort()
+            return logins_list
 
     def check_login(self, login):
         """Проверка существования логина"""
-        return login in self.all_logins()
+        return self._session.query(Unit).filter(Unit.login == login).first()
+        # return login in self.all_logins()
 
-    def add_unit(self, login, password_for_login):
+    def get_category(self, category):
+        """Выдаем категорию, если есть, иначе создаем"""
+        category_obj = self._session.query(Category)\
+            .filter(Category.category == category).first()
+        if category_obj:
+            return category_obj
+        else:
+            return Category(category=category)
+
+    def add_unit(self, login, password_for_login, category=None, url=None, alias=None):
         """Добавление unit"""
-        user = self._session.query(User).filter(User.user == self._user).first()
-        user.logins.append(Unit(login=login, password=password_for_login))
+        unit_for_add = Unit(login, password_for_login, url, alias)
+        self._session.add(unit_for_add)
+        unit_for_add.category = self.get_category(category)
         self._session.commit()
 
     def get_password(self, login):
@@ -144,19 +202,17 @@ class UnitManager:
 
     def delete_unit(self, login):
         """Удаление unit"""
-        user = self._session.query(User).filter(User.user == self._user).first()
-        for unit in user.logins:
-            if unit.login == login:
-                user.logins.remove(unit)
-                self._session.commit()
-                return
+        self._session.query(Unit) \
+            .filter(Unit.login == login).delete()
+        self._session.commit()
 
 
 class SQLAlchemyManager:
     """Менеджер управления БД, предположительно будет отвечать за установление
     коннектов с базой, CRUD(Create, Read, Update, Delete) по хранящимся юнитам"""
-    _file_db = ''
-    _session = None
+    _file_user_db = ''
+    _session_for_user = None
+    _session_for_unit = None
 
     _user = None
 
@@ -164,28 +220,53 @@ class SQLAlchemyManager:
     unit_obj = None
 
     @property
-    def file_db(self):
-        return self._file_db
+    def file_user_db(self):
+        return self._file_user_db
 
     @property
-    def session(self):
-        return self._session
+    def session_for_user(self):
+        return self._session_for_user
+
+    @property
+    def session_for_unit(self):
+        return self._session_for_unit
 
     @property
     def user(self):
         return self._user
 
-    def __init__(self, file_db=FILE_DB, user=None):
+    def __init__(self, file_db=FILE_USERS_DB, user=None, password=None):
         """Инициализация класса при вызове с поднятием текущей сессии"""
         self._user = user
-        self._file_db = file_db
+        self._file_user_db = file_db
 
-        engine = create_engine(f'sqlite:///{self.file_db}', echo=False)
+        # Инициализация User
+        engine = create_engine(f'sqlite:///{self.file_user_db}', echo=False)
 
         # Создание файла БД, если его нет, обновление таблиц, при изменении
-        Base.metadata.create_all(engine)
+        Base.metadata.create_all(engine,
+                                 tables=[Base.metadata.tables["users"]])
 
-        self._session = sessionmaker(bind=engine)()
+        self._session_for_user = sessionmaker(bind=engine)()
 
-        self.user_obj = UserManager(self.session, self.user)
-        self.unit_obj = UnitManager(self.session, self.user)
+        self.user_obj = UserManager(self.session_for_user, self.user)
+
+        # Если пользователя еще не существует, не создаем файл с его БД
+        if not self.user_obj.check_user():
+            return
+
+        # Инициализация Items
+        engine = create_engine(
+            f'sqlite:///{DIR_UNITS_DBS + os.sep + user + ".sqlite"}',
+            echo=False)
+
+        # Создание файла БД, если его нет, обновление таблиц, при изменении
+        Base.metadata.create_all(engine,
+                                 tables=[
+                                     Base.metadata.tables["units"],
+                                     Base.metadata.tables["categories"]
+                                 ])
+
+        self._session_for_unit = sessionmaker(bind=engine)()
+
+        self.unit_obj = UnitManager(self.session_for_unit, self.user)
