@@ -28,6 +28,11 @@ class TimeoutController:
         _default_time_session, то возвращаем False; если меньше, то возвращаем
         True и запрашиваем обновление времени в БД по этому объекту
     """
-    _default_time_session = None
+    _default_time_session = 15 * 60  # дефолтное время в секундах, отведенное на длительность сессии
 
-    pass
+    def check_time_permission(check_datetime):
+        """
+        проверка дельты между переданным datetime и текущим,
+        возвращаем True, если дельта меньше дефолтного времени, отведённого на длительность сессии, иначе False
+        """
+        return dt.datetime.today() - check_datetime < dt.timedelta(seconds=_default_time_session)
