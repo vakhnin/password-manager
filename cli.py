@@ -34,7 +34,7 @@ password_argument = click.option('--password', '-p', help="Provide your password
 @cli.command()
 @user_argument
 @password_argument
-def useradd(user, password):
+def uadd(user, password):
     """
     add user command
     """
@@ -52,7 +52,7 @@ def useradd(user, password):
 @password_argument
 @click.option('-l', '--newusername', prompt="NewUsername", help="Provide new username")
 @click.option('-pl', '--password-for-newusername', prompt=False, hide_input=True)
-def userupd(user, password, newusername, password_for_newusername):
+def uupdate(user, password, newusername, password_for_newusername):
     """
     update username (and password) command
     """
@@ -71,7 +71,7 @@ def userupd(user, password, newusername, password_for_newusername):
 @cli.command()
 @user_argument
 @password_argument
-def deluser(user, password):
+def udelete(user, password):
     """
     delete user command
     """
@@ -86,7 +86,8 @@ def deluser(user, password):
 
 
 @cli.command()
-def whousers():
+@click.pass_context
+def ushow(ctx):
     """
     show users command
     """
