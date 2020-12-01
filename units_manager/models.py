@@ -1,4 +1,5 @@
 import datetime as dt
+from settings import *
 import json
 from abc import ABC, abstractmethod, abstractproperty
 
@@ -28,7 +29,7 @@ class TimeoutController:
         _default_time_session, то возвращаем False; если меньше, то возвращаем
         True и запрашиваем обновление времени в БД по этому объекту
     """
-    _default_time_session = 15 * 60  # дефолтное время в секундах, отведенное на длительность сессии
+    _default_time_session = TIME_SESSION_CLOSE
 
     def check_time_permission(check_datetime):
         """
