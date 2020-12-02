@@ -143,33 +143,62 @@ class UnitManager:
         self._user = user
 
     def get_logins(self, category):
-        """Выдача логинов"""
-        logins_list = []
+        """Выдача units"""
+
+        def make_logins_obj(units_list):
+            """Выдача логинов, из списка"""
+            units_obj = {
+                "logins": [],
+                "category": [],
+                "url": [],
+                "alias": []
+            }
+
+            if units_list:
+                for unit_ in units_list:
+                    units_obj['logins'].append(unit_.login)
+                    units_obj['category']\
+                        .append(unit_.category.category if unit_.category.category else '')
+                    units_obj['url']\
+                        .append(unit_.url if unit_.url else '')
+                    units_obj['alias']\
+                        .append(unit_.alias if unit_.alias else '')
+            return units_obj
+
+        # logins_obj = logins_obj_start
         if category == 'default':
-            category = self._session.query(Category).filter(Category.category == None).first()
+            category = self._session.query(Category)\
+                .filter(Category.category == None).first()
             if category:
-                for unit in category.units:
-                    logins_list.append(unit.login)
-                logins_list.sort()
-                return logins_list
-            else:
-                return []
+                return make_logins_obj(category.units)
+            return make_logins_obj([])
+            # if category:
+            #     for unit in category.units:
+            #         logins_obj['logins'].append(unit.login)
+            #     logins_obj.sort()
+            #     return logins_obj
+            # else:
+            #     return []
         elif category:
             category = self._session.query(Category)\
                 .filter(Category.category == category).first()
             if category:
-                for unit in category.units:
-                    logins_list.append(unit.login)
-                logins_list.sort()
-                return logins_list
-            else:
-                return []
+                return make_logins_obj(category.units)
+            return make_logins_obj([])
+            # if category:
+            #     for unit in category.units:
+            #         logins_obj.append(unit.login)
+            #     logins_obj.sort()
+            #     return logins_obj
+            # else:
+            #     return []
         else:
             units = self._session.query(Unit).all()
-            for unit in units:
-                logins_list.append(unit.login)
-            logins_list.sort()
-            return logins_list
+            return make_logins_obj(units)
+            # for unit in units:
+            #     logins_obj.append(unit.login)
+            # logins_obj.sort()
+            # return logins_obj
 
     def check_login(self, login):
         """Проверка существования логина"""

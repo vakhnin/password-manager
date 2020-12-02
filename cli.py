@@ -115,8 +115,9 @@ def show(user, password, category):
         return
 
     logins = manager_obj.unit_obj.get_logins(category)
-    for login in logins:
-        print(login)
+    print(logins)
+    # for login in logins:
+    #     print(login)
 
 
 @cli.command()
