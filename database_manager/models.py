@@ -158,7 +158,7 @@ class UnitManager:
                 for unit_ in units_list:
                     units_obj['logins'].append(unit_.login)
                     units_obj['category']\
-                        .append(unit_.category.category if unit_.category.category else '')
+                        .append(unit_.category.category if unit_.category.category else 'default')
                     units_obj['url']\
                         .append(unit_.url if unit_.url else '')
                     units_obj['alias']\
