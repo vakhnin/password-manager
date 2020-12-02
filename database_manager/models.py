@@ -165,40 +165,17 @@ class UnitManager:
                         .append(unit_.alias if unit_.alias else '')
             return units_obj
 
-        # logins_obj = logins_obj_start
         if category == 'default':
             category = self._session.query(Category)\
                 .filter(Category.category == None).first()
-            if category:
-                return make_logins_obj(category.units)
-            return make_logins_obj([])
-            # if category:
-            #     for unit in category.units:
-            #         logins_obj['logins'].append(unit.login)
-            #     logins_obj.sort()
-            #     return logins_obj
-            # else:
-            #     return []
+            return make_logins_obj(category.units)
         elif category:
             category = self._session.query(Category)\
                 .filter(Category.category == category).first()
-            if category:
-                return make_logins_obj(category.units)
-            return make_logins_obj([])
-            # if category:
-            #     for unit in category.units:
-            #         logins_obj.append(unit.login)
-            #     logins_obj.sort()
-            #     return logins_obj
-            # else:
-            #     return []
+            return make_logins_obj(category.units)
         else:
             units = self._session.query(Unit).all()
             return make_logins_obj(units)
-            # for unit in units:
-            #     logins_obj.append(unit.login)
-            # logins_obj.sort()
-            # return logins_obj
 
     def check_login(self, login):
         """Проверка существования логина"""

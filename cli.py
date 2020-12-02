@@ -104,10 +104,43 @@ def ushow(ctx):
 @click.option('-c', "--category", help='"default" for default category, '
                                        'skip for all logins, optional',
               default=None, required=False)
-def show(user, password, category):
+@click.pass_context
+def show(ctx, user, password, category):
     """
     show logins command
     """
+
+    def prepare_logins(logins_):
+        """Подготовка списка логинов"""
+        for key, lst in logins_.items():
+            # Ищем максимальную длину строки в столбце
+            max_len = len(key)
+            for item in lst:
+                if len(item) > max_len:
+                    max_len = len(item)
+
+            # Добавляем пробелы в столбцы, для одинаковой длины столбцов
+            for i in range(len(lst)):
+                logins_[key][i] = logins_[key][i].ljust(max_len+1)
+            logins_[key].insert(0, key.ljust(max_len+1))
+
+        return logins_
+
+    def print_logins(logins_, flags):
+        """Печатем логины с флагами"""
+        is_first_line = True
+        for i in range(len(logins_['logins'])):
+            str_for_print = logins_['logins'][i]
+            delimiter_str = "-" * len(logins_['logins'][i])
+            for key in logins_.keys():
+                if key in flags.keys() and flags[key]:
+                    str_for_print += '| ' + logins_[key][i]
+                    delimiter_str += '+-' + '-' * len(logins_[key][i])
+            print(str_for_print)
+            if is_first_line:
+                print(delimiter_str)
+                is_first_line = False
+
     manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, password)
 
     if not manager_obj.user_obj.check_user_password(password):
@@ -115,9 +148,8 @@ def show(user, password, category):
         return
 
     logins = manager_obj.unit_obj.get_logins(category)
-    print(logins)
-    # for login in logins:
-    #     print(login)
+    logins = prepare_logins(logins)
+    print_logins(logins, ctx.obj['FLAGS'])
 
 
 @cli.command()
