@@ -206,6 +206,25 @@ class UnitManager:
                 return unit.password
         return None
 
+    def update_unit(self, login, new_login=None, password_for_login=None,
+                    category=None, url=None, alias=None):
+        """Обновление unit"""
+        update_dict = {'login': login}
+        if new_login:
+            update_dict['login'] = new_login
+        if password_for_login and password_for_login != 'old-password':
+            update_dict['password'] = password_for_login
+        if url:
+            update_dict['url'] = url
+        if alias:
+            update_dict['alias'] = alias
+
+        self._session.query(Unit).filter(Unit.login == login)\
+            .update(update_dict)
+        self._session.query(Unit).filter(Unit.login == login)\
+            .first().category = self.get_category(category)
+        self._session.commit()
+
     def delete_unit(self, login):
         """Удаление unit"""
         self._session.query(Unit) \

@@ -25,7 +25,8 @@ def cli(ctx, a, c, u):
     }
 
 
-user_argument = click.option('--user', '-u', prompt="Username", help="Provide your username",
+user_argument = click.option('--user', '-u', prompt="Username",
+                             help="Provide your username",
                              default=lambda: os.environ.get('USERNAME'))
 password_argument = click.option('--password', '-p', help="Provide your password",
                                  prompt=True, hide_input=True)
@@ -198,7 +199,8 @@ def delete(user, password, login):
 @user_argument
 @password_argument
 @click.option('-l', "--login", prompt="Login", help="Provide login")
-@click.option('-pl', '--password-for-login', prompt=True, help="Provide password for login", hide_input=True)
+@click.option('-pl', '--password-for-login', prompt=True,
+              help="Provide password for login", hide_input=True)
 @click.option('-c', "--category", help='"default" or skip for default category, optional',
               default=None, required=False)
 @click.option('-ur', "--url", help='url, optional', default=None, required=False)
@@ -220,6 +222,43 @@ def add(user, password, login, password_for_login, category, url, alias):
         manager_obj.unit_obj\
             .add_unit(login, password_for_login, category, url, alias)
         print(f' login "{login}" added')
+
+
+@cli.command()
+@user_argument
+@password_argument
+@click.option('-l', "--login", prompt="Login", help="Provide login")
+@click.option('-nl', "--new-login", help='new login, optional',
+              default=None, required=False)
+@click.option('-pl', '--password-for-login',
+              prompt="New password for login (Press 'Enter' for keep old password)",
+              default='old-password',
+              help="New password for login, "
+                   "'old-password' for keep old password", hide_input=True)
+@click.option('-nc', "--new-category", help='"default" or skip for default category, optional',
+              default=None, required=False)
+@click.option('-ur', "--url", help='url, optional', default=None, required=False)
+@click.option('-a', "--alias", help='alias, optional', default=None, required=False)
+def update(user, password, login, new_login, password_for_login, new_category, url, alias):
+    """Update unit"""
+
+    manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, password)
+
+    if not manager_obj.user_obj.check_user_password(password):
+        print('Error: incorrect login or password')
+        return
+
+    if not manager_obj.unit_obj.check_login(login):
+        print(f'Error: login "{login}" not exists')
+    elif manager_obj.unit_obj.check_login(new_login) \
+            and login != new_login:
+        print(f'Error: new login "{login}" already exists')
+    else:
+        new_category = None if new_category == 'default' else new_category
+        manager_obj.unit_obj\
+            .update_unit(login, new_login,
+                         password_for_login, new_category, url, alias)
+        print(f' login "{login}" updated')
 
 
 if __name__ == '__main__':
