@@ -14,7 +14,7 @@ from database_manager.models import FILE_USERS_DB, SQLAlchemyManager
 @click.pass_context
 def cli(ctx, a, c, u):
     """
-    Use "SOS [COMMAND] --help" for more information
+    Use "pwdone [COMMAND] --help" for more information
     """
     ctx.obj = {
         'FLAGS': {
