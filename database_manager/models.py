@@ -200,11 +200,8 @@ class UnitManager:
 
     def get_password(self, login):
         """Получение пароля"""
-        user = self._session.query(User).filter(User.user == self._user).first()
-        for unit in user.logins:
-            if unit.login == login:
-                return unit.password
-        return None
+        unit_obj = self._session.query(Unit).filter(Unit.login == login).first()
+        return unit_obj.password
 
     def update_unit(self, login, new_login=None, password_for_login=None,
                     category=None, url=None, alias=None):
