@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(
-    name='SOS',
+    name='pwdone',
     version='0.1',
     py_modules=['cli'],
     install_requires=[
@@ -11,6 +11,6 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        SOS=cli:cli
+        pwdone=cli:cli
     ''',
 )
