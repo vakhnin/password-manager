@@ -1,18 +1,10 @@
-import os
-
+from settings import *
 from sqlalchemy import (Column, ForeignKey, Integer,
                         String, create_engine)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
-
 from encryption_manager.models import get_hash
 
-DIR_DB = 'databases'
-DIR_UNITS_DBS = DIR_DB + os.sep + 'units'
-FILE_USERS_DB = os.path.join(DIR_DB, 'users.sqlite')
-
-if not os.path.exists(DIR_UNITS_DBS):
-    os.makedirs(DIR_UNITS_DBS)
 
 Base = declarative_base()
 
