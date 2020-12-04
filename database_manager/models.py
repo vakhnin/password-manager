@@ -68,7 +68,7 @@ class UserManager:
         """
         user_tmp = self._user
         if user:
-            user_tmp =user
+            user_tmp = user
 
         if self._session.query(User).filter(User.user == user_tmp).first():
             return True
@@ -135,33 +135,39 @@ class UnitManager:
         self._user = user
 
     def get_logins(self, category):
-        """Выдача логинов"""
-        logins_list = []
+        """Выдача units"""
+
+        def make_logins_obj(units_list):
+            """Выдача логинов, из списка"""
+            units_obj = {
+                "logins": [],
+                "category": [],
+                "url": [],
+                "alias": []
+            }
+
+            if units_list:
+                for unit_ in units_list:
+                    units_obj['logins'].append(unit_.login)
+                    units_obj['category']\
+                        .append(unit_.category.category if unit_.category.category else 'default')
+                    units_obj['url']\
+                        .append(unit_.url if unit_.url else '')
+                    units_obj['alias']\
+                        .append(unit_.alias if unit_.alias else '')
+            return units_obj
+
         if category == 'default':
-            category = self._session.query(Category).filter(Category.category == None).first()
-            if category:
-                for unit in category.units:
-                    logins_list.append(unit.login)
-                logins_list.sort()
-                return logins_list
-            else:
-                return []
+            category = self._session.query(Category)\
+                .filter(Category.category == None).first()
+            return make_logins_obj(category.units)
         elif category:
             category = self._session.query(Category)\
                 .filter(Category.category == category).first()
-            if category:
-                for unit in category.units:
-                    logins_list.append(unit.login)
-                logins_list.sort()
-                return logins_list
-            else:
-                return []
+            return make_logins_obj(category.units)
         else:
             units = self._session.query(Unit).all()
-            for unit in units:
-                logins_list.append(unit.login)
-            logins_list.sort()
-            return logins_list
+            return make_logins_obj(units)
 
     def check_login(self, login):
         """Проверка существования логина"""
@@ -186,11 +192,27 @@ class UnitManager:
 
     def get_password(self, login):
         """Получение пароля"""
-        user = self._session.query(User).filter(User.user == self._user).first()
-        for unit in user.logins:
-            if unit.login == login:
-                return unit.password
-        return None
+        unit_obj = self._session.query(Unit).filter(Unit.login == login).first()
+        return unit_obj.password
+
+    def update_unit(self, login, new_login=None, password_for_login=None,
+                    category=None, url=None, alias=None):
+        """Обновление unit"""
+        update_dict = {'login': login}
+        if new_login:
+            update_dict['login'] = new_login
+        if password_for_login and password_for_login != 'old-password':
+            update_dict['password'] = password_for_login
+        if url:
+            update_dict['url'] = url
+        if alias:
+            update_dict['alias'] = alias
+
+        self._session.query(Unit).filter(Unit.login == login)\
+            .update(update_dict)
+        self._session.query(Unit).filter(Unit.login == login)\
+            .first().category = self.get_category(category)
+        self._session.commit()
 
     def delete_unit(self, login):
         """Удаление unit"""

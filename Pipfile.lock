@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "9d64118e644cd7009ad39b2ea915d0edecd7870d85e198a360fcfee08a075369"
+            "sha256": "39cdd44b4386b8c62a17bbd28dafb58e98a028ba50cb503c25ae0595d048d6fc"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -61,6 +61,10 @@
                 "sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f"
             ],
             "version": "==0.6.1"
+        },
+        "pwdone": {
+            "editable": true,
+            "path": "."
         },
         "pycodestyle": {
             "hashes": [
