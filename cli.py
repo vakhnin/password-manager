@@ -5,6 +5,15 @@ import click
 import pyperclip
 
 from database_manager.models import FILE_USERS_DB, SQLAlchemyManager
+from log_manager.models import logging
+
+LOG = logging.getLogger('cli')
+
+user_argument = click.option('--user', '-u', prompt="Username",
+                             help="Provide your username",
+                             default=lambda: os.environ.get('USERNAME'))
+password_argument = click.option('--password', '-p', help="Provide your password",
+                                 prompt=True, hide_input=True)
 
 
 @click.group()
@@ -23,13 +32,6 @@ def cli(ctx, a, c, u):
             'url': u
         }
     }
-
-
-user_argument = click.option('--user', '-u', prompt="Username",
-                             help="Provide your username",
-                             default=lambda: os.environ.get('USERNAME'))
-password_argument = click.option('--password', '-p', help="Provide your password",
-                                 prompt=True, hide_input=True)
 
 
 @cli.command()
@@ -99,6 +101,7 @@ def ushow(ctx):
     show users command
     """
     manager_obj = SQLAlchemyManager(FILE_USERS_DB)
+    LOG.debug("test log message")
 
     users = manager_obj.user_obj.all_users()
     for user in users:
