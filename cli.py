@@ -59,8 +59,11 @@ def uupdate(user, password, newusername, password_for_newusername):
     """
     manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, password)
 
-    if not manager_obj.user_obj.check_user_password(password):
-        print('Error: incorrect login or password')
+    if not manager_obj.user_obj.check_user():
+        print(f'Error: User named "{user}" not exists')
+        return
+    elif not manager_obj.user_obj.check_user_password(password):
+        print(f'Error: incorrect password for user named "{user}"')
         return
 
     if manager_obj.user_obj.check_user(newusername):
@@ -78,8 +81,11 @@ def udelete(user, password):
     """
     manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, password)
 
-    if not manager_obj.user_obj.check_user_password(password):
-        print('Error: incorrect login or password')
+    if not manager_obj.user_obj.check_user():
+        print(f'Error: User named "{user}" not exists')
+        return
+    elif not manager_obj.user_obj.check_user_password(password):
+        print(f'Error: incorrect password for user named "{user}"')
         return
 
     manager_obj.user_obj.del_user()
@@ -144,8 +150,11 @@ def show(ctx, user, password, category):
 
     manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, password)
 
-    if not manager_obj.user_obj.check_user_password(password):
-        print('Error: incorrect login or password')
+    if not manager_obj.user_obj.check_user():
+        print(f'Error: User named "{user}" not exists')
+        return
+    elif not manager_obj.user_obj.check_user_password(password):
+        print(f'Error: incorrect password for user named "{user}"')
         return
 
     logins = manager_obj.unit_obj.get_logins(category)
@@ -163,8 +172,11 @@ def get(user, password, login):
     """
     manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, password)
 
-    if not manager_obj.user_obj.check_user_password(password):
-        print('Error: incorrect login or password')
+    if not manager_obj.user_obj.check_user():
+        print(f'Error: User named "{user}" not exists')
+        return
+    elif not manager_obj.user_obj.check_user_password(password):
+        print(f'Error: incorrect password for user named "{user}"')
         return
 
     if manager_obj.unit_obj.check_login(login):
@@ -184,8 +196,11 @@ def delete(user, password, login):
     """
     manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, password)
 
-    if not manager_obj.user_obj.check_user_password(password):
-        print('Error: incorrect login or password')
+    if not manager_obj.user_obj.check_user():
+        print(f'Error: User named "{user}" not exists')
+        return
+    elif not manager_obj.user_obj.check_user_password(password):
+        print(f'Error: incorrect password for user named "{user}"')
         return
 
     if manager_obj.unit_obj.check_login(login):
@@ -211,8 +226,11 @@ def add(user, password, login, password_for_login, category, url, alias):
     """
     manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, password)
 
-    if not manager_obj.user_obj.check_user_password(password):
-        print('Error: incorrect login or password')
+    if not manager_obj.user_obj.check_user():
+        print(f'Error: User named "{user}" not exists')
+        return
+    elif not manager_obj.user_obj.check_user_password(password):
+        print(f'Error: incorrect password for user named "{user}"')
         return
 
     if manager_obj.unit_obj.check_login(login):
@@ -244,8 +262,11 @@ def update(user, password, login, new_login, password_for_login, new_category, u
 
     manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, password)
 
-    if not manager_obj.user_obj.check_user_password(password):
-        print('Error: incorrect login or password')
+    if not manager_obj.user_obj.check_user():
+        print(f'Error: User named "{user}" not exists')
+        return
+    elif not manager_obj.user_obj.check_user_password(password):
+        print(f'Error: incorrect password for user named "{user}"')
         return
 
     if not manager_obj.unit_obj.check_login(login):
