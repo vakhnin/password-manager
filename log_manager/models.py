@@ -14,6 +14,22 @@ def change_filename(filename):
         exit(-1)
 
 
+def log_and_print(message, level=logging.DEBUG, print_need=True):
+    if level == logging.DEBUG:
+        LOG.debug(message)
+    elif level == logging.INFO:
+        LOG.info(message)
+    elif level == logging.WARNING:
+        LOG.warning(message)
+    elif level == logging.ERROR:
+        LOG.error(message)
+    elif level == logging.CRITICAL:
+        LOG.critical(message)
+
+    if print_need:
+        print(message)
+
+
 LOG = logging.getLogger('cli')
 
 FORMATTER = \

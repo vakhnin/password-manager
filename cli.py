@@ -1,13 +1,12 @@
 # cli.py
 import os
+from logging import WARNING
 
 import click
 import pyperclip
 
 from database_manager.models import FILE_USERS_DB, SQLAlchemyManager
-from log_manager.models import logging
-
-LOG = logging.getLogger('cli')
+from log_manager.models import log_and_print
 
 user_argument = click.option('--user', '-u', prompt="Username",
                              help="Provide your username",
@@ -101,7 +100,11 @@ def ushow(ctx):
     show users command
     """
     manager_obj = SQLAlchemyManager(FILE_USERS_DB)
-    LOG.debug("test log message")
+    log_and_print("Это сообщение попадает и в лог и выводится на экран")
+    log_and_print("Это сообщение попадает лог, на экран не выводится",
+                  print_need=False)
+    log_and_print("Это сообщение попадает и в лог с "
+                  "пометкой WARNING и выводится на экран", level=WARNING)
 
     users = manager_obj.user_obj.all_users()
     for user in users:
