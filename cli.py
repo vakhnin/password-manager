@@ -1,10 +1,18 @@
 # cli.py
 import os
+from logging import WARNING
 
 import click
 import pyperclip
 
 from database_manager.models import FILE_USERS_DB, SQLAlchemyManager
+from log_manager.models import log_and_print
+
+user_argument = click.option('--user', '-u', prompt="Username",
+                             help="Provide your username",
+                             default=lambda: os.environ.get('USERNAME'))
+password_argument = click.option('--password', '-p', help="Provide your password",
+                                 prompt=True, hide_input=True)
 
 
 @click.group()
@@ -23,13 +31,6 @@ def cli(ctx, a, c, u):
             'url': u
         }
     }
-
-
-user_argument = click.option('--user', '-u', prompt="Username",
-                             help="Provide your username",
-                             default=lambda: os.environ.get('USERNAME'))
-password_argument = click.option('--password', '-p', help="Provide your password",
-                                 prompt=True, hide_input=True)
 
 
 @cli.command()
@@ -59,8 +60,11 @@ def uupdate(user, password, newusername, password_for_newusername):
     """
     manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, password)
 
-    if not manager_obj.user_obj.check_user_password(password):
-        print('Error: incorrect login or password')
+    if not manager_obj.user_obj.check_user():
+        print(f'Error: User named "{user}" not exists')
+        return
+    elif not manager_obj.user_obj.check_user_password(password):
+        print(f'Error: incorrect password for user named "{user}"')
         return
 
     if manager_obj.user_obj.check_user(newusername):
@@ -78,8 +82,11 @@ def udelete(user, password):
     """
     manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, password)
 
-    if not manager_obj.user_obj.check_user_password(password):
-        print('Error: incorrect login or password')
+    if not manager_obj.user_obj.check_user():
+        print(f'Error: User named "{user}" not exists')
+        return
+    elif not manager_obj.user_obj.check_user_password(password):
+        print(f'Error: incorrect password for user named "{user}"')
         return
 
     manager_obj.user_obj.del_user()
@@ -93,6 +100,11 @@ def ushow(ctx):
     show users command
     """
     manager_obj = SQLAlchemyManager(FILE_USERS_DB)
+    log_and_print("Это сообщение попадает и в лог и выводится на экран")
+    log_and_print("Это сообщение попадает лог, на экран не выводится",
+                  print_need=False)
+    log_and_print("Это сообщение попадает и в лог с "
+                  "пометкой WARNING и выводится на экран", level=WARNING)
 
     users = manager_obj.user_obj.all_users()
     for user in users:
@@ -144,8 +156,11 @@ def show(ctx, user, password, category):
 
     manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, password)
 
-    if not manager_obj.user_obj.check_user_password(password):
-        print('Error: incorrect login or password')
+    if not manager_obj.user_obj.check_user():
+        print(f'Error: User named "{user}" not exists')
+        return
+    elif not manager_obj.user_obj.check_user_password(password):
+        print(f'Error: incorrect password for user named "{user}"')
         return
 
     logins = manager_obj.unit_obj.get_logins(category)
@@ -163,8 +178,11 @@ def get(user, password, login):
     """
     manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, password)
 
-    if not manager_obj.user_obj.check_user_password(password):
-        print('Error: incorrect login or password')
+    if not manager_obj.user_obj.check_user():
+        print(f'Error: User named "{user}" not exists')
+        return
+    elif not manager_obj.user_obj.check_user_password(password):
+        print(f'Error: incorrect password for user named "{user}"')
         return
 
     if manager_obj.unit_obj.check_login(login):
@@ -184,8 +202,11 @@ def delete(user, password, login):
     """
     manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, password)
 
-    if not manager_obj.user_obj.check_user_password(password):
-        print('Error: incorrect login or password')
+    if not manager_obj.user_obj.check_user():
+        print(f'Error: User named "{user}" not exists')
+        return
+    elif not manager_obj.user_obj.check_user_password(password):
+        print(f'Error: incorrect password for user named "{user}"')
         return
 
     if manager_obj.unit_obj.check_login(login):
@@ -211,8 +232,11 @@ def add(user, password, login, password_for_login, category, url, alias):
     """
     manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, password)
 
-    if not manager_obj.user_obj.check_user_password(password):
-        print('Error: incorrect login or password')
+    if not manager_obj.user_obj.check_user():
+        print(f'Error: User named "{user}" not exists')
+        return
+    elif not manager_obj.user_obj.check_user_password(password):
+        print(f'Error: incorrect password for user named "{user}"')
         return
 
     if manager_obj.unit_obj.check_login(login):
@@ -244,8 +268,11 @@ def update(user, password, login, new_login, password_for_login, new_category, u
 
     manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, password)
 
-    if not manager_obj.user_obj.check_user_password(password):
-        print('Error: incorrect login or password')
+    if not manager_obj.user_obj.check_user():
+        print(f'Error: User named "{user}" not exists')
+        return
+    elif not manager_obj.user_obj.check_user_password(password):
+        print(f'Error: incorrect password for user named "{user}"')
         return
 
     if not manager_obj.unit_obj.check_login(login):

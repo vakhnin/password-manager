@@ -1,10 +1,9 @@
-from settings import *
 from sqlalchemy import (Column, ForeignKey, Integer,
                         String, create_engine)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from encryption_manager.models import get_hash
-
+from settings import DIR_UNITS_DBS, FILE_USERS_DB
 
 Base = declarative_base()
 
@@ -110,7 +109,8 @@ class UserManager:
         """
         self._session.query(User) \
             .filter(User.user == self._user).delete()
-        os.remove(DIR_UNITS_DBS + os.sep + self._user + ".sqlite")
+        if (DIR_UNITS_DBS / (self._user + ".sqlite")).exists():
+            (DIR_UNITS_DBS / (self._user + ".sqlite")).unlink()
         self._session.commit()
 
     def all_users(self):
@@ -271,7 +271,7 @@ class SQLAlchemyManager:
 
         # Инициализация Items
         engine = create_engine(
-            f'sqlite:///{DIR_UNITS_DBS + os.sep + user + ".sqlite"}',
+            f'sqlite:///{DIR_UNITS_DBS / (user + ".sqlite")}',
             echo=False)
 
         # Создание файла БД, если его нет, обновление таблиц, при изменении
