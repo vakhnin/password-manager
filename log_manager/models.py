@@ -15,19 +15,29 @@ def change_filename(filename):
 
 
 def log_and_print(message, level=logging.DEBUG, print_need=True):
-    if level == logging.DEBUG:
-        LOG.debug(message)
-    elif level == logging.INFO:
-        LOG.info(message)
-    elif level == logging.WARNING:
-        LOG.warning(message)
-    elif level == logging.ERROR:
-        LOG.error(message)
-    elif level == logging.CRITICAL:
-        LOG.critical(message)
+    """Loging and print message"""
+    data_messages = {
+        logging.DEBUG: {
+            'func': LOG.debug,
+            'msg_prefix': ''},
+        logging.INFO: {
+            'func': LOG.info,
+            'msg_prefix': ''},
+        logging.WARNING: {
+            'func': LOG.warning,
+            'msg_prefix': 'Warning: '},
+        logging.ERROR: {
+            'func': LOG.error,
+            'msg_prefix': 'Error: '},
+        logging.CRITICAL: {
+            'func': LOG.critical,
+            'msg_prefix': 'Error: '}
+    }
 
     if print_need:
-        print(message)
+        print(data_messages[level]['msg_prefix'] + message)
+
+    data_messages[level]['func'](message)
 
 
 LOG = logging.getLogger('cli')
