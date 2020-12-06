@@ -1,6 +1,7 @@
 import logging
-import os
 from logging.handlers import TimedRotatingFileHandler
+
+from settings import LOGS_PATH
 
 
 def change_filename(filename):
@@ -44,12 +45,6 @@ LOG = logging.getLogger('cli')
 
 FORMATTER = \
     logging.Formatter('%(asctime)s - %(levelname)s -  %(name)s - %(message)s ')
-
-LOGS_PATH = os.path.join(os.getcwd(), 'logs')
-if not os.path.exists(LOGS_PATH):
-    os.makedirs(LOGS_PATH)
-LOGS_PATH = os.path.join(LOGS_PATH, 'common.log')
-
 
 ROTATION_LOGGING_HANDLER = \
     TimedRotatingFileHandler(
