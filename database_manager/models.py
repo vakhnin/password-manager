@@ -128,11 +128,9 @@ class UserManager:
 class UnitManager:
     """Класс работы с unit"""
     _session = None
-    _user = None
 
-    def __init__(self, session, user):
+    def __init__(self, session):
         self._session = session
-        self._user = user
 
     def get_logins(self, category):
         """Выдача units"""
@@ -283,4 +281,4 @@ class SQLAlchemyManager:
 
         self._session_for_unit = sessionmaker(bind=engine)()
 
-        self.unit_obj = UnitManager(self.session_for_unit, self.user)
+        self.unit_obj = UnitManager(self.session_for_unit)
