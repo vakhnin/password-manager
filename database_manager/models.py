@@ -209,9 +209,9 @@ class UnitManager:
             update_dict['alias'] = alias
 
         self._session.query(Unit).filter(Unit.login == login)\
-            .update(update_dict)
-        self._session.query(Unit).filter(Unit.login == login)\
             .first().category = self.get_category(category)
+        self._session.query(Unit).filter(Unit.login == login)\
+            .update(update_dict)
         self._session.commit()
 
     def delete_unit(self, login):
