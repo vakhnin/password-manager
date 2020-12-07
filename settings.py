@@ -11,5 +11,6 @@ TIME_SESSION_CLOSE = 15 * 60  # дефолтное время в секунда�
 if not DIR_UNITS_DBS.exists():
     DIR_UNITS_DBS.mkdir(parents=True)
 
-if not LOGS_PATH.parent:
-    DIR_UNITS_DBS.mkdir(parents=True)
+if not LOGS_PATH.parent.exists():
+    LOGS_PATH.parent.mkdir(parents=True)
+    LOGS_PATH.touch()
