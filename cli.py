@@ -1,6 +1,6 @@
 # cli.py
 import os
-from logging import WARNING
+from logging import INFO, WARNING, ERROR
 
 import click
 import pyperclip
@@ -43,10 +43,10 @@ def uadd(user, password):
     manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, password)
 
     if manager_obj.user_obj.check_user():
-        print(f'Error: User named "{user}" already exists')
+        log_and_print(f'User named "{user}" already exists', level=ERROR)
     else:
         manager_obj.user_obj.add_user(password)
-        print(f'User named "{user}" created')
+        log_and_print(f'User named "{user}" created', level=INFO)
 
 
 @cli.command()
@@ -61,14 +61,14 @@ def uupdate(user, password, newusername, password_for_newusername):
     manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, password)
 
     if not manager_obj.user_obj.check_user():
-        print(f'Error: User named "{user}" not exists')
+        log_and_print(f'User named "{user}" not exists', level=ERROR)
         return
     elif not manager_obj.user_obj.check_user_password(password):
-        print(f'Error: incorrect password for user named "{user}"')
+        log_and_print(f'Incorrect password for user named "{user}"', level=ERROR)
         return
 
     if manager_obj.user_obj.check_user(newusername):
-        print(f'Error: User named "{newusername}" already exists')
+        log_and_print(f'User named "{newusername}" already exists', level=ERROR)
     else:
         manager_obj.user_obj.update_user(password, newusername, password_for_newusername)
 
@@ -83,14 +83,14 @@ def udelete(user, password):
     manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, password)
 
     if not manager_obj.user_obj.check_user():
-        print(f'Error: User named "{user}" not exists')
+        log_and_print(f'User named "{user}" not exists', level=ERROR)
         return
     elif not manager_obj.user_obj.check_user_password(password):
-        print(f'Error: incorrect password for user named "{user}"')
+        log_and_print(f'Incorrect password for user named "{user}"', level=ERROR)
         return
 
     manager_obj.user_obj.del_user()
-    print(f'User named "{user}" deleted')
+    log_and_print(f'User named "{user}" deleted', level=INFO)
 
 
 @cli.command()
@@ -101,7 +101,7 @@ def ushow(ctx):
     """
     manager_obj = SQLAlchemyManager(FILE_USERS_DB)
     log_and_print("Это сообщение попадает и в лог и выводится на экран")
-    log_and_print("Это сообщение попадает лог, на экран не выводится",
+    log_and_print("Это сообщение попадает в лог, на экран не выводится",
                   print_need=False)
     log_and_print("Это сообщение попадает и в лог с "
                   "пометкой WARNING и выводится на экран", level=WARNING)
