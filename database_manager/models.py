@@ -128,11 +128,9 @@ class UserManager:
 class UnitManager:
     """Класс работы с unit"""
     _session = None
-    _user = None
 
-    def __init__(self, session, user):
+    def __init__(self, session):
         self._session = session
-        self._user = user
 
     def get_logins(self, category):
         """Выдача units"""
@@ -209,9 +207,9 @@ class UnitManager:
             update_dict['alias'] = alias
 
         self._session.query(Unit).filter(Unit.login == login)\
-            .update(update_dict)
-        self._session.query(Unit).filter(Unit.login == login)\
             .first().category = self.get_category(category)
+        self._session.query(Unit).filter(Unit.login == login)\
+            .update(update_dict)
         self._session.commit()
 
     def delete_unit(self, login):
@@ -283,4 +281,4 @@ class SQLAlchemyManager:
 
         self._session_for_unit = sessionmaker(bind=engine)()
 
-        self.unit_obj = UnitManager(self.session_for_unit, self.user)
+        self.unit_obj = UnitManager(self.session_for_unit)
