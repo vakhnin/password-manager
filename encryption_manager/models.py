@@ -50,3 +50,10 @@ class AESCipher(object):
         iv = enc[:AES.block_size]
         cipher = AES.new(self.key, AES.MODE_CBC, iv)
         return self._unpad(cipher.decrypt(enc[AES.block_size:])).decode('utf-8')
+
+def get_secret_obj(key1, key2):
+    """
+    This function returns an instance of AESCipher encoded by key = hash of (key1 + key2)
+    """
+    key = get_hash((key1 + key2).encode("utf-8"))
+    return AESCipher(key)
