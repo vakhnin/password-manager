@@ -171,7 +171,7 @@ class UnitManager:
     def check_login(self, login, alias):
         """Проверка существования логина"""
         return self._session.query(Unit)\
-            .filter((Unit.login == login) & (Unit.alias == alias)).first()
+            .filter((Unit.login == login) & (Unit.alias == alias)).all()
 
     def get_category(self, category):
         """Выдаем категорию, если есть, иначе создаем"""
