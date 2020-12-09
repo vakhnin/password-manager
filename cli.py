@@ -100,15 +100,11 @@ def ushow(ctx):
     show users command
     """
     manager_obj = SQLAlchemyManager(FILE_USERS_DB)
-    log_and_print("Это сообщение попадает и в лог и выводится на экран")
-    log_and_print("Это сообщение попадает в лог, на экран не выводится",
-                  print_need=False)
-    log_and_print("Это сообщение попадает и в лог с "
-                  "пометкой WARNING и выводится на экран", level=WARNING)
 
     users = manager_obj.user_obj.all_users()
     for user in users:
         print(user)
+    log_and_print(f'Show users command is done', print_need=False, level=INFO)
 
 
 @cli.command()
@@ -157,15 +153,16 @@ def show(ctx, user, password, category):
     manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, password)
 
     if not manager_obj.user_obj.check_user():
-        print(f'Error: User named "{user}" not exists')
+        log_and_print(f'User named "{user}" not exists', level=ERROR)
         return
     elif not manager_obj.user_obj.check_user_password(password):
-        print(f'Error: incorrect password for user named "{user}"')
+        log_and_print(f'Incorrect password for user named "{user}"', level=ERROR)
         return
 
     logins = manager_obj.unit_obj.get_logins(category)
     logins = prepare_logins(logins)
     print_logins(logins, ctx.obj['FLAGS'])
+    log_and_print(f'Show logins command is done', print_need=False, level=INFO)
 
 
 @cli.command()
@@ -179,17 +176,17 @@ def get(user, password, login):
     manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, password)
 
     if not manager_obj.user_obj.check_user():
-        print(f'Error: User named "{user}" not exists')
+        log_and_print(f'User named "{user}" not exists', level=ERROR)
         return
     elif not manager_obj.user_obj.check_user_password(password):
-        print(f'Error: incorrect password for user named "{user}"')
+        log_and_print(f'Incorrect password for user named "{user}"', level=ERROR)
         return
 
     if manager_obj.unit_obj.check_login(login):
         pyperclip.copy(manager_obj.unit_obj.get_password(user, password, login))
-        print(f'Password is placed on the clipboard')
+        log_and_print(f'Password is placed on the clipboard', level=INFO)
     else:
-        print(f'Error: login "{login}" not exists')
+        log_and_print(f'Login "{login}" not exists', level=ERROR)
 
 
 @cli.command()
@@ -203,17 +200,17 @@ def delete(user, password, login):
     manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, password)
 
     if not manager_obj.user_obj.check_user():
-        print(f'Error: User named "{user}" not exists')
+        log_and_print(f'User named "{user}" not exists', level=ERROR)
         return
     elif not manager_obj.user_obj.check_user_password(password):
-        print(f'Error: incorrect password for user named "{user}"')
+        log_and_print(f'Incorrect password for user named "{user}"', level=ERROR)
         return
 
     if manager_obj.unit_obj.check_login(login):
         manager_obj.unit_obj.delete_unit(login)
-        print(f' login "{login}" deleted')
+        log_and_print(f'Login "{login}" deleted', level=INFO)
     else:
-        print(f'Error: login "{login}" not exists')
+        log_and_print(f'Login "{login}" not exists', level=ERROR)
 
 
 @cli.command()
@@ -233,19 +230,19 @@ def add(user, password, login, password_for_login, category, url, alias):
     manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, password)
 
     if not manager_obj.user_obj.check_user():
-        print(f'Error: User named "{user}" not exists')
+        log_and_print(f'User named "{user}" not exists', level=ERROR)
         return
     elif not manager_obj.user_obj.check_user_password(password):
-        print(f'Error: incorrect password for user named "{user}"')
+        log_and_print(f'Incorrect password for user named "{user}"', level=ERROR)
         return
 
     if manager_obj.unit_obj.check_login(login):
-        print(f'Error: login "{login}" already exists')
+        log_and_print(f'Error: login "{login}" already exists', level=ERROR)
     else:
         category = None if category == 'default' else category
         manager_obj.unit_obj\
             .add_unit(user, password, login, password_for_login, category, url, alias)
-        print(f' login "{login}" added')
+        log_and_print(f'Login "{login}" added', level=INFO)
 
 
 @cli.command()
@@ -269,23 +266,23 @@ def update(user, password, login, new_login, password_for_login, new_category, u
     manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, password)
 
     if not manager_obj.user_obj.check_user():
-        print(f'Error: User named "{user}" not exists')
+        log_and_print(f'User named "{user}" not exists', level=ERROR)
         return
     elif not manager_obj.user_obj.check_user_password(password):
-        print(f'Error: incorrect password for user named "{user}"')
+        log_and_print(f'Incorrect password for user named "{user}"', level=ERROR)
         return
 
     if not manager_obj.unit_obj.check_login(login):
-        print(f'Error: login "{login}" not exists')
+        log_and_print(f'Login "{login}" not exists', level=ERROR)
     elif manager_obj.unit_obj.check_login(new_login) \
             and login != new_login:
-        print(f'Error: new login "{login}" already exists')
+        log_and_print(f'New login "{login}" already exists', level=ERROR)
     else:
         new_category = None if new_category == 'default' else new_category
         manager_obj.unit_obj\
             .update_unit(user, password, login, new_login,
                          password_for_login, new_category, url, alias)
-        print(f' login "{login}" updated')
+        log_and_print(f'Login "{login}" updated', level=INFO)
 
 
 if __name__ == '__main__':
