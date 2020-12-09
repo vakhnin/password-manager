@@ -1,5 +1,5 @@
 from sqlalchemy import (Column, ForeignKey, Integer,
-                        String, create_engine)
+                        String, create_engine, UniqueConstraint)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from encryption_manager.models import get_hash, get_secret_obj
@@ -25,11 +25,12 @@ class Unit(Base):
     """Определение таблицы units"""
     __tablename__ = 'units'
     id = Column(Integer, primary_key=True)
-    login = Column(String, nullable=False, unique=True)
-    password = Column(String, nullable=False)
+    login = Column(String, nullable=False)
     url = Column(String)
     alias = Column(String)
     category_id = Column(ForeignKey('categories.id', ondelete="CASCADE"))
+    password = Column(String, nullable=False)
+    login_alias = UniqueConstraint(login, alias)
     category = relationship("Category", back_populates="units")
 
     def __init__(self, login, password, url=None, alias=None):
@@ -167,10 +168,10 @@ class UnitManager:
             units = self._session.query(Unit).all()
             return make_logins_obj(units)
 
-    def check_login(self, login):
+    def check_login(self, login, alias):
         """Проверка существования логина"""
-        return self._session.query(Unit).filter(Unit.login == login).first()
-        # return login in self.all_logins()
+        return self._session.query(Unit)\
+            .filter((Unit.login == login) & (Unit.alias == alias)).first()
 
     def get_category(self, category):
         """Выдаем категорию, если есть, иначе создаем"""

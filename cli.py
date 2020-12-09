@@ -251,12 +251,12 @@ def delete(user, password, login):
 @user_argument
 @password_argument
 @click.option('-l', "--login", prompt="Login", help="Provide login")
+@click.option('-a', "--alias", prompt="Alias", help='alias', default='default')
 @click.option('-pl', '--password-for-login', prompt=True,
               help="Provide password for login", hide_input=True)
 @click.option('-c', "--category", help='"default" or skip for default category, optional',
               default=None, required=False)
 @click.option('-ur', "--url", help='url, optional', default=None, required=False)
-@click.option('-a', "--alias", help='alias, optional', default=None, required=False)
 def add(user, password, login, password_for_login, category, url, alias):
     """
     add login and password command
@@ -270,8 +270,9 @@ def add(user, password, login, password_for_login, category, url, alias):
         log_and_print(f'Incorrect password for user named "{user}"', level=ERROR)
         return
 
-    if manager_obj.unit_obj.check_login(login):
-        log_and_print(f'Error: login "{login}" already exists', level=ERROR)
+    if manager_obj.unit_obj.check_login(login, alias):
+        log_and_print(f'login "{login}" with "{alias}"'
+                      f' alias already exists', level=ERROR)
     else:
         category = None if category == 'default' else category
         manager_obj.unit_obj\
