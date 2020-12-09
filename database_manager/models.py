@@ -216,10 +216,10 @@ class UnitManager:
             .update(update_dict)
         self._session.commit()
 
-    def delete_unit(self, login):
+    def delete_unit(self, login, alias):
         """Удаление unit"""
         self._session.query(Unit) \
-            .filter(Unit.login == login).delete()
+            .filter((Unit.login == login) & (Unit.alias == alias)).delete()
         self._session.commit()
 
 

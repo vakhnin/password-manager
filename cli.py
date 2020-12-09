@@ -229,7 +229,8 @@ def get(user, password, login, alias):
 @user_argument
 @password_argument
 @click.option('-l', "--login", prompt="Login", help="Provide login")
-def delete(user, password, login):
+@click.option('-a', "--alias", prompt="Alias", help='alias', default='default')
+def delete(user, password, login, alias):
     """
     delete login and password command
     """
@@ -242,11 +243,12 @@ def delete(user, password, login):
         log_and_print(f'Incorrect password for user named "{user}"', level=ERROR)
         return
 
-    if manager_obj.unit_obj.check_login(login):
-        manager_obj.unit_obj.delete_unit(login)
+    if manager_obj.unit_obj.check_login(login, alias):
+        manager_obj.unit_obj.delete_unit(login, alias)
         log_and_print(f'Login "{login}" deleted', level=INFO)
     else:
-        log_and_print(f'Login "{login}" not exists', level=ERROR)
+        log_and_print(f'login "{login}" with "{alias}"'
+                      f' alias not exists', level=ERROR)
 
 
 @cli.command()
