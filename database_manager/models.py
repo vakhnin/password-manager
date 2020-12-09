@@ -2,7 +2,7 @@ from sqlalchemy import (Column, ForeignKey, Integer,
                         String, create_engine)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
-from encryption_manager.models import get_hash
+from encryption_manager.models import get_hash, get_secret_obj
 from settings import DIR_UNITS_DBS, FILE_USERS_DB
 
 Base = declarative_base()
@@ -181,26 +181,29 @@ class UnitManager:
         else:
             return Category(category=category)
 
-    def add_unit(self, login, password_for_login, category=None, url=None, alias=None):
+    def add_unit(self, user, password, login, password_for_login, category=None, url=None, alias=None):
         """Добавление unit"""
-        unit_for_add = Unit(login, password_for_login, url, alias)
+        secret_obj = get_secret_obj(user, password)
+        unit_for_add = Unit(login, secret_obj.encrypt(password_for_login), url, alias)
         self._session.add(unit_for_add)
         unit_for_add.category = self.get_category(category)
         self._session.commit()
 
-    def get_password(self, login):
+    def get_password(self, user, password, login):
         """Получение пароля"""
+        secret_obj = get_secret_obj(user, password)
         unit_obj = self._session.query(Unit).filter(Unit.login == login).first()
-        return unit_obj.password
+        return secret_obj.decrypt(unit_obj.password)
 
-    def update_unit(self, login, new_login=None, password_for_login=None,
+    def update_unit(self, user, password, login, new_login=None, password_for_login=None,
                     category=None, url=None, alias=None):
         """Обновление unit"""
         update_dict = {'login': login}
         if new_login:
             update_dict['login'] = new_login
         if password_for_login and password_for_login != 'old-password':
-            update_dict['password'] = password_for_login
+            secret_obj = get_secret_obj(user, password)
+            update_dict['password'] = secret_obj.encrypt(password_for_login)
         if url:
             update_dict['url'] = url
         if alias:
