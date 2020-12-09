@@ -8,10 +8,41 @@ import pyperclip
 from database_manager.models import FILE_USERS_DB, SQLAlchemyManager
 from log_manager.models import log_and_print
 
+
+def validate_user(ctx, param, value):
+    """
+    Check user exists
+    """
+    manager_obj = SQLAlchemyManager(FILE_USERS_DB, value)
+
+    if not manager_obj.user_obj.check_user():
+        log_and_print(f'User named "{value}" not exists', level=ERROR)
+        exit(-1)
+    else:
+        ctx.obj['USER'] = value
+        return value
+
+
+def validate_password(ctx, param, value):
+    """
+    Check user exists
+    """
+    user = ctx.obj['USER']
+    manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, value)
+
+    if not manager_obj.user_obj.check_user_password(value):
+        log_and_print(f'Incorrect password for user named "{user}"', level=ERROR)
+        exit(-1)
+    else:
+        return value
+
+
 user_argument = click.option('--user', '-u', prompt="Username",
                              help="Provide your username",
+                             callback=validate_user,
                              default=lambda: os.environ.get('USERNAME'))
 password_argument = click.option('--password', '-p', help="Provide your password",
+                                 callback=validate_password,
                                  prompt=True, hide_input=True)
 
 
@@ -34,8 +65,11 @@ def cli(ctx, a, c, u):
 
 
 @cli.command()
-@user_argument
-@password_argument
+@click.option('--user', '-u', prompt="Username",
+              help="Provide your username",
+              default=lambda: os.environ.get('USERNAME'))
+@click.option('--password', '-p', help="Provide your password",
+              prompt=True, hide_input=True)
 def uadd(user, password):
     """
     add user command
