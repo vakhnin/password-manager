@@ -1,5 +1,5 @@
 import datetime as dt
-from settings import *
+from settings import TIME_SESSION_CLOSE
 import json
 from abc import ABC, abstractmethod, abstractproperty
 
