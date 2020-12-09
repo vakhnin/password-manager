@@ -47,17 +47,17 @@ password_argument = click.option('--password', '-p', help="Provide your password
 
 
 @click.group()
-@click.option('-a/-not-alias', help='print or not alias')
+# @click.option('-a/-not-alias', help='print or not alias')
 @click.option('-c/-not-category', help='print or not category')
 @click.option('-u/-not-url', help='print or not url')
 @click.pass_context
-def cli(ctx, a, c, u):
+def cli(ctx, c, u):
     """
     Use "pwdone [COMMAND] --help" for more information
     """
     ctx.obj = {
         'FLAGS': {
-            'alias': a,
+            'alias': True,
             'category': c,
             'url': u
         }
