@@ -186,7 +186,7 @@ def get(user, password, login):
         return
 
     if manager_obj.unit_obj.check_login(login):
-        pyperclip.copy(manager_obj.unit_obj.get_password(login))
+        pyperclip.copy(manager_obj.unit_obj.get_password(user, password, login))
         print(f'Password is placed on the clipboard')
     else:
         print(f'Error: login "{login}" not exists')
@@ -244,7 +244,7 @@ def add(user, password, login, password_for_login, category, url, alias):
     else:
         category = None if category == 'default' else category
         manager_obj.unit_obj\
-            .add_unit(login, password_for_login, category, url, alias)
+            .add_unit(user, password, login, password_for_login, category, url, alias)
         print(f' login "{login}" added')
 
 
@@ -283,7 +283,7 @@ def update(user, password, login, new_login, password_for_login, new_category, u
     else:
         new_category = None if new_category == 'default' else new_category
         manager_obj.unit_obj\
-            .update_unit(login, new_login,
+            .update_unit(user, password, login, new_login,
                          password_for_login, new_category, url, alias)
         print(f' login "{login}" updated')
 
