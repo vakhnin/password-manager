@@ -190,10 +190,11 @@ class UnitManager:
         unit_for_add.category = self.get_category(category)
         self._session.commit()
 
-    def get_password(self, user, password, login):
+    def get_password(self, user, password, login, alias):
         """Получение пароля"""
         secret_obj = get_secret_obj(user, password)
-        unit_obj = self._session.query(Unit).filter(Unit.login == login).first()
+        unit_obj = self._session.query(Unit)\
+            .filter((Unit.login == login) & (Unit.alias == alias)).first()
         return secret_obj.decrypt(unit_obj.password)
 
     def update_unit(self, user, password, login, new_login=None, password_for_login=None,

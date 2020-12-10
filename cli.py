@@ -218,7 +218,8 @@ def get(user, password, login, alias):
         return
 
     if manager_obj.unit_obj.check_login(login, alias):
-        pyperclip.copy(manager_obj.unit_obj.get_password(user, password, login))
+        pyperclip.copy(manager_obj.unit_obj
+                       .get_password(user, password, login, alias))
         log_and_print(f'Password is placed on the clipboard', level=INFO)
     else:
         log_and_print(f'login "{login}" with "{alias}"'
