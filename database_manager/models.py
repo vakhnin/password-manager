@@ -197,7 +197,7 @@ class UnitManager:
         return secret_obj.decrypt(unit_obj.password)
 
     def update_unit(self, user, password, login, new_login=None, password_for_login=None,
-                    category=None, url=None, alias=None):
+                    category=None, url=None, alias=None, new_alias=None):
         """Обновление unit"""
         update_dict = {'login': login}
         if new_login:
@@ -207,12 +207,14 @@ class UnitManager:
             update_dict['password'] = secret_obj.encrypt(password_for_login)
         if url:
             update_dict['url'] = url
-        if alias:
-            update_dict['alias'] = alias
+        if new_alias:
+            update_dict['alias'] = new_alias
 
-        self._session.query(Unit).filter(Unit.login == login)\
+        self._session.query(Unit)\
+            .filter((Unit.login == login) & (Unit.alias == alias))\
             .first().category = self.get_category(category)
-        self._session.query(Unit).filter(Unit.login == login)\
+        self._session.query(Unit)\
+            .filter((Unit.login == login) & (Unit.alias == alias))\
             .update(update_dict)
         self._session.commit()
 
