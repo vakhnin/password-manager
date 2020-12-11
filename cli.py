@@ -47,17 +47,17 @@ password_argument = click.option('--password', '-p', help="Provide your password
 
 
 @click.group()
-@click.option('-a/-not-alias', help='print or not alias')
+# @click.option('-a/-not-alias', help='print or not alias')
 @click.option('-c/-not-category', help='print or not category')
 @click.option('-u/-not-url', help='print or not url')
 @click.pass_context
-def cli(ctx, a, c, u):
+def cli(ctx, c, u):
     """
     Use "pwdone [COMMAND] --help" for more information
     """
     ctx.obj = {
         'FLAGS': {
-            'alias': a,
+            'alias': True,
             'category': c,
             'url': u
         }
@@ -203,7 +203,8 @@ def show(ctx, user, password, category):
 @user_argument
 @password_argument
 @click.option('-l', "--login", prompt="Login", help="Provide login")
-def get(user, password, login):
+@click.option('-a', "--alias", prompt="Alias", help='alias', default='default')
+def get(user, password, login, alias):
     """
     get password by login command
     """
@@ -216,18 +217,21 @@ def get(user, password, login):
         log_and_print(f'Incorrect password for user named "{user}"', level=ERROR)
         return
 
-    if manager_obj.unit_obj.check_login(login):
-        pyperclip.copy(manager_obj.unit_obj.get_password(user, password, login))
+    if manager_obj.unit_obj.check_login(login, alias):
+        pyperclip.copy(manager_obj.unit_obj
+                       .get_password(user, password, login, alias))
         log_and_print(f'Password is placed on the clipboard', level=INFO)
     else:
-        log_and_print(f'Login "{login}" not exists', level=ERROR)
+        log_and_print(f'login "{login}" with "{alias}"'
+                      f' alias not exists', level=ERROR)
 
 
 @cli.command()
 @user_argument
 @password_argument
 @click.option('-l', "--login", prompt="Login", help="Provide login")
-def delete(user, password, login):
+@click.option('-a', "--alias", prompt="Alias", help='alias', default='default')
+def delete(user, password, login, alias):
     """
     delete login and password command
     """
@@ -240,23 +244,24 @@ def delete(user, password, login):
         log_and_print(f'Incorrect password for user named "{user}"', level=ERROR)
         return
 
-    if manager_obj.unit_obj.check_login(login):
-        manager_obj.unit_obj.delete_unit(login)
+    if manager_obj.unit_obj.check_login(login, alias):
+        manager_obj.unit_obj.delete_unit(login, alias)
         log_and_print(f'Login "{login}" deleted', level=INFO)
     else:
-        log_and_print(f'Login "{login}" not exists', level=ERROR)
+        log_and_print(f'login "{login}" with "{alias}"'
+                      f' alias not exists', level=ERROR)
 
 
 @cli.command()
 @user_argument
 @password_argument
 @click.option('-l', "--login", prompt="Login", help="Provide login")
+@click.option('-a', "--alias", prompt="Alias", help='alias', default='default')
 @click.option('-pl', '--password-for-login', prompt=True,
               help="Provide password for login", hide_input=True)
 @click.option('-c', "--category", help='"default" or skip for default category, optional',
               default=None, required=False)
 @click.option('-ur', "--url", help='url, optional', default=None, required=False)
-@click.option('-a', "--alias", help='alias, optional', default=None, required=False)
 def add(user, password, login, password_for_login, category, url, alias):
     """
     add login and password command
@@ -270,8 +275,9 @@ def add(user, password, login, password_for_login, category, url, alias):
         log_and_print(f'Incorrect password for user named "{user}"', level=ERROR)
         return
 
-    if manager_obj.unit_obj.check_login(login):
-        log_and_print(f'Error: login "{login}" already exists', level=ERROR)
+    if manager_obj.unit_obj.check_login(login, alias):
+        log_and_print(f'login "{login}" with "{alias}"'
+                      f' alias already exists', level=ERROR)
     else:
         category = None if category == 'default' else category
         manager_obj.unit_obj\
@@ -283,8 +289,10 @@ def add(user, password, login, password_for_login, category, url, alias):
 @user_argument
 @password_argument
 @click.option('-l', "--login", prompt="Login", help="Provide login")
+@click.option('-a', "--alias", prompt="Alias", help='alias', default='default')
 @click.option('-nl', "--new-login", help='new login, optional',
               default=None, required=False)
+@click.option('-na', "--new-alias", prompt="New alias", help='alias', default='default')
 @click.option('-pl', '--password-for-login',
               prompt="New password for login (Press 'Enter' for keep old password)",
               default='old-password',
@@ -293,8 +301,8 @@ def add(user, password, login, password_for_login, category, url, alias):
 @click.option('-nc', "--new-category", help='"default" or skip for default category, optional',
               default=None, required=False)
 @click.option('-ur', "--url", help='url, optional', default=None, required=False)
-@click.option('-a', "--alias", help='alias, optional', default=None, required=False)
-def update(user, password, login, new_login, password_for_login, new_category, url, alias):
+def update(user, password, login, alias,
+           new_login, new_alias, password_for_login, new_category, url):
     """Update unit"""
 
     manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, password)
@@ -306,16 +314,21 @@ def update(user, password, login, new_login, password_for_login, new_category, u
         log_and_print(f'Incorrect password for user named "{user}"', level=ERROR)
         return
 
-    if not manager_obj.unit_obj.check_login(login):
-        log_and_print(f'Login "{login}" not exists', level=ERROR)
-    elif manager_obj.unit_obj.check_login(new_login) \
-            and login != new_login:
-        log_and_print(f'New login "{login}" already exists', level=ERROR)
+    new_login = login if new_login is None else new_login
+
+    if not manager_obj.unit_obj.check_login(login, alias):
+        log_and_print(f'login "{login}" with "{alias}"'
+                      f' alias not exists', level=ERROR)
+    elif manager_obj.unit_obj.check_login(new_login, new_alias) \
+            and (login != new_login or alias != new_alias):
+        log_and_print(f'login "{login}" with "{alias}"'
+                      f' alias already exists', level=ERROR)
     else:
         new_category = None if new_category == 'default' else new_category
         manager_obj.unit_obj\
-            .update_unit(user, password, login, new_login,
-                         password_for_login, new_category, url, alias)
+            .update_unit(user, password,
+                         login, new_login, password_for_login,
+                         new_category, url, alias, new_alias)
         log_and_print(f'Login "{login}" updated', level=INFO)
 
 
