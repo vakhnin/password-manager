@@ -1,6 +1,6 @@
 # cli.py
 import os
-from logging import INFO, WARNING, ERROR
+from logging import ERROR, INFO, WARNING
 
 import click
 import pyperclip

@@ -1,7 +1,8 @@
 import datetime as dt
-from settings import TIME_SESSION_CLOSE
 import json
 from abc import ABC, abstractmethod, abstractproperty
+
+from settings import TIME_SESSION_CLOSE
 
 
 class UnitsComposition:

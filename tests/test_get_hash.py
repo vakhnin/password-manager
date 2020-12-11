@@ -3,6 +3,7 @@ import unittest
 
 from encryption_manager.models import get_hash
 
+
 class Test_get_hash(unittest.TestCase):
 
     def test_get_hashe(self):
