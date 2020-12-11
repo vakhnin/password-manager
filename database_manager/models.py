@@ -1,5 +1,5 @@
 from sqlalchemy import (Column, ForeignKey, Integer,
-                        String, create_engine)
+                        String, create_engine, UniqueConstraint)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from encryption_manager.models import get_hash, get_secret_obj
@@ -25,11 +25,12 @@ class Unit(Base):
     """Определение таблицы units"""
     __tablename__ = 'units'
     id = Column(Integer, primary_key=True)
-    login = Column(String, nullable=False, unique=True)
-    password = Column(String, nullable=False)
+    login = Column(String, nullable=False)
     url = Column(String)
     alias = Column(String)
     category_id = Column(ForeignKey('categories.id', ondelete="CASCADE"))
+    password = Column(String, nullable=False)
+    login_alias = UniqueConstraint(login, alias)
     category = relationship("Category", back_populates="units")
 
     def __init__(self, login, password, url=None, alias=None):
@@ -167,10 +168,10 @@ class UnitManager:
             units = self._session.query(Unit).all()
             return make_logins_obj(units)
 
-    def check_login(self, login):
+    def check_login(self, login, alias):
         """Проверка существования логина"""
-        return self._session.query(Unit).filter(Unit.login == login).first()
-        # return login in self.all_logins()
+        return self._session.query(Unit)\
+            .filter((Unit.login == login) & (Unit.alias == alias)).all()
 
     def get_category(self, category):
         """Выдаем категорию, если есть, иначе создаем"""
@@ -189,14 +190,15 @@ class UnitManager:
         unit_for_add.category = self.get_category(category)
         self._session.commit()
 
-    def get_password(self, user, password, login):
+    def get_password(self, user, password, login, alias):
         """Получение пароля"""
         secret_obj = get_secret_obj(user, password)
-        unit_obj = self._session.query(Unit).filter(Unit.login == login).first()
+        unit_obj = self._session.query(Unit)\
+            .filter((Unit.login == login) & (Unit.alias == alias)).first()
         return secret_obj.decrypt(unit_obj.password)
 
     def update_unit(self, user, password, login, new_login=None, password_for_login=None,
-                    category=None, url=None, alias=None):
+                    category=None, url=None, alias=None, new_alias=None):
         """Обновление unit"""
         update_dict = {'login': login}
         if new_login:
@@ -206,19 +208,21 @@ class UnitManager:
             update_dict['password'] = secret_obj.encrypt(password_for_login)
         if url:
             update_dict['url'] = url
-        if alias:
-            update_dict['alias'] = alias
+        if new_alias:
+            update_dict['alias'] = new_alias
 
-        self._session.query(Unit).filter(Unit.login == login)\
+        self._session.query(Unit)\
+            .filter((Unit.login == login) & (Unit.alias == alias))\
             .first().category = self.get_category(category)
-        self._session.query(Unit).filter(Unit.login == login)\
+        self._session.query(Unit)\
+            .filter((Unit.login == login) & (Unit.alias == alias))\
             .update(update_dict)
         self._session.commit()
 
-    def delete_unit(self, login):
+    def delete_unit(self, login, alias):
         """Удаление unit"""
         self._session.query(Unit) \
-            .filter(Unit.login == login).delete()
+            .filter((Unit.login == login) & (Unit.alias == alias)).delete()
         self._session.commit()
 
 
