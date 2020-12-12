@@ -1,6 +1,7 @@
 import pathlib
 
-DIR_DB = pathlib.Path.cwd() / 'databases'
+DB_ROOT = 'databases'
+DIR_DB = pathlib.Path.cwd() / DB_ROOT
 DIR_UNITS_DBS = DIR_DB / 'units'
 FILE_USERS_DB = DIR_DB / 'users.sqlite'
 

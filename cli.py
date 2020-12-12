@@ -7,6 +7,7 @@ import pyperclip
 
 from database_manager.models import FILE_USERS_DB, SQLAlchemyManager
 from log_manager.models import log_and_print
+from settings import DB_ROOT
 from units_manager.models import UnitsComposition
 
 
@@ -36,6 +37,14 @@ def validate_password(ctx, param, value):
         exit(-1)
     else:
         return value
+
+
+def dangerous_warning(ctx, param, value):
+    """Предупреждение об опасности команды uupdate"""
+    log_and_print(f'The "uupdate" command is potentially dangerous.\n'
+                  f'It is strongly recommended to make a backup '
+                  f'of the "{DB_ROOT}" folder.', level=WARNING)
+    return value
 
 
 user_argument = click.option('--user', '-u', prompt="Username",
@@ -89,7 +98,10 @@ def uadd(user, password):
 @password_argument
 @click.option('-l', '--newusername', prompt="NewUsername", help="Provide new username")
 @click.option('-pl', '--password-for-newusername', prompt=False, hide_input=True)
-def uupdate(user, password, newusername, password_for_newusername):
+@click.option('--dangerous-warning-option', callback=dangerous_warning, required=False)
+@click.confirmation_option(prompt='Are you sure you want to update user data?')
+def uupdate(user, password,
+            newusername, password_for_newusername, dangerous_warning_option):
     """
     update username (and password) command
     """
