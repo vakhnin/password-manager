@@ -17,6 +17,7 @@ def change_filename(filename):
 
 def log_and_print(message, level=logging.DEBUG, print_need=True):
     """Loging and print message"""
+    message_without_new_lines = message.replace('\n', ' ')
     data_messages = {
         logging.DEBUG: {
             'func': LOG.debug,
@@ -38,7 +39,7 @@ def log_and_print(message, level=logging.DEBUG, print_need=True):
     if print_need:
         print(data_messages[level]['msg_prefix'] + message)
 
-    data_messages[level]['func'](message)
+    data_messages[level]['func'](message_without_new_lines)
 
 
 LOG = logging.getLogger('cli')

@@ -1,12 +1,14 @@
 # cli.py
 import os
-from logging import INFO, WARNING, ERROR
+from logging import ERROR, INFO, WARNING
 
 import click
 import pyperclip
 
 from database_manager.models import FILE_USERS_DB, SQLAlchemyManager
 from log_manager.models import log_and_print
+from settings import DB_ROOT
+from units_manager.models import UnitsComposition
 
 
 def validate_user(ctx, param, value):
@@ -35,6 +37,14 @@ def validate_password(ctx, param, value):
         exit(-1)
     else:
         return value
+
+
+def dangerous_warning(ctx, param, value):
+    """Предупреждение об опасности команды uupdate"""
+    log_and_print(f'The "uupdate" command is potentially dangerous.\n'
+                  f'It is strongly recommended to make a backup '
+                  f'of the "{DB_ROOT}" folder.', level=WARNING)
+    return value
 
 
 user_argument = click.option('--user', '-u', prompt="Username",
@@ -88,7 +98,10 @@ def uadd(user, password):
 @password_argument
 @click.option('-l', '--newusername', prompt="NewUsername", help="Provide new username")
 @click.option('-pl', '--password-for-newusername', prompt=False, hide_input=True)
-def uupdate(user, password, newusername, password_for_newusername):
+@click.option('--dangerous-warning-option', callback=dangerous_warning, required=False)
+@click.confirmation_option(prompt='Are you sure you want to update user data?')
+def uupdate(user, password,
+            newusername, password_for_newusername, dangerous_warning_option):
     """
     update username (and password) command
     """
@@ -152,38 +165,6 @@ def show(ctx, user, password, category):
     """
     show logins command
     """
-
-    def prepare_logins(logins_):
-        """Подготовка списка логинов"""
-        for key, lst in logins_.items():
-            # Ищем максимальную длину строки в столбце
-            max_len = len(key)
-            for item in lst:
-                if len(item) > max_len:
-                    max_len = len(item)
-
-            # Добавляем пробелы в столбцы, для одинаковой длины столбцов
-            for i in range(len(lst)):
-                logins_[key][i] = logins_[key][i].ljust(max_len+1)
-            logins_[key].insert(0, key.ljust(max_len+1))
-
-        return logins_
-
-    def print_logins(logins_, flags):
-        """Печатем логины с флагами"""
-        is_first_line = True
-        for i in range(len(logins_['logins'])):
-            str_for_print = logins_['logins'][i]
-            delimiter_str = "-" * len(logins_['logins'][i])
-            for key in logins_.keys():
-                if key in flags.keys() and flags[key]:
-                    str_for_print += '| ' + logins_[key][i]
-                    delimiter_str += '+-' + '-' * len(logins_[key][i])
-            print(str_for_print)
-            if is_first_line:
-                print(delimiter_str)
-                is_first_line = False
-
     manager_obj = SQLAlchemyManager(FILE_USERS_DB, user, password)
 
     if not manager_obj.user_obj.check_user():
@@ -194,8 +175,10 @@ def show(ctx, user, password, category):
         return
 
     logins = manager_obj.unit_obj.get_logins(category)
-    logins = prepare_logins(logins)
-    print_logins(logins, ctx.obj['FLAGS'])
+    units_composition_obj = UnitsComposition(logins)
+    units_composition_obj.prepare_data()
+    res_str = units_composition_obj.make_str_logins(ctx.obj['FLAGS'])
+    print(res_str)
     log_and_print(f'Show logins command is done', print_need=False, level=INFO)
 
 
