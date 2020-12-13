@@ -1,5 +1,6 @@
 # cli.py
 import os
+import re
 from logging import ERROR, INFO, WARNING, CRITICAL
 
 import click
@@ -9,6 +10,18 @@ from database_manager.models import FILE_USERS_DB, DIR_UNITS_DBS, SQLAlchemyMana
 from log_manager.models import log_and_print
 from settings import DB_ROOT
 from units_manager.models import UnitsComposition
+
+
+def validate_new_user(ctx, param, value):
+    """
+    Check new user name
+    """
+    if not re.match('^[A-Za-z][A-Za-z0-9_]*$', value):
+        log_and_print('The user name must consist of English letters, '
+                      'numbers, and underscores. Start with a letter', level=ERROR)
+        exit(-1)
+    else:
+        return value
 
 
 def validate_user(ctx, param, value):
@@ -77,6 +90,7 @@ def cli(ctx, c, u):
 @cli.command()
 @click.option('--user', '-u', prompt="Username",
               help="Provide your username",
+              callback=validate_new_user,
               default=lambda: os.environ.get('USERNAME'))
 @click.option('--password', '-p', help="Provide your password",
               prompt=True, hide_input=True)
@@ -96,7 +110,8 @@ def uadd(user, password):
 @cli.command()
 @user_argument
 @password_argument
-@click.option('-l', '--newusername', prompt="NewUsername", help="Provide new username")
+@click.option('-l', '--newusername', prompt="NewUsername",
+              callback=validate_new_user, help="Provide new username")
 @click.option('-pl', '--password-for-newusername', prompt=False, hide_input=True)
 @click.option('--dangerous-warning-option', callback=dangerous_warning, required=False)
 @click.confirmation_option(prompt='Are you sure you want to update user data?')
