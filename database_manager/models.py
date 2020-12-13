@@ -134,7 +134,7 @@ class UnitManager:
     def __init__(self, session):
         self._session = session
 
-    def get_logins(self, category):
+    def get_logins(self, category=None):
         """Выдача units"""
 
         def make_logins_obj(units_list):

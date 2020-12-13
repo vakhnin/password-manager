@@ -33,7 +33,7 @@ def log_and_print(message, level=logging.DEBUG, print_need=True):
             'msg_prefix': 'Error: '},
         logging.CRITICAL: {
             'func': LOG.critical,
-            'msg_prefix': 'Error: '}
+            'msg_prefix': 'Critical error: '}
     }
 
     if print_need:
