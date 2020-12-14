@@ -43,7 +43,7 @@ class TestUserManager(unittest.TestCase):
 
     def test_add_user(self):
         """
-        Проверка метод add_user
+        check for add_user
         """
         user_for_test = 'test-user'
         password_for_test = 'test-password'
@@ -55,14 +55,20 @@ class TestUserManager(unittest.TestCase):
         self._cursor_sqlite.execute(sql, ([user_for_test]))
         result = self._cursor_sqlite.fetchall()
 
-        # проверяем что результат только одна строка
+        # check that the result is only one line
         self.assertEqual(1, len(result))
-        # проверяем, что поле user верное
+        # check that 'user' field is correct
         self.assertEqual(user_for_test, result[0][0])
-        # Дальше проверяем что хэш user + password записан верно.
-        # Проверяем добавление еще одного пользователя. Проверяем
-        # что выдается exeption, при добавлении пользоввателя, который уже существует
-        # и так далее ...
+        # check that the hash(user + password) is written correctly
+        pass_hash = get_hash((user_for_test + password_for_test).encode("utf-8"))
+        self.assertEqual(pass_hash, result[0][1])
+        # сheck that exeption is occur when adding a user that already exists
+        exception_occur = False
+        try:
+            user_obj.add_user(password_for_test)
+        except Exception:
+            exception_occur = True
+        self.assertEqual(True, exception_occur)
 
     def test_check_user(self):
         """
