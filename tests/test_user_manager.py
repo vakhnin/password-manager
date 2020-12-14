@@ -88,11 +88,28 @@ class TestUserManager(unittest.TestCase):
         sql = "SELECT * FROM users WHERE user = ?"
         self._cursor_sqlite.execute(sql, (['non-existent-user']))
         result = self._cursor_sqlite.fetchall()
-        self.assertEqual([], result)  # user 'non-existent-user' is absent in BD
+        self.assertEqual([], result)  # user 'non-existent-user' isn't exists in BD
         
         user_exist = user_obj.check_user('non-existent-user')
         self.assertEqual(False, user_exist)
+        
+    def test_check_user_password(self):
+        """
+        check for check_user_password
+        """
+        # add user to BD
+        user_for_test = 'test-user'
+        password_for_test = 'test-password'
+        user_obj = UserManager(self._session_for_user, user_for_test)
+        user_obj.add_user(password_for_test)
 
+        # check that the check_user_password method confirms the correct password
+        pass_is_correct = user_obj.check_user_password(password_for_test)
+        self.assertEqual(True, pass_is_correct)
+        # check that the check_user_password method doesn't confirm incorrect password
+        pass_is_correct = user_obj.check_user_password('some-incorrect-password')
+        self.assertEqual(False, pass_is_correct)
+        
 
 if __name__ == '__main__':
     unittest.main()
