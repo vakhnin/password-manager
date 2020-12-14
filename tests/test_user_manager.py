@@ -110,6 +110,20 @@ class TestUserManager(unittest.TestCase):
         pass_is_correct = user_obj.check_user_password('some-incorrect-password')
         self.assertEqual(False, pass_is_correct)
         
+    def test_del_user(self):
+        """
+        check for del_user
+        """
+        # add user to BD
+        user_for_test = 'test-user'
+        password_for_test = 'test-password'
+        user_obj = UserManager(self._session_for_user, user_for_test)
+
+        # delete user from BD, than check that it isn't exists in BD
+        user_obj.del_user()
+        user_exist = user_obj.check_user('user_for_test')
+        self.assertEqual(False, user_exist)
+        
 
 if __name__ == '__main__':
     unittest.main()
