@@ -118,11 +118,30 @@ class TestUserManager(unittest.TestCase):
         user_for_test = 'test-user'
         password_for_test = 'test-password'
         user_obj = UserManager(self._session_for_user, user_for_test)
+        user_obj.add_user(password_for_test)
 
         # delete user from BD, than check that it isn't exists in BD
         user_obj.del_user()
-        user_exist = user_obj.check_user('user_for_test')
+        user_exist = user_obj.check_user()
         self.assertEqual(False, user_exist)
+
+    def test_all_users(self):
+        """
+        check for all_users
+        """
+        # create a sorted list of users with adding them to BD
+        users_list = []
+        for i in '654321':
+            user_for_test = 'test-user-' + i
+            password_for_test = 'test-password-' + i
+            user_obj = UserManager(self._session_for_user, user_for_test)
+            user_obj.add_user(password_for_test)
+            users_list.append(user_for_test)
+        users_list.sort()
+
+        # check the equivalence of the list of users with the data from the all_users method
+        users_list_from_BD = user_obj.all_users()
+        self.assertEqual(users_list, users_list_from_BD)
         
 
 if __name__ == '__main__':
