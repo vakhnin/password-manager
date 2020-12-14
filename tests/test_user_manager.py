@@ -66,9 +66,26 @@ class TestUserManager(unittest.TestCase):
 
     def test_check_user(self):
         """
-        Проверяем метод check_user, по аналогии с test_add_user
-        И далее, остальные методы
+        check for check_user
         """
+        # add user to BD
+        user_for_test = 'test-user'
+        password_for_test = 'test-password'
+        user_obj = UserManager(self._session_for_user, user_for_test)
+        user_obj.add_user(password_for_test)
+
+        # check that the check_user method confirms user existence in BD
+        user_exist = user_obj.check_user()
+        self.assertEqual(True, user_exist)
+        
+        # check that the check_user method confirms the absence of a user that hasn't been added to BD
+        sql = "SELECT * FROM users WHERE user = ?"
+        self._cursor_sqlite.execute(sql, (['non-existent-user']))
+        result = self._cursor_sqlite.fetchall()
+        self.assertEqual([], result)  # user 'non-existent-user' is absent in BD
+        
+        user_exist = user_obj.check_user('non-existent-user')
+        self.assertEqual(False, user_exist)
 
 
 if __name__ == '__main__':
