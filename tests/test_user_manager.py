@@ -13,7 +13,8 @@ class TestUserManager(unittest.TestCase):
     _session_for_user = None
     _conn_sqlite = None
     _cursor_sqlite = None
-    file_path = 'databases/users.sqlite'
+    dir_path = 'tests' + os.sep + 'databases'
+    file_path = dir_path + os.sep + 'users.sqlite'
 
     def setUp(self) -> None:
         """Настройка окружения"""
@@ -23,6 +24,8 @@ class TestUserManager(unittest.TestCase):
         engine = create_engine(f'sqlite:///{self.file_path}', echo=False)
 
         # Создание файла БД, если его нет
+        if not os.path.isdir(self.dir_path):
+            os.makedirs(self.dir_path)
         Base.metadata.create_all(engine,
                                  tables=[Base.metadata.tables['users']])
 
