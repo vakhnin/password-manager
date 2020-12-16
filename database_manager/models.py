@@ -6,6 +6,9 @@ from sqlalchemy.orm import relationship, sessionmaker
 from encryption_manager.models import get_hash, get_secret_obj
 from settings import DIR_UNITS_DBS, FILE_USERS_DB
 
+from log_manager.models import log_and_print
+from logging import ERROR, INFO, CRITICAL
+
 Base = declarative_base()
 
 
@@ -94,16 +97,47 @@ class UserManager:
         self._session.add(user_for_add)
         self._session.commit()
 
-    def update_user(self, password, newuser, newpassword=None):
+    def update_user(self, password, new_user, new_password=None):
         """
         update username (and password) in BD
         """
-        if newpassword is not None:
-            password = newpassword
-        pass_hash = get_hash((newuser + password).encode("utf-8"))
-        self._session.query(User) \
-            .filter(User.user == self._user).update({"user": newuser, "password": pass_hash})
-        self._session.commit()
+        try:
+            old_path = DIR_UNITS_DBS / ''.join([self._user, '.sqlite'])
+            new_path = DIR_UNITS_DBS / ''.join([new_user, '.sqlite'])
+            old_path.rename(new_path)
+        except OSError as oserr:
+            log_and_print('OSError has occurred. Update command failed. See the log for details.', level=ERROR)
+            log_and_print(f'{oserr.strerror}', level=ERROR, print_need=False)
+        else:
+            if new_password:
+                secret_password = new_user + new_password
+            else:
+                secret_password = new_user + password
+            pass_hash = get_hash((secret_password).encode("utf-8"))
+            self._session.query(User) \
+                .filter(User.user == self._user).update({"user": new_user, "password": pass_hash})
+            self._session.commit()
+            log_and_print(f'User "{self._user}" updated. New username is "{new_user}". Need for units rebinding ...',
+                          level=INFO)
+            try:
+                if not new_password:
+                    new_password = password
+                new_manager_obj = SQLAlchemyManager(FILE_USERS_DB, new_user, new_password)
+                logins = new_manager_obj.unit_obj.get_logins()
+                logins_list = logins.get('logins')
+                alias_list = logins.get('alias')
+                for i in range(len(logins_list)):
+                    password_for_login = new_manager_obj.unit_obj.get_password(self._user, password, logins_list[i],
+                                                                               alias_list[i])
+                    new_manager_obj.unit_obj \
+                        .update_unit(new_user, new_password,
+                                     logins_list[i], password_for_login=password_for_login, alias=alias_list[i])
+            except Exception as exc:
+                log_and_print('Exception has occurred. Units rebinding failed! See the log for details.',
+                              level=CRITICAL)
+                log_and_print(getattr(exc, 'message', repr(exc)), level=CRITICAL, print_need=False)
+            else:
+                log_and_print('Units rebinding succeed.', level=INFO)
 
     def del_user(self):
         """
