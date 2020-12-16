@@ -132,33 +132,7 @@ def uupdate(user, password,
     if manager_obj.user_obj.check_user(newusername):
         log_and_print(f'User named "{newusername}" already exists', level=ERROR)
     else:
-        try:
-            old_path = DIR_UNITS_DBS / ''.join([user, '.sqlite'])
-            new_path = DIR_UNITS_DBS / ''.join([newusername, '.sqlite'])
-            old_path.rename(new_path)
-        except OSError as oserr:
-            log_and_print('OSError has occurred. Update command failed. See the log for details.', level=ERROR)
-            log_and_print(f'{oserr.strerror}', level=ERROR, print_need=False)
-        else:
-            manager_obj.user_obj.update_user(password, newusername, password_for_newusername)
-            log_and_print(f'User "{user}" updated. New username is "{newusername}".', level=INFO)
-            try:
-                if not password_for_newusername:
-                    password_for_newusername = password
-                new_manager_obj = SQLAlchemyManager(FILE_USERS_DB, newusername, password_for_newusername)
-                logins = new_manager_obj.unit_obj.get_logins()
-                logins_list = logins.get('logins')
-                alias_list = logins.get('alias')
-                for i in range(len(logins_list)):
-                    password_for_login = new_manager_obj.unit_obj.get_password(user, password, logins_list[i], alias_list[i])
-                    new_manager_obj.unit_obj \
-                        .update_unit(newusername, password_for_newusername,
-                                     logins_list[i], password_for_login=password_for_login, alias=alias_list[i])
-            except Exception as exc:
-                log_and_print('Exception has occurred. Units rebinding failed! See the log for details.', level=CRITICAL)
-                log_and_print(getattr(exc, 'message', repr(exc)), level=CRITICAL, print_need=False)
-            else:
-                log_and_print('Units rebinding succeed.', level=INFO)
+        manager_obj.user_obj.update_user(password, newusername, password_for_newusername)
 
 
 @cli.command()
