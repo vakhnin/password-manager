@@ -103,6 +103,34 @@ class TestUserManager(unittest.TestCase):
             exception_occur = True
         self.assertEqual(True, exception_occur)
 
+    def test_check_login(self):
+        """
+        check for check_login
+        """
+        # add unit to BD
+        login_for_test = 'test-login'
+        passlogin_for_test = 'test-passlogin'
+        unit_obj = UnitManager(self._session_for_unit)
+        unit_obj.add_unit(self.user_for_test, self.password_for_test, login_for_test, passlogin_for_test)
+
+        # check that the check_login method confirms unit existence in BD by key login + alias
+        unit_exist = False
+        if unit_obj.check_login(login_for_test, alias='default'):
+            unit_exist = True
+        self.assertEqual(True, unit_exist)
+
+        # check that unit with 'non-existent-login' and default alias doesn't exist in BD
+        sql = "SELECT * FROM units WHERE login = ? and alias = ?"
+        self._cursor_sqlite.execute(sql, (['non-existent-login', 'default']))
+        result = self._cursor_sqlite.fetchall()
+        self.assertEqual([], result)
+
+        # check that the check_login method confirms the absence of a unit that hasn't been added to BD
+        unit_exist = False
+        if unit_obj.check_login('non-existent-login', alias='default'):
+            unit_exist = True
+        self.assertEqual(False, unit_exist)
+
     
 if __name__ == '__main__':
     unittest.main()
