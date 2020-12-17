@@ -1,58 +1,110 @@
 # pwdone
+
 ## Password manager with command line interface
 
-pwdone is a multi-user, multi-platform command-line utility 
-for storing and organizing passwords and another info for logins.
+pwdone is a multi-user, multi-platform command-line utility for storing and organizing passwords and another info for
+logins.
 
 1. Common commands
+   <br>
+   <br>
 
-    help on using the utility:
+   help on using the utility:
     ```
-    pwdone --help
+    $ pwdone --help
     ```
-    
-    more detailed help on using utility commands:
+   <br>   
+
+   more detailed help on using utility commands:
     ```
-    pwdone [command] --help
+    $ pwdone [command] --help
     ```
-    
-    adding a new user:
+   <br>   
+
+   adding a new user:
     ```
-    pwdone uadd
+    $ pwdone uadd
     ```
-    or using options
+   or using options:
     ```
-    pwdone uadd -u user-name
-    ```    
-    
-    adding a new record in passwods DB:
+    $ pwdone uadd -u user-name
+    ``` 
+   <br>      
+
+   adding a new record in passwods DB:
     ```
-    pwdone add
+    $ pwdone add
     ```
-    or using options 
+   or using options:
+   ```
+   $ pwdone add -u user-name -l login-for-site -a record-name
+   ```
+   <br>   
+
+   show all user records:
     ```
-    pwdone add -u user-name -l login-for-site -a record-name
+    $ pwdone show
     ```
-   
-    show all user records:
+   <br>   
+
+   get password of record to the clipboard:
     ```
-    pwdone show
+    $ pwdone get
     ```
-    
-    get password of record to the clipboard:    
+   or using options:
     ```
-    pwdone get
+    $ pwdone get -a record-name
     ```
-    or using options    
+   <br>   
+
+   full list of command options:
     ```
-    pwdone get -a record-name
-    ```
-    
-    full list of command options:
-    ```
-    pwdone [command] --help
+    $ python3 --version [command] --help
     ```
 
 2. Installing the utility
-    1. Installing on Ubuntu 
+
+   <br>
+
+    1. Installing on Ubuntu
+       <br>   
+       the utility requires python 3.8 or higher
+
+       check version python:
+       ```
+       $ python3 --version
+       ```
+       <br>
+       install pip3:
+       
+       ```
+       sudo apt update
+       $ sudo apt upgrade
+       $ sudo apt install python3-pip
+       $ pip3 --version
+       ```
+       <br>
+       install pipenv:
+       
+       ```
+       pip3 install --user pipenv
+       ```
+       if you see a warning like this
+       ```
+       WARNING: The script virtualenv is installed 
+       in '/home/sv/.local/bin' which is not on PATH.
+       ```
+       follow this:
+         - Open ~/.profile file.
+         - Check if ~/.local/bin path exist in that file.
+         - If not add these following lines:
+            ```
+            # set PATH so it includes user's private bin if it exists
+            if [ -d "$HOME/.local/bin" ] ; then
+               PATH="$HOME/.local/bin:$PATH"
+            ```
+         - Run bash --login for login mode because ~/.profile 
+           is executed for login shells.
+   
+
     2. Installing on Windows
