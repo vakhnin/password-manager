@@ -78,7 +78,7 @@ logins.
        install pip3:
        
        ```
-       sudo apt update
+       $ sudo apt update
        $ sudo apt upgrade
        $ sudo apt install python3-pip
        $ pip3 --version
@@ -105,6 +105,40 @@ logins.
             ```
          - Run bash --login for login mode because ~/.profile 
            is executed for login shells.
-   
+           <br>
+    <br>      
 
-    2. Installing on Windows
+    install pwdone:
+    ```
+   $ cd pwdone-folder
+   $ pipenv install -e .
+   $ pipenv shell
+   ```
+           
+
+2. Installing on Windows
+   
+   <br>
+   
+   the utility requires python 3.8 or higher<br> 
+   check version python:
+   ```
+   $ python3 --version
+   ```
+   
+   check pip3:
+   ```
+   $ pip3 --version
+   ```
+   install pipenv:
+   
+   ```
+   pip3 install pipenv
+   ```    
+
+    install pwdone:
+    ```
+   $ cd pwdone-folder
+   $ pipenv install -e .
+   $ pipenv shell
+   ```
