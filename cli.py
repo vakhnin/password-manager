@@ -63,7 +63,7 @@ def dangerous_warning(ctx, param, value):
 user_argument = click.option('--user', '-u', prompt="Username",
                              help="Provide your username",
                              callback=validate_user,
-                             default=lambda: os.environ.get('USERNAME'))
+                             default=lambda: os.getlogin())
 password_argument = click.option('--password', '-p', help="Provide your password",
                                  callback=validate_password,
                                  prompt=True, hide_input=True)
