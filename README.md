@@ -1,6 +1,6 @@
 # pwdone
 
-## Password manager with command line interface
+## Password manager with a command-line interface
 
 pwdone is a multi-user, multi-platform command-line utility for storing and organizing passwords and another info for
 logins.
@@ -31,7 +31,7 @@ logins.
     ``` 
    <br>      
 
-   adding a new record in passwods DB:
+   adding a new record in passwords DB:
     ```
     $ pwdone add
     ```
@@ -47,7 +47,7 @@ logins.
     ```
    <br>   
 
-   get password of record to the clipboard:
+   get the password of record to the clipboard:
     ```
     $ pwdone get
     ```
@@ -92,11 +92,11 @@ logins.
        if you see a warning like this
        ```
        WARNING: The script virtualenv is installed 
-       in '/home/sv/.local/bin' which is not on PATH.
+       in '/home/user-name/.local/bin' which is not on PATH.
        ```
        follow this:
          - Open ~/.profile file.
-         - Check if ~/.local/bin path exist in that file.
+         - Check if ~/.local/bin path exists in that file.
          - If not add these following lines:
             ```
             # set PATH so it includes user's private bin if it exists
@@ -142,3 +142,10 @@ logins.
    $ pipenv install -e .
    $ pipenv shell
    ```
+
+3. Backup and restore data
+    <br>
+    <br>
+    All data is stored in the 'databases' folder.
+    You can simply copy the folder 'databases' with all the contents to backup and replace the contents of the folder 'databases' with
+    the previously saved folder for restore data.
