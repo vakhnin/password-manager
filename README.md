@@ -133,7 +133,7 @@ logins
    the utility requires python 3.8 or higher<br> 
    check version python:
    ```
-   $ python3 --version
+   $ python --version
    ```
    
    check pip3:
