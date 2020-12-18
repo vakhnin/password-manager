@@ -12,6 +12,14 @@ from settings import DB_ROOT
 from units_manager.models import UnitsComposition
 
 
+def get_os_username():
+    if 'USERNAME' in os.environ and os.environ.get('USERNAME'):
+        return os.environ.get('USERNAME')
+    if 'USER' in os.environ and os.environ.get('USER'):
+        return os.environ.get('USER')
+    return None
+
+
 def validate_new_user(ctx, param, value):
     """
     Check new user name
@@ -63,7 +71,8 @@ def dangerous_warning(ctx, param, value):
 user_argument = click.option('--user', '-u', prompt="Username",
                              help="Provide your username",
                              callback=validate_user,
-                             default=lambda: os.getlogin())
+                             default=get_os_username)
+                             # default=lambda: os.getlogin())
 password_argument = click.option('--password', '-p', help="Provide your password",
                                  callback=validate_password,
                                  prompt=True, hide_input=True)
