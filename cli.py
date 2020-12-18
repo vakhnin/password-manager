@@ -72,7 +72,6 @@ user_argument = click.option('--user', '-u', prompt="Username",
                              help="Provide your username",
                              callback=validate_user,
                              default=get_os_username)
-                             # default=lambda: os.getlogin())
 password_argument = click.option('--password', '-p', help="Provide your password",
                                  callback=validate_password,
                                  prompt=True, hide_input=True)
@@ -101,7 +100,6 @@ def cli(ctx, c, u):
               help="Provide your username",
               callback=validate_new_user,
               default=get_os_username)
-              # default=lambda: os.environ.get('USERNAME'))
 @click.option('--password', '-p', help="Provide your password",
               prompt=True, hide_input=True)
 def uadd(user, password):
