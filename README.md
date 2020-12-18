@@ -1,9 +1,16 @@
 # pwdone
 
-## Password manager with a command-line interface
+### Password manager with a command-line interface
 
 pwdone is a multi-user, multi-platform command-line utility for storing and organizing passwords and another info for
 logins.
+
+### Contents
+1\. Common commands
+
+2\. Installing the utility
+
+3\. Backup and restore data
 
 1. Common commands
    <br>
