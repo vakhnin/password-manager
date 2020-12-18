@@ -68,8 +68,9 @@ logins.
 
    full list of command options:
     ```
-    $ python3 --version [command] --help
+    $ pwdone [command] --help
     ```
+   <br>  
 
 2. Installing the utility
 
@@ -123,9 +124,9 @@ logins.
    $ pipenv install -e .
    $ pipenv shell
    ```
-           
+    <br>                 
 
-2. Installing on Windows
+    2. Installing on Windows
    
    <br>
    
