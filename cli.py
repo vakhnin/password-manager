@@ -1,12 +1,12 @@
 # cli.py
 import os
 import re
-from logging import ERROR, INFO, WARNING, CRITICAL
+from logging import ERROR, INFO, WARNING
 
 import click
 import pyperclip
 
-from database_manager.models import FILE_USERS_DB, DIR_UNITS_DBS, SQLAlchemyManager
+from database_manager.models import FILE_USERS_DB, SQLAlchemyManager
 from log_manager.models import log_and_print
 from settings import DB_ROOT
 from units_manager.models import UnitsComposition

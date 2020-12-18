@@ -1,13 +1,13 @@
+from logging import ERROR, INFO
+
 from sqlalchemy import (Column, ForeignKey, Integer, String, UniqueConstraint,
                         create_engine)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 
 from encryption_manager.models import get_hash, get_secret_obj
-from settings import DIR_UNITS_DBS, FILE_USERS_DB
-
 from log_manager.models import log_and_print
-from logging import ERROR, INFO, CRITICAL
+from settings import DIR_UNITS_DBS, FILE_USERS_DB
 
 Base = declarative_base()
 

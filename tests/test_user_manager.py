@@ -1,6 +1,6 @@
 import os
-import unittest
 import sqlite3
+import unittest
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
