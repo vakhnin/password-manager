@@ -110,6 +110,7 @@ def uadd(user, password):
 
     if manager_obj.user_obj.check_user():
         log_and_print(f'User named "{user}" already exists', level=ERROR)
+        exit(-1)
     else:
         manager_obj.user_obj.add_user(password)
         log_and_print(f'User named "{user}" created', level=INFO)
