@@ -37,7 +37,7 @@ class Unit(Base):
     login_alias = UniqueConstraint(login, alias)
     category = relationship("Category", back_populates="units")
 
-    def __init__(self, login, password, url=None, alias=None):
+    def __init__(self, login, password, url=None, alias='default'):
         self.login = login
         self.password = password
         self.url = url
@@ -228,8 +228,8 @@ class UnitManager:
             .filter((Unit.login == login) & (Unit.alias == alias)).first()
         return secret_obj.decrypt(unit_obj.password)
 
-    def update_unit(self, user, password, login, new_login=None, password_for_login=None,
-                    category=None, url=None, alias=None, new_alias=None):
+    def update_unit(self, user, password, login, alias, new_login=None, password_for_login=None,
+                    category=None, url=None, new_alias=None):
         """Обновление unit"""
         update_dict = {'login': login}
         if new_login:
