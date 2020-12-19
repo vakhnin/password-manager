@@ -1,13 +1,13 @@
+from logging import ERROR, INFO
+
 from sqlalchemy import (Column, ForeignKey, Integer, String, UniqueConstraint,
                         create_engine)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 
 from encryption_manager.models import get_hash, get_secret_obj
-from settings import DIR_UNITS_DBS, FILE_USERS_DB
-
 from log_manager.models import log_and_print
-from logging import ERROR, INFO, CRITICAL
+from settings import DIR_UNITS_DBS, FILE_USERS_DB
 
 Base = declarative_base()
 
@@ -31,7 +31,7 @@ class Unit(Base):
     id = Column(Integer, primary_key=True)
     login = Column(String, nullable=False)
     url = Column(String)
-    alias = Column(String)
+    alias = Column(String, nullable=False)
     category_id = Column(ForeignKey('categories.id', ondelete="CASCADE"))
     password = Column(String, nullable=False)
     login_alias = UniqueConstraint(login, alias)
@@ -108,36 +108,32 @@ class UserManager:
         except OSError as oserr:
             log_and_print('OSError has occurred. Update command failed. See the log for details.', level=ERROR)
             log_and_print(f'{oserr.strerror}', level=ERROR, print_need=False)
+            exit(-1)
         else:
-            if new_password:
+            if new_password and new_password != 'old-password':
                 secret_password = new_user + new_password
             else:
                 secret_password = new_user + password
-            pass_hash = get_hash((secret_password).encode("utf-8"))
+            pass_hash = get_hash(secret_password.encode("utf-8"))
             self._session.query(User) \
                 .filter(User.user == self._user).update({"user": new_user, "password": pass_hash})
             self._session.commit()
             log_and_print(f'User "{self._user}" updated. New username is "{new_user}". Need for units rebinding ...',
                           level=INFO)
-            try:
-                if not new_password:
-                    new_password = password
-                new_manager_obj = SQLAlchemyManager(FILE_USERS_DB, new_user, new_password)
-                logins = new_manager_obj.unit_obj.get_logins()
-                logins_list = logins.get('logins')
-                alias_list = logins.get('alias')
-                for i in range(len(logins_list)):
-                    password_for_login = new_manager_obj.unit_obj.get_password(self._user, password, logins_list[i],
-                                                                               alias_list[i])
-                    new_manager_obj.unit_obj \
-                        .update_unit(new_user, new_password,
-                                     logins_list[i], password_for_login=password_for_login, alias=alias_list[i])
-            except Exception as exc:
-                log_and_print('Exception has occurred. Units rebinding failed! See the log for details.',
-                              level=CRITICAL)
-                log_and_print(getattr(exc, 'message', repr(exc)), level=CRITICAL, print_need=False)
-            else:
-                log_and_print('Units rebinding succeed.', level=INFO)
+
+            if not new_password and new_password != 'old-password':
+                new_password = password
+            new_manager_obj = SQLAlchemyManager(FILE_USERS_DB, new_user, new_password)
+            logins = new_manager_obj.unit_obj.get_logins()
+            logins_list = logins.get('logins')
+            alias_list = logins.get('alias')
+            for i in range(len(logins_list)):
+                password_for_login = new_manager_obj.unit_obj.get_password(self._user, password, logins_list[i],
+                                                                           alias_list[i])
+                new_manager_obj.unit_obj \
+                    .update_unit(new_user, new_password,
+                                 logins_list[i], password_for_login=password_for_login, alias=alias_list[i])
+            log_and_print('Units rebinding succeed.', level=INFO)
 
     def del_user(self):
         """

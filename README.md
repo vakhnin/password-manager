@@ -1,16 +1,162 @@
-# password-manager
-Менеджер паролей на Python
+# pwdone
 
-Русский
-___________________________________________________________________________________________________________________________________________
-  Программа поддерживает большое количество пользователей. На данный момент список всех пользователей хранится в текстовом файле. Логины хранятся в открытом виде, а вместо паролей хранятся хеши. При этом хеш берется не от пароля а от конкатенации имени пользователя и пароля. Таким образом даже если пользователи имеют одинаковый пароль, хеши будут отличаться.
-   База данных паролей каждого пользователя хранится в отдельном текстовом файле. Эти файлы шифруются при помощи алгоритма AES. В качестве ключа для шифрования принимается хеш от пароля пользователя.
+### Password manager with a command-line interface
+
+pwdone is a multi-user, multi-platform command-line utility for storing and organizing passwords and another info for
+logins
+
+### Contents
+1\. Common commands
+
+2\. Installing the utility
+
+3\. Backup and restore data
+<br>
+<br>
+
+1. Common commands
+   <br>
+   <br>
+
+   help on using the utility:
+    ```
+    $ pwdone --help
+    ```
+   <br>   
+
+   more detailed help on using utility commands:
+    ```
+    $ pwdone [command] --help
+    ```
+   <br>   
+
+   adding a new user:
+    ```
+    $ pwdone uadd
+    ```
+   or using options:
+    ```
+    $ pwdone uadd -u user-name
+    ``` 
+   <br>      
+
+   adding a new record in passwords DB:
+    ```
+    $ pwdone add
+    ```
+   or using options:
+   ```
+   $ pwdone add -u user-name -l login-for-site -a record-name
+   ```
+   <br>   
+
+   show all user records:
+    ```
+    $ pwdone show
+    ```
+   <br>   
+
+   get the password of record to the clipboard:
+    ```
+    $ pwdone get
+    ```
+   or using options:
+    ```
+    $ pwdone get -a record-name
+    ```
+   <br>   
+
+   full list of command options:
+    ```
+    $ pwdone [command] --help
+    ```
+   <br>  
+
+2. Installing the utility
+
+   <br>
+
+    1. Installing on Ubuntu
+       <br>   
+       the utility requires python 3.8 or higher
+
+       check version python:
+       ```
+       $ python3 --version
+       ```
+       <br>
+       install pip3:
+       
+       ```
+       $ sudo apt update
+       $ sudo apt upgrade
+       $ sudo apt install python3-pip
+       $ pip3 --version
+       ```
+       <br>
+       install pipenv:
+       
+       ```
+       pip3 install --user pipenv
+       ```
+       if you see a warning like this
+       ```
+       WARNING: The script virtualenv is installed 
+       in '/home/user-name/.local/bin' which is not on PATH.
+       ```
+       follow this:
+         - Open ~/.profile file.
+         - Check if ~/.local/bin path exists in that file.
+         - If not add these following lines:
+            ```
+            # set PATH so it includes user's private bin if it exists
+            if [ -d "$HOME/.local/bin" ] ; then
+               PATH="$HOME/.local/bin:$PATH"
+            ```
+         - Run bash --login for login mode because ~/.profile 
+           is executed for login shells.
+           <br>
+    <br>      
+
+    install pwdone:
+    ```
+   $ cd pwdone-folder
+   $ pipenv install -e .
+   $ pipenv shell
+   ```
+    <br>                 
+
+    2. Installing on Windows
    
-   На данный момент разрабатывается консольный интерфейс, в дальнейшем будет разработан также графический.
+   <br>
    
- English
-___________________________________________________________________________________________________________________________________________
-   Program supports multi-user work. For now the list of users is stored in txt file. Usernames are stored uncovered and instead of passwords stores hashes, which are calculated using concatenation of username and password. So even if two users have similar password their hashes are different.
-   The passwords databases for each user is stored in separated files. This files are encrypted with AES. For the key takes the hash of user password.
+   the utility requires python 3.8 or higher<br> 
+   check version python:
+   ```
+   $ python --version
+   ```
    
-   For now I'm developing console interface but in future I'll make GUI.
+   check pip3:
+   ```
+   $ pip3 --version
+   ```
+   install pipenv:
+   
+   ```
+   pip3 install pipenv
+   ```    
+
+    install pwdone:
+    ```
+   $ cd pwdone-folder
+   $ pipenv install -e .
+   $ pipenv shell
+   ```
+   <br>  
+
+3. Backup and restore data
+    <br>
+    <br>
+    All data is stored in the 'databases' folder.
+    You can simply copy the folder 'databases' with all the contents to backup and replace the contents of the folder 'databases' with
+    the previously saved folder for restore data.
