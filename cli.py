@@ -1,15 +1,23 @@
 # cli.py
 import os
 import re
-from logging import ERROR, INFO, WARNING, CRITICAL
+from logging import ERROR, INFO, WARNING
 
 import click
 import pyperclip
 
-from database_manager.models import FILE_USERS_DB, DIR_UNITS_DBS, SQLAlchemyManager
+from database_manager.models import FILE_USERS_DB, SQLAlchemyManager
 from log_manager.models import log_and_print
 from settings import DB_ROOT
 from units_manager.models import UnitsComposition
+
+
+def get_os_username():
+    if 'USERNAME' in os.environ and os.environ.get('USERNAME'):
+        return os.environ.get('USERNAME')
+    if 'USER' in os.environ and os.environ.get('USER'):
+        return os.environ.get('USER')
+    return None
 
 
 def validate_new_user(ctx, param, value):
@@ -63,7 +71,7 @@ def dangerous_warning(ctx, param, value):
 user_argument = click.option('--user', '-u', prompt="Username",
                              help="Provide your username",
                              callback=validate_user,
-                             default=lambda: os.environ.get('USERNAME'))
+                             default=get_os_username)
 password_argument = click.option('--password', '-p', help="Provide your password",
                                  callback=validate_password,
                                  prompt=True, hide_input=True)
@@ -91,7 +99,7 @@ def cli(ctx, c, u):
 @click.option('--user', '-u', prompt="Username",
               help="Provide your username",
               callback=validate_new_user,
-              default=lambda: os.environ.get('USERNAME'))
+              default=get_os_username)
 @click.option('--password', '-p', help="Provide your password",
               prompt=True, hide_input=True)
 def uadd(user, password):
@@ -110,13 +118,16 @@ def uadd(user, password):
 @cli.command()
 @user_argument
 @password_argument
-@click.option('-l', '--newusername', prompt="NewUsername",
+@click.option('-nu', '--new-username', prompt="New username",
               callback=validate_new_user, help="Provide new username")
-@click.option('-pl', '--password-for-newusername', prompt=False, hide_input=True)
+@click.option('-np', '--new-password',
+              prompt="New password (Press 'Enter' for keep old password)",
+              default='old-password',
+              help="New password 'old-password' for keep old password", hide_input=True)
 @click.option('--dangerous-warning-option', callback=dangerous_warning, required=False)
 @click.confirmation_option(prompt='Are you sure you want to update user data?')
 def uupdate(user, password,
-            newusername, password_for_newusername, dangerous_warning_option):
+            new_username, new_password, dangerous_warning_option):
     """
     update username (and password) command
     """
@@ -129,10 +140,10 @@ def uupdate(user, password,
         log_and_print(f'Incorrect password for user named "{user}"', level=ERROR)
         return
 
-    if manager_obj.user_obj.check_user(newusername):
-        log_and_print(f'User named "{newusername}" already exists', level=ERROR)
+    if manager_obj.user_obj.check_user(new_username):
+        log_and_print(f'User named "{new_username}" already exists', level=ERROR)
     else:
-        manager_obj.user_obj.update_user(password, newusername, password_for_newusername)
+        manager_obj.user_obj.update_user(password, new_username, new_password)
 
 
 @cli.command()

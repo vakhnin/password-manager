@@ -1,11 +1,11 @@
 import os
-import unittest
 import sqlite3
+import unittest
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from database_manager.models import Base, UserManager, UnitManager
+from database_manager.models import Base, UnitManager, UserManager
 from encryption_manager.models import get_secret_obj
 
 
@@ -67,8 +67,7 @@ class TestUserManager(unittest.TestCase):
         # файл БД вручную, перед следующим прогоном
         os.remove(self.file_path)
         os.remove(self.file_units_path)
-        #os.rmdir
-        
+        # os.rmdir
 
     def test_add_unit(self):
         """

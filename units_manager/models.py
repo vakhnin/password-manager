@@ -1,6 +1,4 @@
 import datetime as dt
-import json
-from abc import ABC, abstractmethod, abstractproperty
 
 from settings import TIME_SESSION_CLOSE
 
@@ -19,10 +17,12 @@ class UnitsComposition:
     """
     _data_obj = {}
 
-    def __init__(self, data_obj={}):
+    def __init__(self, data_obj=None):
+        if data_obj is None:
+            data_obj = {}
         self._data_obj = data_obj
 
-    def prepare_data(self, data_obj={}):
+    def prepare_data(self, data_obj=None):
         """Подготовка списка логинов"""
         if not data_obj:
             data_obj = self._data_obj
@@ -40,8 +40,10 @@ class UnitsComposition:
 
         self._data_obj = data_obj
 
-    def make_str_logins(self, flags={}, data_obj={}):
+    def make_str_logins(self, flags=None, data_obj=None):
         """Печатем логины с флагами"""
+        if not flags:
+            flags = {}
         if not data_obj:
             data_obj = self._data_obj
 
@@ -81,4 +83,4 @@ class TimeoutController:
         возвращаем True, если дельта меньше дефолтного времени, отведённого на длительность сессии, иначе False
         """
         return dt.datetime.today() - check_datetime \
-               < dt.timedelta(seconds=self._default_time_session)
+            < dt.timedelta(seconds=self._default_time_session)

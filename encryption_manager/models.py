@@ -16,6 +16,7 @@ def get_hash(password):
     except UnicodeDecodeError:
         print("Password contains unexpected symbols (note that russian lang is not supported)")
 
+
 class AESCipher(object):
     """
     A classical AES Cipher. Can use any size of data and any size of password thanks to padding.
@@ -50,6 +51,7 @@ class AESCipher(object):
         iv = enc[:AES.block_size]
         cipher = AES.new(self.key, AES.MODE_CBC, iv)
         return self._unpad(cipher.decrypt(enc[AES.block_size:])).decode('utf-8')
+
 
 def get_secret_obj(key1, key2):
     """
