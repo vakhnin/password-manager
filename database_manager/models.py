@@ -121,9 +121,9 @@ class UserManager:
             log_and_print(f'User "{self._user}" updated. New username is "{new_user}". Need for units rebinding ...',
                           level=INFO)
 
-            if not new_password and new_password != 'old-password':
+            if not new_password or new_password == 'old-password':
                 new_password = password
-            new_manager_obj = SQLAlchemyManager(FILE_USERS_DB, new_user, new_password)
+            new_manager_obj = SQLAlchemyManager(FILE_USERS_DB, new_user)
             logins = new_manager_obj.unit_obj.get_logins()
             logins_list = logins.get('logins')
             alias_list = logins.get('alias')
@@ -285,7 +285,7 @@ class SQLAlchemyManager:
     def user(self):
         return self._user
 
-    def __init__(self, file_db=FILE_USERS_DB, user=None, password=None):
+    def __init__(self, file_db=FILE_USERS_DB, user=None):
         """Инициализация класса при вызове с поднятием текущей сессии"""
         self._user = user
         self._file_user_db = file_db
