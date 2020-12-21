@@ -1,5 +1,9 @@
 # Установка приложения:
 # $ pipenv install -e .
+#
+# Создание установщика для Windows
+# $ python setup.py bdist --format=msi
+# Установщик в папке dist
 from setuptools import setup
 
 setup(
