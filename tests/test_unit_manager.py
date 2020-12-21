@@ -9,17 +9,20 @@ from database_manager.models import Base, UnitManager, UserManager
 from encryption_manager.models import get_secret_obj
 
 
-class TestUserManager(unittest.TestCase):
+class TestUnitManager(unittest.TestCase):
     _session_for_user = None
     _session_for_unit = None
     _conn_sqlite = None
     _cursor_sqlite = None
     dir_path = 'tests' + os.sep + 'test_databases'
     file_path = dir_path + os.sep + 'users.sqlite'
-    user_for_test = 'test-user'
-    password_for_test = 'test-password'
+    _test_user = 'test-user'
+    _test_pwd_user = 'T_u!123'
     dir_units_path = ''.join([dir_path, os.sep, 'test_units'])
-    file_units_path = ''.join([dir_units_path, os.sep, user_for_test, '.sqlite'])  
+    file_units_path = ''.join([dir_units_path, os.sep, _test_user, '.sqlite'])
+    _test_login = 'test-login'
+    _test_pwd_login = 'T_l!456'
+    _test_alias = 'test-alias'
 
     def setUp(self) -> None:
         """Настройка окружения"""
@@ -37,8 +40,8 @@ class TestUserManager(unittest.TestCase):
         self._session_for_user = sessionmaker(bind=engine)()
         
         # Добавление тестового пользователя
-        user_obj = UserManager(self._session_for_user, self.user_for_test)
-        user_obj.add_user(self.password_for_test)
+        user_obj = UserManager(self._session_for_user, self._test_user)
+        user_obj.add_user(self._test_pwd_user)
         
         # Инициализация Units
         engine = create_engine(f'sqlite:///{self.file_units_path}', echo=False)
@@ -73,31 +76,30 @@ class TestUserManager(unittest.TestCase):
         """
         check for add_unit
         """
-        login_for_test = 'test-login'
-        passlogin_for_test = 'test-passlogin'
+        # add unit to DB
         unit_obj = UnitManager(self._session_for_unit)
+        unit_obj.add_unit(self._test_user, self._test_pwd_user, self._test_login, self._test_pwd_login)
 
-        unit_obj.add_unit(self.user_for_test, self.password_for_test, login_for_test, passlogin_for_test)
-
+        # checking query
         sql = "SELECT login, password FROM units WHERE login = ? and alias = ?"
-        self._cursor_sqlite.execute(sql, ([login_for_test, 'default']))
+        self._cursor_sqlite.execute(sql, ([self._test_login, 'default']))
         result = self._cursor_sqlite.fetchall()
         
         # check that the result is only one line
         self.assertEqual(1, len(result))
         
         # check that 'login' field is correct
-        self.assertEqual(login_for_test, result[0][0])
+        self.assertEqual(self._test_login, result[0][0])
         
-        # check that encrypted passlogin_for_test is written correctly
-        secret_obj = get_secret_obj(self.user_for_test, self.password_for_test)
-        encrypted_pass = secret_obj.encrypt(passlogin_for_test)
+        # check that encrypted password for login is written correctly
+        secret_obj = get_secret_obj(self._test_user, self._test_pwd_user)
+        encrypted_pass = secret_obj.encrypt(self._test_pwd_login)
         self.assertEqual(secret_obj.decrypt(encrypted_pass), secret_obj.decrypt(result[0][1]))
         
         # сheck that exeption is occur when adding a unit that already exists
         exception_occur = False
         try:
-            unit_obj.add_unit(self.user_for_test, self.password_for_test, login_for_test, passlogin_for_test)
+            unit_obj.add_unit(self._test_user, self._test_pwd_user, self._test_login, self._test_pwd_login)
         except Exception:
             exception_occur = True
         self.assertEqual(True, exception_occur)
@@ -106,25 +108,23 @@ class TestUserManager(unittest.TestCase):
         """
         check for check_login
         """
-        # add unit to BD
-        login_for_test = 'test-login'
-        passlogin_for_test = 'test-passlogin'
+        # add unit to DB
         unit_obj = UnitManager(self._session_for_unit)
-        unit_obj.add_unit(self.user_for_test, self.password_for_test, login_for_test, passlogin_for_test)
+        unit_obj.add_unit(self._test_user, self._test_pwd_user, self._test_login, self._test_pwd_login)
 
-        # check that the check_login method confirms unit existence in BD by key login + alias
+        # check that the check_login method confirms unit existence in DB by key login + default alias
         unit_exist = False
-        if unit_obj.check_login(login_for_test, alias='default'):
+        if unit_obj.check_login(self._test_login, alias='default'):
             unit_exist = True
         self.assertEqual(True, unit_exist)
 
-        # check that unit with 'non-existent-login' and default alias doesn't exist in BD
+        # check that unit with 'non-existent-login' and default alias doesn't exist in DB
         sql = "SELECT * FROM units WHERE login = ? and alias = ?"
         self._cursor_sqlite.execute(sql, (['non-existent-login', 'default']))
         result = self._cursor_sqlite.fetchall()
         self.assertEqual([], result)
 
-        # check that the check_login method confirms the absence of a unit that hasn't been added to BD
+        # check that the check_login method confirms the absence of a unit that hasn't been added to DB
         unit_exist = False
         if unit_obj.check_login('non-existent-login', alias='default'):
             unit_exist = True
