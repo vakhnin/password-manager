@@ -213,7 +213,7 @@ class UnitManager:
         else:
             return Category(category=category)
 
-    def add_unit(self, user, password, login, password_for_login, category=None, url=None, alias='default'):
+    def add_unit(self, user, password, login, password_for_login, alias='default', category=None, url=None):
         """Добавление unit"""
         secret_obj = get_secret_obj(user, password)
         unit_for_add = Unit(login, secret_obj.encrypt(password_for_login), url, alias)

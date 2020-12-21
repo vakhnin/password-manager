@@ -130,6 +130,22 @@ class TestUnitManager(unittest.TestCase):
             unit_exist = True
         self.assertEqual(False, unit_exist)
 
+    def test_get_password(self):
+        """
+        check for get_password
+        """
+        # add unit to DB
+        unit_obj = UnitManager(self._session_for_unit)
+        unit_obj.add_unit(
+            self._test_user, self._test_pwd_user,
+            self._test_login, self._test_pwd_login, self._test_alias
+        )
+
+        # check that get_password method returns correct password
+        self.assertEqual(self._test_pwd_login, unit_obj.get_password(self._test_user, self._test_pwd_user,
+                                                                     self._test_login, self._test_alias))
+
+
     
 if __name__ == '__main__':
     unittest.main()
