@@ -8,7 +8,7 @@ from setuptools import setup
 
 setup(
     name='pwdone',
-    version='0.1',
+    version='1.0',
     py_modules=['cli'],
     install_requires=[
         'Click',
