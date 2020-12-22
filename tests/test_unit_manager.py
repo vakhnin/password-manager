@@ -145,6 +145,20 @@ class TestUnitManager(unittest.TestCase):
         self.assertEqual(self._test_pwd_login, unit_obj.get_password(self._test_user, self._test_pwd_user,
                                                                      self._test_login, self._test_alias))
 
+    def test_delete_unit(self):
+        """
+        check for delete_unit
+        """
+        # add unit to DB
+        unit_obj = UnitManager(self._session_for_unit)
+        unit_obj.add_unit(
+            self._test_user, self._test_pwd_user,
+            self._test_login, self._test_pwd_login, self._test_alias
+        )
+
+        # delete unit from DB, than check that it isn't exists in DB
+        unit_obj.delete_unit(self._test_login, self._test_alias)
+        self.assertEqual(False, True if unit_obj.check_login(self._test_login, self._test_alias) else False)
 
     
 if __name__ == '__main__':
