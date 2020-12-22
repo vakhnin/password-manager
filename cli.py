@@ -84,7 +84,34 @@ password_argument = click.option('--password', '-p', help="Provide your password
 @click.pass_context
 def cli(ctx, c, u):
     """
-    Use "pwdone [COMMAND] --help" for more information
+    pwdone is a multi-user, multi-platform command-line utility
+    for storing and organizing passwords and another info for logins
+
+    Samples:
+
+    \b
+    adding a new user:
+    $ pwdone uadd
+    or using options:
+    $ pwdone uadd -u user-name
+
+    \b
+    adding a new record in passwords DB:
+    $ pwdone add
+    or using options:
+    $ pwdone add -u user-name -l login-for-site -a record-name
+
+    \b
+    show all user records:
+    $ pwdone show
+
+    \b
+    get the password of record to the clipboard:
+    $ pwdone get
+
+    \b
+    full list of command options:
+    $ pwdone [command] --help
     """
     ctx.obj = {
         'FLAGS': {
