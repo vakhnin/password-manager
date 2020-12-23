@@ -332,9 +332,8 @@ def add(user, password, login, password_for_login, category, url, alias):
 @click.option('-na', "--new-alias", help='"default" or skip for old alias, optional', required=False)
 @click.option('-pl', '--password-for-login',
               prompt="New password for login (Press 'Enter' for keep old password)",
-              default='old-password',
-              help="New password for login, "
-                   "'old-password' for keep old password", hide_input=True)
+              default='',
+              help="Provide new password for login", hide_input=True)
 @click.option('-nc', "--new-category", help='"default" or skip for default category, optional',
               default=None, required=False)
 @click.option('-ur', "--url", help='url, optional', default=None, required=False)
@@ -361,6 +360,7 @@ def update(user, password, login, alias,
         log_and_print(f'login "{login}" with "{alias}"'
                       f' alias already exists', level=ERROR)
     else:
+        password_for_login = None if password_for_login == '' else password_for_login
         new_category = None if new_category == 'default' else new_category
         manager_obj.unit_obj\
             .update_unit(user, password, login, alias,

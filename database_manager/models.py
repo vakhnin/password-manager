@@ -234,7 +234,7 @@ class UnitManager:
         update_dict = {'login': login}
         if new_login:
             update_dict['login'] = new_login
-        if password_for_login and password_for_login != 'old-password':
+        if password_for_login:
             secret_obj = get_secret_obj(user, password)
             update_dict['password'] = secret_obj.encrypt(password_for_login)
         if url:
