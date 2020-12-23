@@ -1,10 +1,14 @@
 # Установка приложения:
 # $ pipenv install -e .
+#
+# Создание установщика для Windows
+# $ python setup.py bdist --format=msi
+# Установщик в папке dist
 from setuptools import setup
 
 setup(
     name='pwdone',
-    version='0.1',
+    version='1.0',
     py_modules=['cli'],
     install_requires=[
         'Click',
