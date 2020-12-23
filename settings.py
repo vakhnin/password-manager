@@ -1,7 +1,7 @@
 import pathlib
 
-DB_ROOT = 'databases'
-DIR_DB = pathlib.Path.cwd() / DB_ROOT
+DB_ROOT = 'pwdone-databases'
+DIR_DB = pathlib.Path.home() / DB_ROOT
 DIR_UNITS_DBS = DIR_DB / 'units'
 FILE_USERS_DB = DIR_DB / 'users.sqlite'
 
