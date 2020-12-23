@@ -160,6 +160,80 @@ class TestUnitManager(unittest.TestCase):
         unit_obj.delete_unit(self._test_login, self._test_alias)
         self.assertEqual(False, True if unit_obj.check_login(self._test_login, self._test_alias) else False)
 
-    
+    def test_get_logins(self):
+        """
+        check for get_logins
+        """
+
+        class UnitsObj(dict):
+
+            def __init__(self):
+                self['logins'] = []
+                self['alias'] = []
+                self['category'] = []
+                self['url'] = []
+
+            def append(self, logins, alias='default', category='default', url=''):
+                self['logins'].append(logins)
+                self['alias'].append(alias)
+                self['category'].append(category)
+                self['url'].append(url)
+
+        # create three dictionaries for collections of units with different categories
+        units_default_category = UnitsObj()
+        units_category1 = UnitsObj()
+        units_category2 = UnitsObj()
+
+        # union of created dictionaries
+        units_all = UnitsObj()
+
+        # create three collections of units with different categories with adding them to DB and dictionaries
+        unit_obj = UnitManager(self._session_for_unit)
+        for i in '123':
+            test_login = 'test-login-' + i
+            test_pwd_login = 'T_l!-' + i * 3
+            unit_obj.add_unit(
+                self._test_user, self._test_pwd_user,
+                test_login, test_pwd_login
+            )
+            units_default_category.append(test_login)
+            units_all.append(test_login)
+
+        for i in '456':
+            test_login = 'test-login-' + i
+            test_pwd_login = 'T_l!-' + i * 3
+            test_alias = 'test-alias'
+            test_category = 'category1'
+            test_url = 'https://test.ru/'
+            unit_obj.add_unit(
+                self._test_user, self._test_pwd_user,
+                test_login, test_pwd_login, test_alias, category=test_category, url=test_url
+            )
+            units_category1.append(test_login, test_alias, test_category, test_url)
+            units_all.append(test_login, test_alias, test_category, test_url)
+
+        for i in '789':
+            test_login = 'test-login-' + i
+            test_pwd_login = 'T_l!-' + i * 3
+            test_alias = 'test-alias-' + i
+            test_category = 'category2'
+            test_url = 'https://test.ru/' + i
+            unit_obj.add_unit(
+                self._test_user, self._test_pwd_user,
+                test_login, test_pwd_login, test_alias, category=test_category, url=test_url
+            )
+            units_category2.append(test_login, test_alias, test_category, test_url)
+            units_all.append(test_login, test_alias, test_category, test_url)
+
+        # check the equivalence of dictionary and result of get_logins method for all units
+        self.assertEqual(units_all, unit_obj.get_logins())
+        # check the equivalence of dictionary and result of get_logins method for units with 'default'-category
+        self.assertEqual(units_default_category, unit_obj.get_logins(category='default'))
+        # check the equivalence of dictionary and result of get_logins method for units with category1
+        self.assertEqual(units_category1, unit_obj.get_logins(category='category1'))
+        # check the equivalence of dictionary and result of get_logins method for units with category2
+        self.assertEqual(units_category2, unit_obj.get_logins(category='category2'))
+
+
 if __name__ == '__main__':
     unittest.main()
