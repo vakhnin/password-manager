@@ -318,7 +318,7 @@ def add(user, password, login, password_for_login, category, url, alias):
     else:
         category = None if category == 'default' else category
         manager_obj.unit_obj\
-            .add_unit(user, password, login, password_for_login, category, url, alias)
+            .add_unit(user, password, login, password_for_login, alias, category, url)
         log_and_print(f'Login "{login}" added', level=INFO)
 
 
@@ -329,7 +329,7 @@ def add(user, password, login, password_for_login, category, url, alias):
 @click.option('-a', "--alias", prompt="Alias", help='alias', default='default')
 @click.option('-nl', "--new-login", help='new login, optional',
               default=None, required=False)
-@click.option('-na', "--new-alias", prompt="New alias", help='alias', default='default')
+@click.option('-na', "--new-alias", help='"default" or skip for old alias, optional', required=False)
 @click.option('-pl', '--password-for-login',
               prompt="New password for login (Press 'Enter' for keep old password)",
               default='old-password',

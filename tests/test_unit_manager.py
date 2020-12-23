@@ -164,9 +164,10 @@ class TestUnitManager(unittest.TestCase):
         """
         check for get_logins
         """
-
         class UnitsObj(dict):
-
+            """
+            extending functionality of dict class for dictionary of units
+            """
             def __init__(self):
                 self['logins'] = []
                 self['alias'] = []
@@ -233,6 +234,46 @@ class TestUnitManager(unittest.TestCase):
         self.assertEqual(units_category1, unit_obj.get_logins(category='category1'))
         # check the equivalence of dictionary and result of get_logins method for units with category2
         self.assertEqual(units_category2, unit_obj.get_logins(category='category2'))
+
+    def test_update_unit(self):
+        """
+        check for update_unit
+        """
+        # add unit to DB
+        unit_obj = UnitManager(self._session_for_unit)
+        unit_obj.add_unit(
+            self._test_user, self._test_pwd_user,
+            self._test_login, self._test_pwd_login, self._test_alias
+        )
+
+        # check that without a set of mutable attributes, the update_unit method doesn't change the unit
+        unit_obj.update_unit(self._test_user, self._test_pwd_user, self._test_login, self._test_alias)
+        self.assertEqual(True, True if unit_obj.check_login(self._test_login, self._test_alias) else False)
+
+        # update unit
+        new_login = 'new-login'
+        new_pwd_login = 'new-password-for-login'
+        new_url = 'https://test.ru/'
+        new_alias = 'new-alias'
+        unit_obj.update_unit(
+            self._test_user, self._test_pwd_user, self._test_login, self._test_alias,
+            new_login, new_pwd_login, url=new_url, new_alias=new_alias
+        )
+
+        # checking query
+        sql = "SELECT login, alias, url FROM units WHERE login = ? and alias = ? and url = ?"
+        self._cursor_sqlite.execute(sql, ([new_login, new_alias, new_url]))
+        result = self._cursor_sqlite.fetchall()
+
+        # check the equivalence of updated unit attributes and data from DB
+        self.assertEqual(new_login, result[0][0])
+        self.assertEqual(new_alias, result[0][1])
+        self.assertEqual(new_url, result[0][2])
+        self.assertEqual(new_pwd_login, unit_obj.get_password(self._test_user, self._test_pwd_user,
+                                                              new_login, new_alias))
+
+        # check that the unit with old attributes doesn't exist in DB
+        self.assertEqual(False, True if unit_obj.check_login(self._test_login, self._test_alias) else False)
 
 
 if __name__ == '__main__':
