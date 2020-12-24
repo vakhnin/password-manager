@@ -129,3 +129,5 @@ databases/
 users.txt
 tmp.py
 db.sqlite
+
+pyproject.toml
