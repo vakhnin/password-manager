@@ -37,7 +37,7 @@ class Unit(Base):
     login_alias = UniqueConstraint(login, alias)
     category = relationship("Category", back_populates="units")
 
-    def __init__(self, login, password, url=None, alias=None):
+    def __init__(self, login, password, url=None, alias='default'):
         self.login = login
         self.password = password
         self.url = url
@@ -110,7 +110,7 @@ class UserManager:
             log_and_print(f'{oserr.strerror}', level=ERROR, print_need=False)
             exit(-1)
         else:
-            if new_password and new_password != 'old-password':
+            if new_password:
                 secret_password = new_user + new_password
             else:
                 secret_password = new_user + password
@@ -121,9 +121,9 @@ class UserManager:
             log_and_print(f'User "{self._user}" updated. New username is "{new_user}". Need for units rebinding ...',
                           level=INFO)
 
-            if not new_password and new_password != 'old-password':
+            if not new_password:
                 new_password = password
-            new_manager_obj = SQLAlchemyManager(FILE_USERS_DB, new_user, new_password)
+            new_manager_obj = SQLAlchemyManager(FILE_USERS_DB, new_user)
             logins = new_manager_obj.unit_obj.get_logins()
             logins_list = logins.get('logins')
             alias_list = logins.get('alias')
@@ -213,7 +213,7 @@ class UnitManager:
         else:
             return Category(category=category)
 
-    def add_unit(self, user, password, login, password_for_login, category=None, url=None, alias='default'):
+    def add_unit(self, user, password, login, password_for_login, alias='default', category=None, url=None):
         """Добавление unit"""
         secret_obj = get_secret_obj(user, password)
         unit_for_add = Unit(login, secret_obj.encrypt(password_for_login), url, alias)
@@ -228,13 +228,13 @@ class UnitManager:
             .filter((Unit.login == login) & (Unit.alias == alias)).first()
         return secret_obj.decrypt(unit_obj.password)
 
-    def update_unit(self, user, password, login, new_login=None, password_for_login=None,
-                    category=None, url=None, alias=None, new_alias=None):
+    def update_unit(self, user, password, login, alias, new_login=None, password_for_login=None,
+                    category=None, url=None, new_alias=None):
         """Обновление unit"""
         update_dict = {'login': login}
         if new_login:
             update_dict['login'] = new_login
-        if password_for_login and password_for_login != 'old-password':
+        if password_for_login:
             secret_obj = get_secret_obj(user, password)
             update_dict['password'] = secret_obj.encrypt(password_for_login)
         if url:
@@ -285,7 +285,7 @@ class SQLAlchemyManager:
     def user(self):
         return self._user
 
-    def __init__(self, file_db=FILE_USERS_DB, user=None, password=None):
+    def __init__(self, file_db=FILE_USERS_DB, user=None):
         """Инициализация класса при вызове с поднятием текущей сессии"""
         self._user = user
         self._file_user_db = file_db
