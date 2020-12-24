@@ -1,9 +1,12 @@
+from logging import ERROR, INFO
+
 from sqlalchemy import (Column, ForeignKey, Integer, String, UniqueConstraint,
                         create_engine)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 
 from encryption_manager.models import get_hash, get_secret_obj
+from log_manager.models import log_and_print
 from settings import DIR_UNITS_DBS, FILE_USERS_DB
 
 Base = declarative_base()
@@ -28,13 +31,13 @@ class Unit(Base):
     id = Column(Integer, primary_key=True)
     login = Column(String, nullable=False)
     url = Column(String)
-    alias = Column(String)
+    alias = Column(String, nullable=False)
     category_id = Column(ForeignKey('categories.id', ondelete="CASCADE"))
     password = Column(String, nullable=False)
     login_alias = UniqueConstraint(login, alias)
     category = relationship("Category", back_populates="units")
 
-    def __init__(self, login, password, url=None, alias=None):
+    def __init__(self, login, password, url=None, alias='default'):
         self.login = login
         self.password = password
         self.url = url
@@ -94,16 +97,43 @@ class UserManager:
         self._session.add(user_for_add)
         self._session.commit()
 
-    def update_user(self, password, newuser, newpassword=None):
+    def update_user(self, password, new_user, new_password=None):
         """
         update username (and password) in BD
         """
-        if newpassword is not None:
-            password = newpassword
-        pass_hash = get_hash((newuser + password).encode("utf-8"))
-        self._session.query(User) \
-            .filter(User.user == self._user).update({"user": newuser, "password": pass_hash})
-        self._session.commit()
+        try:
+            old_path = DIR_UNITS_DBS / ''.join([self._user, '.sqlite'])
+            new_path = DIR_UNITS_DBS / ''.join([new_user, '.sqlite'])
+            old_path.rename(new_path)
+        except OSError as oserr:
+            log_and_print('OSError has occurred. Update command failed. See the log for details.', level=ERROR)
+            log_and_print(f'{oserr.strerror}', level=ERROR, print_need=False)
+            exit(-1)
+        else:
+            if new_password:
+                secret_password = new_user + new_password
+            else:
+                secret_password = new_user + password
+            pass_hash = get_hash(secret_password.encode("utf-8"))
+            self._session.query(User) \
+                .filter(User.user == self._user).update({"user": new_user, "password": pass_hash})
+            self._session.commit()
+            log_and_print(f'User "{self._user}" updated. New username is "{new_user}". Need for units rebinding ...',
+                          level=INFO)
+
+            if not new_password:
+                new_password = password
+            new_manager_obj = SQLAlchemyManager(FILE_USERS_DB, new_user)
+            logins = new_manager_obj.unit_obj.get_logins()
+            logins_list = logins.get('logins')
+            alias_list = logins.get('alias')
+            for i in range(len(logins_list)):
+                password_for_login = new_manager_obj.unit_obj.get_password(self._user, password, logins_list[i],
+                                                                           alias_list[i])
+                new_manager_obj.unit_obj \
+                    .update_unit(new_user, new_password,
+                                 logins_list[i], password_for_login=password_for_login, alias=alias_list[i])
+            log_and_print('Units rebinding succeed.', level=INFO)
 
     def del_user(self):
         """
@@ -183,7 +213,7 @@ class UnitManager:
         else:
             return Category(category=category)
 
-    def add_unit(self, user, password, login, password_for_login, category=None, url=None, alias=None):
+    def add_unit(self, user, password, login, password_for_login, alias='default', category=None, url=None):
         """Добавление unit"""
         secret_obj = get_secret_obj(user, password)
         unit_for_add = Unit(login, secret_obj.encrypt(password_for_login), url, alias)
@@ -198,13 +228,13 @@ class UnitManager:
             .filter((Unit.login == login) & (Unit.alias == alias)).first()
         return secret_obj.decrypt(unit_obj.password)
 
-    def update_unit(self, user, password, login, new_login=None, password_for_login=None,
-                    category=None, url=None, alias=None, new_alias=None):
+    def update_unit(self, user, password, login, alias, new_login=None, password_for_login=None,
+                    category=None, url=None, new_alias=None):
         """Обновление unit"""
         update_dict = {'login': login}
         if new_login:
             update_dict['login'] = new_login
-        if password_for_login and password_for_login != 'old-password':
+        if password_for_login:
             secret_obj = get_secret_obj(user, password)
             update_dict['password'] = secret_obj.encrypt(password_for_login)
         if url:
@@ -255,7 +285,7 @@ class SQLAlchemyManager:
     def user(self):
         return self._user
 
-    def __init__(self, file_db=FILE_USERS_DB, user=None, password=None):
+    def __init__(self, file_db=FILE_USERS_DB, user=None):
         """Инициализация класса при вызове с поднятием текущей сессии"""
         self._user = user
         self._file_user_db = file_db
