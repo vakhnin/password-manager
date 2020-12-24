@@ -1,7 +1,20 @@
 import base64
 import hashlib
+
 from Crypto import Random
 from Crypto.Cipher import AES
+
+
+def get_hash(password):
+    """
+    This function calculates the hash of the given string
+    """
+    try:
+        check_hash = hashlib.sha256()
+        check_hash.update(password)
+        return check_hash.hexdigest()
+    except UnicodeDecodeError:
+        print("Password contains unexpected symbols (note that russian lang is not supported)")
 
 
 class AESCipher(object):
@@ -38,3 +51,11 @@ class AESCipher(object):
         iv = enc[:AES.block_size]
         cipher = AES.new(self.key, AES.MODE_CBC, iv)
         return self._unpad(cipher.decrypt(enc[AES.block_size:])).decode('utf-8')
+
+
+def get_secret_obj(key1, key2):
+    """
+    This function returns an instance of AESCipher encoded by key = hash of (key1 + key2)
+    """
+    key = get_hash((key1 + key2).encode("utf-8"))
+    return AESCipher(key)

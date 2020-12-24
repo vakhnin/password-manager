@@ -1,10 +1,20 @@
-from cx_Freeze import setup, Executable
-
+# Установка приложения:
+# $ pipenv install -e .
+#
+# Создание установщика для Windows
+# $ python setup.py bdist --format=msi
+# Установщик в папке dist
+from setuptools import setup
 
 setup(
-    name="SOS",
-    version="0.1",
-    description="Save our secrets",
-    executables=[Executable("main.py")],
-    options={"build_exe": {"include_msvcr": True}}
+    name='pwdone',
+    version='1.0',
+    py_modules=['cli'],
+    install_requires=[
+        'Click',
+    ],
+    entry_points='''
+        [console_scripts]
+        pwdone=cli:cli
+    ''',
 )
