@@ -150,8 +150,8 @@ def uadd(user, password):
               callback=validate_new_user, help="Provide new username")
 @click.option('-np', '--new-password',
               prompt="New password (Press 'Enter' for keep old password)",
-              default='old-password',
-              help="New password 'old-password' for keep old password", hide_input=True)
+              default='',
+              help="Provide new password for user", hide_input=True)
 @click.option('--dangerous-warning-option', callback=dangerous_warning, required=False)
 @click.confirmation_option(prompt='Are you sure you want to update user data?')
 def uupdate(user, password,
@@ -171,6 +171,7 @@ def uupdate(user, password,
     if manager_obj.user_obj.check_user(new_username):
         log_and_print(f'User named "{new_username}" already exists', level=ERROR)
     else:
+        new_password = None if new_password == '' else new_password
         manager_obj.user_obj.update_user(password, new_username, new_password)
 
 

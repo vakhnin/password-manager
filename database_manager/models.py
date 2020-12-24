@@ -110,7 +110,7 @@ class UserManager:
             log_and_print(f'{oserr.strerror}', level=ERROR, print_need=False)
             exit(-1)
         else:
-            if new_password and new_password != 'old-password':
+            if new_password:
                 secret_password = new_user + new_password
             else:
                 secret_password = new_user + password
@@ -121,7 +121,7 @@ class UserManager:
             log_and_print(f'User "{self._user}" updated. New username is "{new_user}". Need for units rebinding ...',
                           level=INFO)
 
-            if not new_password or new_password == 'old-password':
+            if not new_password:
                 new_password = password
             new_manager_obj = SQLAlchemyManager(FILE_USERS_DB, new_user)
             logins = new_manager_obj.unit_obj.get_logins()

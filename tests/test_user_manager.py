@@ -13,7 +13,7 @@ class TestUserManager(unittest.TestCase):
     _session_for_user = None
     _conn_sqlite = None
     _cursor_sqlite = None
-    dir_path = 'tests' + os.sep + 'databases'
+    dir_path = 'tests' + os.sep + 'test_databases'
     file_path = dir_path + os.sep + 'users.sqlite'
 
     def setUp(self) -> None:
@@ -43,6 +43,11 @@ class TestUserManager(unittest.TestCase):
         # комментируем строку ниже. Не забываем удалить
         # файл БД вручную, перед следующим прогоном
         os.remove(self.file_path)
+
+    @classmethod
+    def tearDownClass(cls):
+        """cleaning after finishing all tests"""
+        os.rmdir(cls.dir_path)
 
     def test_add_user(self):
         """

@@ -70,7 +70,12 @@ class TestUnitManager(unittest.TestCase):
         # файл БД вручную, перед следующим прогоном
         os.remove(self.file_path)
         os.remove(self.file_units_path)
-        # os.rmdir
+
+    @classmethod
+    def tearDownClass(cls):
+        """cleaning after finishing all tests"""
+        os.rmdir(cls.dir_units_path)
+        os.rmdir(cls.dir_path)
 
     def test_add_unit(self):
         """
