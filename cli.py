@@ -59,15 +59,6 @@ def validate_password(ctx, param, value):
     else:
         return value
 
-
-def dangerous_warning(ctx, param, value):
-    """Предупреждение об опасности команды uupdate"""
-    log_and_print(f'The "uupdate" command is potentially dangerous.\n'
-                  f'It is strongly recommended to make a backup '
-                  f'of the "" folder.', level=WARNING)
-    return value
-
-
 user_argument = click.option('--user', '-u', prompt="Username",
                              help="Provide your username",
                              callback=validate_user,
@@ -152,10 +143,8 @@ def uadd(user, password):
               prompt="New password (Press 'Enter' for keep old password)",
               default='',
               help="Provide new password for user", hide_input=True)
-@click.option('--dangerous-warning-option', callback=dangerous_warning, required=False)
-@click.confirmation_option(prompt='Are you sure you want to update user data?')
 def uupdate(user, password,
-            new_username, new_password, dangerous_warning_option):
+            new_username, new_password):
     """
     update username (and password) command
     """
@@ -168,10 +157,11 @@ def uupdate(user, password,
         log_and_print(f'Incorrect password for user named "{user}"', level=ERROR)
         return
 
-    if manager_obj.user_obj.check_user(new_username):
-        log_and_print(f'User named "{new_username}" already exists', level=ERROR)
+    new_password = None if new_password == '' else new_password
+    if manager_obj.user_obj.check_user(new_username) and not new_password:
+        log_and_print(f'User named "{new_username}" already exists '
+                      f'and no new password is given', level=ERROR)
     else:
-        new_password = None if new_password == '' else new_password
         manager_obj.user_obj.update_user(password, new_username, new_password)
 
 

@@ -106,40 +106,30 @@ class UserManager:
         """
         update username (and password) in BD
         """
-        try:
-            # old_path = DIR_UNITS_DBS / ''.join([self._user, '.sqlite'])
-            # new_path = DIR_UNITS_DBS / ''.join([new_user, '.sqlite'])
-            # old_path.rename(new_path)
-            pass
-        except OSError as oserr:
-            log_and_print('OSError has occurred. Update command failed. See the log for details.', level=ERROR)
-            log_and_print(f'{oserr.strerror}', level=ERROR, print_need=False)
-            exit(-1)
-        else:
-            if new_password:
-                secret_password = new_user + new_password
-            else:
-                secret_password = new_user + password
-            pass_hash = get_hash(secret_password.encode("utf-8"))
-            self._session.query(User) \
-                .filter(User.user == self._user).update({"user": new_user, "password": pass_hash})
-            self._session.commit()
-            log_and_print(f'User "{self._user}" updated. New username is "{new_user}". Need for units rebinding ...',
-                          level=INFO)
+        if not new_password:
+            new_password = password
+        new_manager_obj = SQLAlchemyManager(FILE_DB, self._user)
+        logins = new_manager_obj.unit_obj.get_logins()
+        logins_list = logins.get('logins')
+        alias_list = logins.get('alias')
+        for i in range(len(logins_list)):
+            password_for_login = new_manager_obj.unit_obj.get_password(self._user, password, logins_list[i],
+                                                                       alias_list[i])
+            new_manager_obj.unit_obj \
+                .update_unit(new_user, new_password,
+                             logins_list[i], password_for_login=password_for_login, alias=alias_list[i])
 
-            if not new_password:
-                new_password = password
-            # new_manager_obj = SQLAlchemyManager(FILE_USERS_DB, new_user)
-            # logins = new_manager_obj.unit_obj.get_logins()
-            # logins_list = logins.get('logins')
-            # alias_list = logins.get('alias')
-            # for i in range(len(logins_list)):
-            #     password_for_login = new_manager_obj.unit_obj.get_password(self._user, password, logins_list[i],
-            #                                                                alias_list[i])
-            #     new_manager_obj.unit_obj \
-            #         .update_unit(new_user, new_password,
-            #                      logins_list[i], password_for_login=password_for_login, alias=alias_list[i])
-            # log_and_print('Units rebinding succeed.', level=INFO)
+        if new_password:
+            secret_password = new_user + new_password
+        else:
+            secret_password = new_user + password
+        pass_hash = get_hash(secret_password.encode("utf-8"))
+        self._session.query(User) \
+            .filter(User.user == self._user).update({"user": new_user, "password": pass_hash})
+
+        self._session.commit()
+        log_and_print(f'User "{self._user}" updated. New username is "{new_user}"',
+                      level=INFO)
 
     def del_user(self):
         """
@@ -244,7 +234,8 @@ class UnitManager:
         """Получение пароля"""
         secret_obj = get_secret_obj(user, password)
         unit_obj = self._session.query(Unit)\
-            .filter((Unit.login == login) & (Unit.alias == alias)).first()
+            .filter(Unit.user.has(User.user == self._user) &
+                    (Unit.login == login) & (Unit.alias == alias)).first()
         return secret_obj.decrypt(unit_obj.password)
 
     def update_unit(self, user, password, login, alias, new_login=None, password_for_login=None,
