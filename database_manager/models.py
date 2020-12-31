@@ -197,15 +197,15 @@ class UnitManager:
             return units_obj
 
         if category == 'default':
-            category = self._session.query(Category)\
+            units = self._session.query(Unit)\
                 .filter(Unit.user.has(User.user == self._user)
-                        & (Category.category == None)).first()
-            return make_logins_obj(category.units)
+                        & Unit.category.has(Category.category == None)).all()
+            return make_logins_obj(units)
         elif category:
-            category = self._session.query(Category)\
+            units = self._session.query(Unit)\
                 .filter(Unit.user.has(User.user == self._user)
-                        & (Category.category == category)).first()
-            return make_logins_obj(category.units)
+                        & Unit.category.has(Category.category == category)).all()
+            return make_logins_obj(units)
         else:
             units = self._session.query(Unit)\
                 .filter(Unit.user.has(User.user == self._user)).all()
