@@ -6,9 +6,9 @@ from logging import ERROR, INFO, WARNING
 import click
 import pyperclip
 
-from database_manager.models import FILE_USERS_DB, SQLAlchemyManager
+from database_manager.models import SQLAlchemyManager
 from log_manager.models import log_and_print
-from settings import DB_ROOT
+from settings import FILE_DB
 from units_manager.models import UnitsComposition
 
 
@@ -36,7 +36,7 @@ def validate_user(ctx, param, value):
     """
     Check user exists
     """
-    manager_obj = SQLAlchemyManager(FILE_USERS_DB, value)
+    manager_obj = SQLAlchemyManager(FILE_DB, value)
 
     if not manager_obj.user_obj.check_user():
         log_and_print(f'User named "{value}" not exists', level=ERROR)
@@ -51,7 +51,7 @@ def validate_password(ctx, param, value):
     Check user exists
     """
     user = ctx.obj['USER']
-    manager_obj = SQLAlchemyManager(FILE_USERS_DB, user)
+    manager_obj = SQLAlchemyManager(FILE_DB, user)
 
     if not manager_obj.user_obj.check_user_password(value):
         log_and_print(f'Incorrect password for user named "{user}"', level=ERROR)
@@ -64,7 +64,7 @@ def dangerous_warning(ctx, param, value):
     """Предупреждение об опасности команды uupdate"""
     log_and_print(f'The "uupdate" command is potentially dangerous.\n'
                   f'It is strongly recommended to make a backup '
-                  f'of the "{DB_ROOT}" folder.', level=WARNING)
+                  f'of the "" folder.', level=WARNING)
     return value
 
 
@@ -133,7 +133,7 @@ def uadd(user, password):
     """
     add user command
     """
-    manager_obj = SQLAlchemyManager(FILE_USERS_DB, user)
+    manager_obj = SQLAlchemyManager(FILE_DB, user)
 
     if manager_obj.user_obj.check_user():
         log_and_print(f'User named "{user}" already exists', level=ERROR)
@@ -159,7 +159,7 @@ def uupdate(user, password,
     """
     update username (and password) command
     """
-    manager_obj = SQLAlchemyManager(FILE_USERS_DB, user)
+    manager_obj = SQLAlchemyManager(FILE_DB, user)
 
     if not manager_obj.user_obj.check_user():
         log_and_print(f'User named "{user}" not exists', level=ERROR)
@@ -182,7 +182,7 @@ def udelete(user, password):
     """
     delete user command
     """
-    manager_obj = SQLAlchemyManager(FILE_USERS_DB, user)
+    manager_obj = SQLAlchemyManager(FILE_DB, user)
 
     if not manager_obj.user_obj.check_user():
         log_and_print(f'User named "{user}" not exists', level=ERROR)
@@ -201,7 +201,7 @@ def ushow(ctx):
     """
     show users command
     """
-    manager_obj = SQLAlchemyManager(FILE_USERS_DB)
+    manager_obj = SQLAlchemyManager(FILE_DB)
 
     users = manager_obj.user_obj.all_users()
     for user in users:
@@ -220,7 +220,7 @@ def show(ctx, user, password, category):
     """
     show logins command
     """
-    manager_obj = SQLAlchemyManager(FILE_USERS_DB, user)
+    manager_obj = SQLAlchemyManager(FILE_DB, user)
 
     if not manager_obj.user_obj.check_user():
         log_and_print(f'User named "{user}" not exists', level=ERROR)
@@ -246,7 +246,7 @@ def get(user, password, login, alias):
     """
     get password by login command
     """
-    manager_obj = SQLAlchemyManager(FILE_USERS_DB, user)
+    manager_obj = SQLAlchemyManager(FILE_DB, user)
 
     if not manager_obj.user_obj.check_user():
         log_and_print(f'User named "{user}" not exists', level=ERROR)
@@ -273,7 +273,7 @@ def delete(user, password, login, alias):
     """
     delete login and password command
     """
-    manager_obj = SQLAlchemyManager(FILE_USERS_DB, user)
+    manager_obj = SQLAlchemyManager(FILE_DB, user)
 
     if not manager_obj.user_obj.check_user():
         log_and_print(f'User named "{user}" not exists', level=ERROR)
@@ -304,7 +304,7 @@ def add(user, password, login, password_for_login, category, url, alias):
     """
     add login and password command
     """
-    manager_obj = SQLAlchemyManager(FILE_USERS_DB, user)
+    manager_obj = SQLAlchemyManager(FILE_DB, user)
 
     if not manager_obj.user_obj.check_user():
         log_and_print(f'User named "{user}" not exists', level=ERROR)
@@ -342,7 +342,7 @@ def update(user, password, login, alias,
            new_login, new_alias, password_for_login, new_category, url):
     """Update unit"""
 
-    manager_obj = SQLAlchemyManager(FILE_USERS_DB, user)
+    manager_obj = SQLAlchemyManager(FILE_DB, user)
 
     if not manager_obj.user_obj.check_user():
         log_and_print(f'User named "{user}" not exists', level=ERROR)

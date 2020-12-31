@@ -7,7 +7,7 @@ from sqlalchemy.orm import relationship, sessionmaker
 
 from encryption_manager.models import get_hash, get_secret_obj
 from log_manager.models import log_and_print
-from settings import DIR_UNITS_DBS, FILE_USERS_DB
+from settings import FILE_DB
 
 Base = declarative_base()
 
@@ -19,6 +19,9 @@ class User(Base):
     user = Column(String, nullable=False, unique=True,
                   sqlite_on_conflict_unique='FAIL')
     password = Column(String, nullable=False)
+    units = relationship("Unit",
+                         back_populates="user",
+                         cascade="all, delete-orphan")
 
     def __init__(self, user, password):
         self.user = user
@@ -29,13 +32,15 @@ class Unit(Base):
     """Определение таблицы units"""
     __tablename__ = 'units'
     id = Column(Integer, primary_key=True)
+    user_id = Column(ForeignKey('users.id', ondelete="CASCADE"))
     login = Column(String, nullable=False)
     url = Column(String)
     alias = Column(String, nullable=False)
     category_id = Column(ForeignKey('categories.id', ondelete="CASCADE"))
     password = Column(String, nullable=False)
-    login_alias = UniqueConstraint(login, alias)
+    login_alias = UniqueConstraint(user_id, login, alias)
     category = relationship("Category", back_populates="units")
+    user = relationship("User", back_populates="units")
 
     def __init__(self, login, password, url=None, alias='default'):
         self.login = login
@@ -102,9 +107,10 @@ class UserManager:
         update username (and password) in BD
         """
         try:
-            old_path = DIR_UNITS_DBS / ''.join([self._user, '.sqlite'])
-            new_path = DIR_UNITS_DBS / ''.join([new_user, '.sqlite'])
-            old_path.rename(new_path)
+            # old_path = DIR_UNITS_DBS / ''.join([self._user, '.sqlite'])
+            # new_path = DIR_UNITS_DBS / ''.join([new_user, '.sqlite'])
+            # old_path.rename(new_path)
+            pass
         except OSError as oserr:
             log_and_print('OSError has occurred. Update command failed. See the log for details.', level=ERROR)
             log_and_print(f'{oserr.strerror}', level=ERROR, print_need=False)
@@ -123,26 +129,27 @@ class UserManager:
 
             if not new_password:
                 new_password = password
-            new_manager_obj = SQLAlchemyManager(FILE_USERS_DB, new_user)
-            logins = new_manager_obj.unit_obj.get_logins()
-            logins_list = logins.get('logins')
-            alias_list = logins.get('alias')
-            for i in range(len(logins_list)):
-                password_for_login = new_manager_obj.unit_obj.get_password(self._user, password, logins_list[i],
-                                                                           alias_list[i])
-                new_manager_obj.unit_obj \
-                    .update_unit(new_user, new_password,
-                                 logins_list[i], password_for_login=password_for_login, alias=alias_list[i])
-            log_and_print('Units rebinding succeed.', level=INFO)
+            # new_manager_obj = SQLAlchemyManager(FILE_USERS_DB, new_user)
+            # logins = new_manager_obj.unit_obj.get_logins()
+            # logins_list = logins.get('logins')
+            # alias_list = logins.get('alias')
+            # for i in range(len(logins_list)):
+            #     password_for_login = new_manager_obj.unit_obj.get_password(self._user, password, logins_list[i],
+            #                                                                alias_list[i])
+            #     new_manager_obj.unit_obj \
+            #         .update_unit(new_user, new_password,
+            #                      logins_list[i], password_for_login=password_for_login, alias=alias_list[i])
+            # log_and_print('Units rebinding succeed.', level=INFO)
 
     def del_user(self):
         """
         delete user from BD
         """
+        self._session.query(Unit) \
+            .filter(Unit.user.has(User.user == self._user))\
+            .delete(synchronize_session='fetch')
         self._session.query(User) \
             .filter(User.user == self._user).delete()
-        if (DIR_UNITS_DBS / (self._user + ".sqlite")).exists():
-            (DIR_UNITS_DBS / (self._user + ".sqlite")).unlink()
         self._session.commit()
 
     def all_users(self):
@@ -160,9 +167,11 @@ class UserManager:
 class UnitManager:
     """Класс работы с unit"""
     _session = None
+    _user = None
 
-    def __init__(self, session):
+    def __init__(self, session, user):
         self._session = session
+        self._user = user
 
     def get_logins(self, category=None):
         """Выдача units"""
@@ -189,20 +198,24 @@ class UnitManager:
 
         if category == 'default':
             category = self._session.query(Category)\
-                .filter(Category.category == None).first()
+                .filter(Unit.user.has(User.user == self._user)
+                        & (Category.category == None)).first()
             return make_logins_obj(category.units)
         elif category:
             category = self._session.query(Category)\
-                .filter(Category.category == category).first()
+                .filter(Unit.user.has(User.user == self._user)
+                        & (Category.category == category)).first()
             return make_logins_obj(category.units)
         else:
-            units = self._session.query(Unit).all()
+            units = self._session.query(Unit)\
+                .filter(Unit.user.has(User.user == self._user)).all()
             return make_logins_obj(units)
 
     def check_login(self, login, alias):
         """Проверка существования логина"""
         return self._session.query(Unit)\
-            .filter((Unit.login == login) & (Unit.alias == alias)).all()
+            .filter(Unit.user.has(User.user == self._user) & (Unit.login == login)
+                    & (Unit.alias == alias)).all()
 
     def get_category(self, category):
         """Выдаем категорию, если есть, иначе создаем"""
@@ -213,12 +226,18 @@ class UnitManager:
         else:
             return Category(category=category)
 
-    def add_unit(self, user, password, login, password_for_login, alias='default', category=None, url=None):
+    def get_user(self):
+        """Выдаем пользователя"""
+        return self._session.query(User).filter(User.user == self._user).first()
+
+    def add_unit(self, user, password, login, password_for_login, alias='default'
+                 , category=None, url=None):
         """Добавление unit"""
         secret_obj = get_secret_obj(user, password)
         unit_for_add = Unit(login, secret_obj.encrypt(password_for_login), url, alias)
         self._session.add(unit_for_add)
         unit_for_add.category = self.get_category(category)
+        unit_for_add.user = self.get_user()
         self._session.commit()
 
     def get_password(self, user, password, login, alias):
@@ -253,7 +272,9 @@ class UnitManager:
     def delete_unit(self, login, alias):
         """Удаление unit"""
         self._session.query(Unit) \
-            .filter((Unit.login == login) & (Unit.alias == alias)).delete()
+            .filter(Unit.user.has(User.user == self._user)
+                    & (Unit.login == login) & (Unit.alias == alias))\
+            .delete(synchronize_session='fetch')
         self._session.commit()
 
 
@@ -285,7 +306,7 @@ class SQLAlchemyManager:
     def user(self):
         return self._user
 
-    def __init__(self, file_db=FILE_USERS_DB, user=None):
+    def __init__(self, file_db=FILE_DB, user=None):
         """Инициализация класса при вызове с поднятием текущей сессии"""
         self._user = user
         self._file_user_db = file_db
@@ -294,12 +315,15 @@ class SQLAlchemyManager:
         engine = create_engine(f'sqlite:///{self.file_user_db}', echo=False)
 
         # Создание файла БД, если его нет
-        Base.metadata.create_all(engine,
-                                 tables=[Base.metadata.tables["users"]])
+        Base.metadata.create_all(engine)
+        # Base.metadata.create_all(engine,
+        #                          tables=[Base.metadata.tables["users"]])
 
         self._session_for_user = sessionmaker(bind=engine)()
 
         self.user_obj = UserManager(self.session_for_user, self.user)
+        self.unit_obj = UnitManager(self.session_for_user, self.user)
+        return
 
         # Если пользователя еще не существует, не создаем файл с его БД
         if not self.user_obj.check_user():
