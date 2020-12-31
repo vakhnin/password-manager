@@ -262,11 +262,13 @@ class UnitManager:
             update_dict['alias'] = new_alias
 
         self._session.query(Unit)\
-            .filter((Unit.login == login) & (Unit.alias == alias))\
+            .filter(Unit.user.has(User.user == self._user)
+                    & (Unit.login == login) & (Unit.alias == alias))\
             .first().category = self.get_category(category)
         self._session.query(Unit)\
-            .filter((Unit.login == login) & (Unit.alias == alias))\
-            .update(update_dict)
+            .filter(Unit.user.has(User.user == self._user)
+                    & (Unit.login == login) & (Unit.alias == alias))\
+            .update(update_dict, synchronize_session='fetch')
         self._session.commit()
 
     def delete_unit(self, login, alias):
