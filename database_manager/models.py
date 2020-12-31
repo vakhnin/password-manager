@@ -318,31 +318,8 @@ class SQLAlchemyManager:
 
         # Создание файла БД, если его нет
         Base.metadata.create_all(engine)
-        # Base.metadata.create_all(engine,
-        #                          tables=[Base.metadata.tables["users"]])
 
         self._session_for_user = sessionmaker(bind=engine)()
 
         self.user_obj = UserManager(self.session_for_user, self.user)
         self.unit_obj = UnitManager(self.session_for_user, self.user)
-        return
-
-        # Если пользователя еще не существует, не создаем файл с его БД
-        if not self.user_obj.check_user():
-            return
-
-        # Инициализация Items
-        engine = create_engine(
-            f'sqlite:///{DIR_UNITS_DBS / (user + ".sqlite")}',
-            echo=False)
-
-        # Создание файла БД, если его нет
-        Base.metadata.create_all(engine,
-                                 tables=[
-                                     Base.metadata.tables["units"],
-                                     Base.metadata.tables["categories"]
-                                 ])
-
-        self._session_for_unit = sessionmaker(bind=engine)()
-
-        self.unit_obj = UnitManager(self.session_for_unit)
