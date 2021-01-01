@@ -59,6 +59,7 @@ def validate_password(ctx, param, value):
     else:
         return value
 
+
 user_argument = click.option('--user', '-u', prompt="Username",
                              help="Provide your username",
                              callback=validate_user,

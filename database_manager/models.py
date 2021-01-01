@@ -1,4 +1,4 @@
-from logging import ERROR, INFO
+from logging import INFO
 
 from sqlalchemy import (Column, ForeignKey, Integer, String, UniqueConstraint,
                         create_engine)
@@ -215,8 +215,8 @@ class UnitManager:
         """Выдаем пользователя"""
         return self._session.query(User).filter(User.user == self._user).first()
 
-    def add_unit(self, user, password, login, password_for_login, alias='default'
-                 , category=None, url=None):
+    def add_unit(self, user, password, login, password_for_login, alias='default',
+                 category=None, url=None):
         """Добавление unit"""
         secret_obj = get_secret_obj(user, password)
         unit_for_add = Unit(login, secret_obj.encrypt(password_for_login), url, alias)
