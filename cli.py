@@ -1,7 +1,7 @@
 # cli.py
 import os
 import re
-from logging import ERROR, INFO, WARNING
+from logging import ERROR, INFO
 
 import click
 import pyperclip
@@ -307,7 +307,7 @@ def add(user, password, login, password_for_login, category, url, alias):
         log_and_print(f'login "{login}" with "{alias}"'
                       f' alias already exists', level=ERROR)
     else:
-        category = None if category == 'default' else category
+        category = 'default' if category is None else category
         manager_obj.unit_obj\
             .add_unit(user, password, login, password_for_login, alias, category, url)
         log_and_print(f'Login "{login}" added', level=INFO)
@@ -352,7 +352,7 @@ def update(user, password, login, alias,
                       f' alias already exists', level=ERROR)
     else:
         password_for_login = None if password_for_login == '' else password_for_login
-        new_category = None if new_category == 'default' else new_category
+        new_category = 'default' if new_category is None else new_category
         manager_obj.unit_obj\
             .update_unit(user, password, login, alias,
                          new_login, password_for_login,

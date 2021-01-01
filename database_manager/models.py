@@ -53,7 +53,7 @@ class Category(Base):
     """Определение таблицы units"""
     __tablename__ = 'categories'
     id = Column(Integer, primary_key=True)
-    category = Column(String, unique=True, nullable=True)
+    category = Column(String, unique=True, nullable=False)
     units = relationship("Unit",
                          back_populates="category",
                          cascade="all, delete-orphan")
@@ -186,12 +186,7 @@ class UnitManager:
                         .append(unit_.alias if unit_.alias else '')
             return units_obj
 
-        if category == 'default':
-            units = self._session.query(Unit)\
-                .filter(Unit.user.has(User.user == self._user)
-                        & Unit.category.has(Category.category == None)).all()
-            return make_logins_obj(units)
-        elif category:
+        if category:
             units = self._session.query(Unit)\
                 .filter(Unit.user.has(User.user == self._user)
                         & Unit.category.has(Category.category == category)).all()
