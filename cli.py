@@ -24,7 +24,7 @@ def validate_new_user(ctx, param, value):
     """
     Check new user name
     """
-    if not re.match('^[A-Za-z][A-Za-z0-9_]*$', value):
+    if not re.match('^[A-Za-z][A-Za-z0-9_-]*$', value):
         log_and_print('The user name must consist of English letters, '
                       'numbers, and underscores. Start with a letter', level=ERROR)
         exit(-1)
