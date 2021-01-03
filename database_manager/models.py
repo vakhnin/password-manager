@@ -8,6 +8,7 @@ from sqlalchemy.orm import relationship, sessionmaker
 from encryption_manager.models import get_hash, get_secret_obj
 from log_manager.models import log_and_print
 from settings import DIR_UNITS_DBS, FILE_USERS_DB
+import pathlib
 
 Base = declarative_base()
 
@@ -285,7 +286,8 @@ class SQLAlchemyManager:
     def user(self):
         return self._user
 
-    def __init__(self, file_db=FILE_USERS_DB, user=None):
+    def __init__(self, file_db=FILE_USERS_DB, user=None, 
+        dir_units_dbs: pathlib.Path=DIR_UNITS_DBS):
         """Инициализация класса при вызове с поднятием текущей сессии"""
         self._user = user
         self._file_user_db = file_db
@@ -301,20 +303,18 @@ class SQLAlchemyManager:
 
         self.user_obj = UserManager(self.session_for_user, self.user)
 
-        # Если пользователя еще не существует, не создаем файл с его БД
-        if not self.user_obj.check_user():
-            return
+        # Если логин пользователя передали, то создаем БД units
+        if user:
+            # Инициализация Items
+            engine = create_engine(
+                f'sqlite:///{dir_units_dbs / (user + ".sqlite")}',
+                echo=False)
 
-        # Инициализация Items
-        engine = create_engine(
-            f'sqlite:///{DIR_UNITS_DBS / (user + ".sqlite")}',
-            echo=False)
-
-        # Создание файла БД, если его нет
-        Base.metadata.create_all(engine,
-                                 tables=[
-                                     Base.metadata.tables["units"],
-                                     Base.metadata.tables["categories"]
+            # Создание файла БД, если его нет
+            Base.metadata.create_all(engine,
+                                    tables=[
+                                        Base.metadata.tables["units"],
+                                        Base.metadata.tables["categories"]
                                  ])
 
         self._session_for_unit = sessionmaker(bind=engine)()

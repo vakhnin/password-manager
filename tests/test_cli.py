@@ -1,15 +1,49 @@
 import unittest
-
+import pathlib
 from click.testing import CliRunner
-
 from cli import cli
+import database_manager.models as models_db
 
 
 class TestCli(unittest.TestCase):
+    _login_user = 'temp'
+    _password_user = 'temp1234!@#$'
+    _path_project = pathlib.Path.cwd() / 'tests'
+
+    @classmethod
+    def setUpClass(cls):
+        """Инициация тестовой базы данных"""
+        if not pathlib.Path.exists(cls._path_project):
+            pathlib.Path.mkdir(cls._path_project)
+        if not pathlib.Path.exists(cls._path_project / 'units'):
+            pathlib.Path.mkdir(cls._path_project / 'units')    
+        _file_db = cls._path_project / 'test_users.sqlite'
+        _dir_units_dbs = cls._path_project / 'units'
+        cls._test_BD = models_db.SQLAlchemyManager(
+            file_db=_file_db, user=cls._login_user,
+            dir_units_dbs=_dir_units_dbs
+        )
+        cls._test_BD.user_obj.add_user(cls._password_user)
+
+    @classmethod
+    def tearDownClass(cls):
+        """Очистка сгенерированных тестовых данных"""
+        pathlib.Path.unlink(cls._path_project / 'test_users.sqlite')
+        pathlib.Path.unlink(cls._path_project / 'units' / f'{cls._login_user}.sqlite')
+        pathlib.Path.rmdir(cls._path_project / 'units')
+        
 
     def setUp(self) -> None:
         self.runner = CliRunner()
 
+    def test_user_add(self):
+        user_for_test = 'test_user1'
+        password_for_test = 'test_password'
+        with self.runner.isolated_filesystem() as tmpdir:
+            pass
+        import time
+        time.sleep(5)
+    
     def test_uadd(self):
         """
         Test uadd command
