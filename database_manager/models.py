@@ -135,11 +135,9 @@ class UserManager:
         """
         delete user from BD
         """
-        if self._session.query(Unit) \
-            .filter(Unit.user.has(User.user == self._user)).all():
-            self._session.query(Unit) \
-                .filter(Unit.user.has(User.user == self._user))\
-                .delete(synchronize_session='fetch')
+        self._session.query(Unit) \
+            .filter(Unit.user.has(User.user == self._user))\
+            .delete(synchronize_session='fetch')
         self._session.query(User) \
             .filter(User.user == self._user).delete()
         self._session.commit()
