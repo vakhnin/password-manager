@@ -12,10 +12,6 @@ from settings import DB_ROOT
 from units_manager.models import UnitsComposition
 
 
-def get_os_username():
-    return os.getlogin()
-
-
 def validate_new_user(ctx, param, value):
     """
     Check new user name
