@@ -41,6 +41,10 @@ def validate_user(ctx, param, value):
     if not manager_obj.user_obj.check_user():
         log_and_print(f'User named "{value}" not exists', level=ERROR)
         exit(-1)
+    elif 'PASSWORD' in ctx.obj.keys() \
+            and not manager_obj.user_obj.check_user_password(ctx.obj['PASSWORD']):
+        log_and_print(f'Incorrect password for user named "{value}"', level=ERROR)
+        exit(-1)
     else:
         ctx.obj['USER'] = value
         return value
@@ -50,6 +54,10 @@ def validate_password(ctx, param, value):
     """
     Check user exists
     """
+    if 'USER' not in ctx.obj.keys():
+        ctx.obj['PASSWORD'] = value
+        return value
+
     user = ctx.obj['USER']
     manager_obj = SQLAlchemyManager(FILE_DB, user)
 
