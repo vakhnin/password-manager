@@ -216,7 +216,7 @@ class UnitManager:
         return self._session.query(User).filter(User.user == self._user).first()
 
     def add_unit(self, user, password, login, password_for_login, alias='default',
-                 category=None, url=None):
+                 category='default', url=None):
         """Добавление unit"""
         secret_obj = get_secret_obj(user, password)
         unit_for_add = Unit(login, secret_obj.encrypt(password_for_login), url, alias)
@@ -234,7 +234,7 @@ class UnitManager:
         return secret_obj.decrypt(unit_obj.password)
 
     def update_unit(self, user, password, login, alias, new_login=None, password_for_login=None,
-                    category=None, url=None, new_alias=None):
+                    new_category=None, url=None, new_alias=None):
         """Обновление unit"""
         update_dict = {'login': login}
         if new_login:
@@ -247,10 +247,11 @@ class UnitManager:
         if new_alias:
             update_dict['alias'] = new_alias
 
-        self._session.query(Unit)\
-            .filter(Unit.user.has(User.user == self._user)
-                    & (Unit.login == login) & (Unit.alias == alias))\
-            .first().category = self.get_category(category)
+        if new_category:
+            self._session.query(Unit)\
+                .filter(Unit.user.has(User.user == self._user)
+                        & (Unit.login == login) & (Unit.alias == alias))\
+                .first().category = self.get_category(new_category)
         self._session.query(Unit)\
             .filter(Unit.user.has(User.user == self._user)
                     & (Unit.login == login) & (Unit.alias == alias))\
