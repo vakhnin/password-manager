@@ -27,7 +27,10 @@ class TestUserManager(unittest.TestCase):
         if not os.path.isdir(self.dir_path):
             os.makedirs(self.dir_path)
         Base.metadata.create_all(engine,
-                                 tables=[Base.metadata.tables['users']])
+                                 tables=[
+                                     Base.metadata.tables["users"],
+                                     Base.metadata.tables["units"]
+                                 ])
 
         self._session_for_user = sessionmaker(bind=engine)()
 
