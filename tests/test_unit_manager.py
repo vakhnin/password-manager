@@ -67,7 +67,7 @@ class TestUnitManager(unittest.TestCase):
         check for add_unit
         """
         # add unit to DB
-        unit_obj = UnitManager(self._session_for_user)
+        unit_obj = UnitManager(self._session_for_user, self._test_user)
         unit_obj.add_unit(self._test_user, self._test_pwd_user, self._test_login, self._test_pwd_login)
 
         # checking query
@@ -99,7 +99,7 @@ class TestUnitManager(unittest.TestCase):
         check for check_login
         """
         # add unit to DB
-        unit_obj = UnitManager(self._session_for_user)
+        unit_obj = UnitManager(self._session_for_user, self._test_user)
         unit_obj.add_unit(self._test_user, self._test_pwd_user, self._test_login, self._test_pwd_login)
 
         # check that the check_login method confirms unit existence in DB by key login + default alias
@@ -125,7 +125,7 @@ class TestUnitManager(unittest.TestCase):
         check for get_password
         """
         # add unit to DB
-        unit_obj = UnitManager(self._session_for_user)
+        unit_obj = UnitManager(self._session_for_user, self._test_user)
         unit_obj.add_unit(
             self._test_user, self._test_pwd_user,
             self._test_login, self._test_pwd_login, self._test_alias
@@ -140,7 +140,7 @@ class TestUnitManager(unittest.TestCase):
         check for delete_unit
         """
         # add unit to DB
-        unit_obj = UnitManager(self._session_for_user)
+        unit_obj = UnitManager(self._session_for_user, self._test_user)
         unit_obj.add_unit(
             self._test_user, self._test_pwd_user,
             self._test_login, self._test_pwd_login, self._test_alias
@@ -179,7 +179,7 @@ class TestUnitManager(unittest.TestCase):
         units_all = UnitsObj()
 
         # create three collections of units with different categories with adding them to DB and dictionaries
-        unit_obj = UnitManager(self._session_for_user)
+        unit_obj = UnitManager(self._session_for_user, self._test_user)
         for i in '123':
             test_login = 'test-login-' + i
             test_pwd_login = 'T_l!-' + i * 3
@@ -230,7 +230,7 @@ class TestUnitManager(unittest.TestCase):
         check for update_unit
         """
         # add unit to DB
-        unit_obj = UnitManager(self._session_for_user)
+        unit_obj = UnitManager(self._session_for_user, self._test_user)
         unit_obj.add_unit(
             self._test_user, self._test_pwd_user,
             self._test_login, self._test_pwd_login, self._test_alias
