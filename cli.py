@@ -326,7 +326,7 @@ def add(user, password, login, password_for_login, category, url, alias):
               prompt="New password for login (Press 'Enter' for keep old password)",
               default='',
               help="Provide new password for login", hide_input=True)
-@click.option('-nc', "--new-category", help='"default" or skip for default category, optional',
+@click.option('-nc', "--new-category", help='"default" or skip for old category, optional',
               default=None, required=False)
 @click.option('-ur', "--url", help='url, optional', default=None, required=False)
 def update(user, password, login, alias,
@@ -353,7 +353,6 @@ def update(user, password, login, alias,
                       f' alias already exists', level=ERROR)
     else:
         password_for_login = None if password_for_login == '' else password_for_login
-        new_category = 'default' if new_category is None else new_category
         manager_obj.unit_obj\
             .update_unit(user, password, login, alias,
                          new_login, password_for_login,
