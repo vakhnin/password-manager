@@ -148,7 +148,7 @@ def uadd(user, password, db):
 @click.confirmation_option(prompt='Are you sure you want to update user data?')
 @click.option("--db", default=FILE_DB, required=False, hidden=True)
 def uupdate(user, password,
-            new_username, new_password, dangerous_warning_option, db):
+            new_username, new_password, db):
     """
     update username (and password) command
     """
