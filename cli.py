@@ -52,7 +52,7 @@ def validate_user(ctx, param, value):
 
 def validate_password(ctx, param, value):
     """
-    Check user exists
+    Check password
     """
     if 'USER' not in ctx.obj.keys():
         ctx.obj['PASSWORD'] = value
