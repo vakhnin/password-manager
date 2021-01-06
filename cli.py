@@ -166,7 +166,7 @@ def uupdate(user, password,
         log_and_print(f'User named "{new_username}" already exists '
                       f'and no new password is given', level=ERROR)
     else:
-        manager_obj.user_obj.update_user(password, new_username, new_password)
+        manager_obj.user_obj.update_user(db, password, new_username, new_password)
 
 
 @cli.command()
