@@ -1,3 +1,4 @@
+# python -m unittest
 import unittest
 import pathlib
 from click.testing import CliRunner
