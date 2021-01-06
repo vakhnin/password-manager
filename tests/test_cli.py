@@ -13,6 +13,8 @@ class TestCli(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Инициация тестовой базы данных"""
+        if pathlib.Path.exists(cls._path_project / 'test_users.sqlite'):
+            pathlib.Path.unlink(cls._path_project / 'test_users.sqlite')
         # инициация runner через которого будем обращаться к cli
         cls.runner = CliRunner()
         # ручная проверка и создание тестовых директорий с тестовыми БД
@@ -28,7 +30,9 @@ class TestCli(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         """Очистка сгенерированных тестовых данных"""
-        pathlib.Path.unlink(cls._path_project / 'test_users.sqlite')
+        # pathlib.Path.unlink(cls._path_project / 'test_users.sqlite')
+        pass
+
     
     def test_uadd(self):
         """

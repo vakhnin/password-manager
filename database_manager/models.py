@@ -7,7 +7,6 @@ from sqlalchemy.orm import relationship, sessionmaker
 
 from encryption_manager.models import get_hash, get_secret_obj
 from log_manager.models import log_and_print
-import pathlib
 from settings import FILE_DB
 
 Base = declarative_base()
