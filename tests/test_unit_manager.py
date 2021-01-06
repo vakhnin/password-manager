@@ -265,6 +265,52 @@ class TestUnitManager(unittest.TestCase):
         # check that the unit with old attributes doesn't exist in DB
         self.assertEqual(False, True if unit_obj.check_login(self._test_login, self._test_alias) else False)
 
+    def test_update_user(self):
+        """
+        check for update_user
+        """
+        user_obj = UserManager(self._session_for_user, self._test_user)
+
+        # add unit to DB
+        unit_obj = UnitManager(self._session_for_user, self._test_user)
+        unit_obj.add_unit(
+            self._test_user, self._test_pwd_user,
+            self._test_login, self._test_pwd_login, self._test_alias
+        )
+
+        # update username and password
+        new_user = 'new-user'
+        new_password = 'N_u!123'
+        user_obj.update_user(self.file_path, self._test_pwd_user, new_user, new_password)
+
+        # check that original user doesn't exist in DB
+        self.assertEqual(False, user_obj.check_user(self._test_user))
+        # check that new user exist in DB
+        self.assertEqual(True, user_obj.check_user(new_user))
+        # check that new password for new user is saved correctly
+        user_obj = UserManager(self._session_for_user, new_user)
+        self.assertEqual(True, user_obj.check_user_password(new_password))
+        # check that unit from original user belongs now to new user and we can get its password
+        unit_obj = UnitManager(self._session_for_user, new_user)
+        self.assertEqual(self._test_pwd_login, unit_obj.get_password(new_user, new_password,
+                                                                     self._test_login, self._test_alias))
+
+        # update username without changing password (the password must be stay on new_password)
+        newer_user = 'newer-user'
+        user_obj.update_user(self.file_path, new_password, newer_user)
+
+        # check that parent user doesn't exist in DB
+        self.assertEqual(False, user_obj.check_user(new_user))
+        # check that newer user exist in DB
+        self.assertEqual(True, user_obj.check_user(newer_user))
+        # check that password for newer user doesn't changed
+        user_obj = UserManager(self._session_for_user, newer_user)
+        self.assertEqual(True, user_obj.check_user_password(new_password))
+        # check that unit from parent user belongs now to newer user and we can get its password
+        unit_obj = UnitManager(self._session_for_user, newer_user)
+        self.assertEqual(self._test_pwd_login, unit_obj.get_password(newer_user, new_password,
+                                                                     self._test_login, self._test_alias))
+
 
 if __name__ == '__main__':
     unittest.main()

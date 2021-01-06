@@ -103,13 +103,13 @@ class UserManager:
         self._session.add(user_for_add)
         self._session.commit()
 
-    def update_user(self, password, new_user, new_password=None):
+    def update_user(self, db, password, new_user, new_password=None):
         """
         update username (and password) in BD
         """
         if not new_password:
             new_password = password
-        new_manager_obj = SQLAlchemyManager(FILE_DB, self._user)
+        new_manager_obj = SQLAlchemyManager(db, self._user)
         logins = new_manager_obj.unit_obj.get_logins()
         logins_list = logins.get('logins')
         alias_list = logins.get('alias')
