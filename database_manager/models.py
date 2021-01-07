@@ -7,7 +7,6 @@ from sqlalchemy.orm import relationship, sessionmaker
 
 from encryption_manager.models import get_hash, get_secret_obj
 from log_manager.models import log_and_print
-import pathlib
 from settings import FILE_DB
 
 Base = declarative_base()
@@ -81,6 +80,7 @@ class UserManager:
             user_tmp = user
 
         if self._session.query(User).filter(User.user == user_tmp).first():
+            self._session.close()
             return True
         return False
 
@@ -91,6 +91,7 @@ class UserManager:
         pass_hash = get_hash((self._user + password).encode("utf-8"))
         if self._session.query(User).filter(User.user == self._user) \
                 .filter(User.password == pass_hash).first():
+            self._session.close()
             return True
         return False
 
@@ -102,6 +103,7 @@ class UserManager:
         user_for_add = User(self._user, pass_hash)
         self._session.add(user_for_add)
         self._session.commit()
+        self._session.close()
 
     def update_user(self, db, password, new_user, new_password=None):
         """

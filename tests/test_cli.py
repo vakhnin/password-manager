@@ -1,3 +1,4 @@
+# python -m unittest
 import unittest
 import pathlib
 from click.testing import CliRunner
@@ -13,6 +14,8 @@ class TestCli(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Инициация тестовой базы данных"""
+        if pathlib.Path.exists(cls._path_project / 'test_users.sqlite'):
+            pathlib.Path.unlink(cls._path_project / 'test_users.sqlite')
         # инициация runner через которого будем обращаться к cli
         cls.runner = CliRunner()
         # ручная проверка и создание тестовых директорий с тестовыми БД
@@ -56,6 +59,5 @@ class TestCli(unittest.TestCase):
         self.assertNotEqual(result.exit_code, 0)  # Пользователь уже есть, поэтому код возврата не 0
         # Нужно всем неуспешным завершениям проставить exit(-1), как в этом коммите
         res_str = result.output.split('\n')  # Делим вывод построчно
-        self.assertEqual(res_str[-2], f'Error: User named "{self._login_user}" already exists') # Проверяем нижнюю
-        # строку на соответсвии тексту ошибки
-
+        # Проверяем нижнюю строку на соответсвии тексту ошибки
+        self.assertEqual(res_str[-2], f'Error: User named "{self._login_user}" already exists')
