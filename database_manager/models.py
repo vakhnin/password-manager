@@ -35,18 +35,18 @@ class Unit(Base):
     user_id = Column(ForeignKey('users.id', ondelete="CASCADE"))
     login = Column(String, nullable=False)
     url = Column(String)
-    alias = Column(String, nullable=False)
+    name = Column(String, nullable=False)
     category_id = Column(ForeignKey('categories.id', ondelete="CASCADE"))
     password = Column(String, nullable=False)
-    login_alias = UniqueConstraint(user_id, login, alias)
+    login_name = UniqueConstraint(user_id, login, name)
     category = relationship("Category", back_populates="units")
     user = relationship("User", back_populates="units")
 
-    def __init__(self, login, password, url=None, alias='default'):
+    def __init__(self, login, password, url=None, name='default'):
         self.login = login
         self.password = password
         self.url = url
-        self.alias = alias
+        self.name = name
 
 
 class Category(Base):
@@ -105,22 +105,22 @@ class UserManager:
         self._session.commit()
         self._session.close()
 
-    def update_user(self, password, new_user, new_password=None):
+    def update_user(self, db, password, new_user, new_password=None):
         """
         update username (and password) in BD
         """
         if not new_password:
             new_password = password
-        new_manager_obj = SQLAlchemyManager(FILE_DB, self._user)
+        new_manager_obj = SQLAlchemyManager(db, self._user)
         logins = new_manager_obj.unit_obj.get_logins()
         logins_list = logins.get('logins')
-        alias_list = logins.get('alias')
+        name_list = logins.get('name')
         for i in range(len(logins_list)):
             password_for_login = new_manager_obj.unit_obj.get_password(self._user, password, logins_list[i],
-                                                                       alias_list[i])
+                                                                       name_list[i])
             new_manager_obj.unit_obj \
                 .update_unit(new_user, new_password,
-                             logins_list[i], password_for_login=password_for_login, alias=alias_list[i])
+                             logins_list[i], password_for_login=password_for_login, name=name_list[i])
 
         if new_password:
             secret_password = new_user + new_password
@@ -175,7 +175,7 @@ class UnitManager:
                 "logins": [],
                 "category": [],
                 "url": [],
-                "alias": []
+                "name": []
             }
 
             if units_list:
@@ -185,8 +185,8 @@ class UnitManager:
                         .append(unit_.category.category if unit_.category.category else 'default')
                     units_obj['url']\
                         .append(unit_.url if unit_.url else '')
-                    units_obj['alias']\
-                        .append(unit_.alias if unit_.alias else '')
+                    units_obj['name']\
+                        .append(unit_.name if unit_.name else '')
             return units_obj
 
         if category:
@@ -199,11 +199,11 @@ class UnitManager:
                 .filter(Unit.user.has(User.user == self._user)).all()
             return make_logins_obj(units)
 
-    def check_login(self, login, alias):
+    def check_login(self, login, name):
         """Проверка существования логина"""
         return self._session.query(Unit)\
             .filter(Unit.user.has(User.user == self._user) & (Unit.login == login)
-                    & (Unit.alias == alias)).all()
+                    & (Unit.name == name)).all()
 
     def get_category(self, category):
         """Выдаем категорию, если есть, иначе создаем"""
@@ -218,26 +218,26 @@ class UnitManager:
         """Выдаем пользователя"""
         return self._session.query(User).filter(User.user == self._user).first()
 
-    def add_unit(self, user, password, login, password_for_login, alias='default',
+    def add_unit(self, user, password, login, password_for_login, name='default',
                  category='default', url=None):
         """Добавление unit"""
         secret_obj = get_secret_obj(user, password)
-        unit_for_add = Unit(login, secret_obj.encrypt(password_for_login), url, alias)
+        unit_for_add = Unit(login, secret_obj.encrypt(password_for_login), url, name)
         self._session.add(unit_for_add)
         unit_for_add.category = self.get_category(category)
         unit_for_add.user = self.get_user()
         self._session.commit()
 
-    def get_password(self, user, password, login, alias):
+    def get_password(self, user, password, login, name):
         """Получение пароля"""
         secret_obj = get_secret_obj(user, password)
         unit_obj = self._session.query(Unit)\
             .filter(Unit.user.has(User.user == self._user) &
-                    (Unit.login == login) & (Unit.alias == alias)).first()
+                    (Unit.login == login) & (Unit.name == name)).first()
         return secret_obj.decrypt(unit_obj.password)
 
-    def update_unit(self, user, password, login, alias, new_login=None, password_for_login=None,
-                    new_category=None, url=None, new_alias=None):
+    def update_unit(self, user, password, login, name, new_login=None, password_for_login=None,
+                    new_category=None, url=None, new_name=None):
         """Обновление unit"""
         update_dict = {'login': login}
         if new_login:
@@ -247,25 +247,25 @@ class UnitManager:
             update_dict['password'] = secret_obj.encrypt(password_for_login)
         if url:
             update_dict['url'] = url
-        if new_alias:
-            update_dict['alias'] = new_alias
+        if new_name:
+            update_dict['name'] = new_name
 
         if new_category:
             self._session.query(Unit)\
                 .filter(Unit.user.has(User.user == self._user)
-                        & (Unit.login == login) & (Unit.alias == alias))\
+                        & (Unit.login == login) & (Unit.name == name))\
                 .first().category = self.get_category(new_category)
         self._session.query(Unit)\
             .filter(Unit.user.has(User.user == self._user)
-                    & (Unit.login == login) & (Unit.alias == alias))\
+                    & (Unit.login == login) & (Unit.name == name))\
             .update(update_dict, synchronize_session='fetch')
         self._session.commit()
 
-    def delete_unit(self, login, alias):
+    def delete_unit(self, login, name):
         """Удаление unit"""
         self._session.query(Unit) \
             .filter(Unit.user.has(User.user == self._user)
-                    & (Unit.login == login) & (Unit.alias == alias))\
+                    & (Unit.login == login) & (Unit.name == name))\
             .delete(synchronize_session='fetch')
         self._session.commit()
 
