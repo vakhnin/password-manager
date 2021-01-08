@@ -1,4 +1,4 @@
-from logging import INFO
+from logging import INFO, ERROR
 
 from sqlalchemy import (Column, ForeignKey, Integer, String, UniqueConstraint,
                         create_engine)
@@ -94,6 +94,18 @@ class UserManager:
             self._session.close()
             return True
         return False
+
+    def check_user_and_password(self, user, password):
+        """
+        check user and password in BD
+        """
+        if not self.check_user(user):
+            log_and_print(f'User named "{user}" not exists', level=ERROR)
+            return False
+        if not self.check_user_password(password):
+            log_and_print(f'Incorrect password for user named "{user}"', level=ERROR)
+            return False
+        return True
 
     def add_user(self, password):
         """
