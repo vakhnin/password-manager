@@ -12,7 +12,7 @@ from settings import FILE_DB
 from units_manager.models import UnitsComposition
 
 
-def validate_new_user(ctx, param, value):
+def validate_new_user(value):
     """
     Check new user name
     """
@@ -24,7 +24,7 @@ def validate_new_user(ctx, param, value):
         return value
 
 
-def validate_user(ctx, param, value):
+def validate_user(ctx, value):
     """
     Check user exists
     """
@@ -42,7 +42,7 @@ def validate_user(ctx, param, value):
         return value
 
 
-def validate_password(ctx, param, value):
+def validate_password(ctx, value):
     """
     Check password
     """
@@ -166,7 +166,7 @@ def uupdate(user, password,
 @user_argument
 @password_argument
 @click.option("--db", default=FILE_DB, required=False, hidden=True)
-def udelete(user, password, db):
+def udelete(user, db):
     """
     delete user command
     """
@@ -179,7 +179,7 @@ def udelete(user, password, db):
 @cli.command()
 @click.pass_context
 @click.option("--db", default=FILE_DB, required=False, hidden=True)
-def ushow(ctx, db):
+def ushow(db):
     """
     show users command
     """
@@ -199,7 +199,7 @@ def ushow(ctx, db):
               default=None, required=False)
 @click.pass_context
 @click.option("--db", default=FILE_DB, required=False, hidden=True)
-def show(ctx, user, password, category, db):
+def show(ctx, user, category, db):
     """
     show logins command
     """
@@ -240,7 +240,7 @@ def get(user, password, login, name, db):
 @click.option('-l', "--login", prompt="Login", help="Provide login")
 @click.option('-n', "--name", prompt="Name", help='name', default='default')
 @click.option("--db", default=FILE_DB, required=False, hidden=True)
-def delete(user, password, login, name, db):
+def delete(user, login, name, db):
     """
     delete login and password command
     """
