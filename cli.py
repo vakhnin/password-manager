@@ -154,9 +154,6 @@ def uupdate(user, password,
     """
     manager_obj = SQLAlchemyManager(db, user)
 
-    if not manager_obj.user_obj.check_user_and_password(user, password):
-        exit(-1)
-
     new_password = None if new_password == '' else new_password
     if manager_obj.user_obj.check_user(new_username) and not new_password:
         log_and_print(f'User named "{new_username}" already exists '
@@ -174,9 +171,6 @@ def udelete(user, password, db):
     delete user command
     """
     manager_obj = SQLAlchemyManager(db, user)
-
-    if not manager_obj.user_obj.check_user_and_password(user, password):
-        exit(-1)
 
     manager_obj.user_obj.del_user()
     log_and_print(f'User named "{user}" deleted', level=INFO)
@@ -211,9 +205,6 @@ def show(ctx, user, password, category, db):
     """
     manager_obj = SQLAlchemyManager(db, user)
 
-    if not manager_obj.user_obj.check_user_and_password(user, password):
-        exit(-1)
-
     logins = manager_obj.unit_obj.get_logins(category)
     units_composition_obj = UnitsComposition(logins)
     units_composition_obj.prepare_data()
@@ -233,9 +224,6 @@ def get(user, password, login, name, db):
     get password by login command
     """
     manager_obj = SQLAlchemyManager(db, user)
-
-    if not manager_obj.user_obj.check_user_and_password(user, password):
-        exit(-1)
 
     if manager_obj.unit_obj.check_login(login, name):
         pyperclip.copy(manager_obj.unit_obj
@@ -257,9 +245,6 @@ def delete(user, password, login, name, db):
     delete login and password command
     """
     manager_obj = SQLAlchemyManager(db, user)
-
-    if not manager_obj.user_obj.check_user_and_password(user, password):
-        exit(-1)
 
     if manager_obj.unit_obj.check_login(login, name):
         manager_obj.unit_obj.delete_unit(login, name)
@@ -285,9 +270,6 @@ def add(user, password, login, password_for_login, category, url, name, db):
     add login and password command
     """
     manager_obj = SQLAlchemyManager(db, user)
-
-    if not manager_obj.user_obj.check_user_and_password(user, password):
-        exit(-1)
 
     if manager_obj.unit_obj.check_login(login, name):
         log_and_print(f'login "{login}" with "{name}"'
@@ -320,9 +302,6 @@ def update(user, password, login, name,
     """Update unit"""
 
     manager_obj = SQLAlchemyManager(db, user)
-
-    if not manager_obj.user_obj.check_user_and_password(user, password):
-        exit(-1)
 
     new_login = login if new_login is None else new_login
 

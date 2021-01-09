@@ -1,4 +1,4 @@
-from logging import INFO, ERROR
+from logging import INFO
 
 from sqlalchemy import (Column, ForeignKey, Integer, String, UniqueConstraint,
                         create_engine)
@@ -86,7 +86,7 @@ class UserManager:
 
     def check_user_password(self, password):
         """
-        check user and password in BD
+        check user password in BD
         """
         pass_hash = get_hash((self._user + password).encode("utf-8"))
         if self._session.query(User).filter(User.user == self._user) \
@@ -94,18 +94,6 @@ class UserManager:
             self._session.close()
             return True
         return False
-
-    def check_user_and_password(self, user, password):
-        """
-        check user and password in BD
-        """
-        if not self.check_user(user):
-            log_and_print(f'User named "{user}" not exists', level=ERROR)
-            return False
-        if not self.check_user_password(password):
-            log_and_print(f'Incorrect password for user named "{user}"', level=ERROR)
-            return False
-        return True
 
     def add_user(self, password):
         """
