@@ -12,7 +12,7 @@ from settings import FILE_DB
 from units_manager.models import UnitsComposition
 
 
-def validate_new_user(value):
+def validate_new_user(ctx, param, value):
     """
     Check new user name
     """
@@ -24,7 +24,7 @@ def validate_new_user(value):
         return value
 
 
-def validate_user(ctx, value):
+def validate_user(ctx, param, value):
     """
     Check user exists
     """
@@ -42,7 +42,7 @@ def validate_user(ctx, value):
         return value
 
 
-def validate_password(ctx, value):
+def validate_password(ctx, param, value):
     """
     Check password
     """
