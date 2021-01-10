@@ -46,7 +46,7 @@ logins
    ```
    or using options:
    ```
-   $ pwdone add -u user-name -l login-for-site -a record-name
+   $ pwdone add -u user-name -l login-for-site -n record-name
    ```
    <br>   
 
@@ -62,7 +62,7 @@ logins
    ```
    or using options:
    ```
-   $ pwdone get -a record-name
+   $ pwdone get -n record-name
    ```
    <br>   
 
