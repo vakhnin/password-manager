@@ -166,7 +166,7 @@ def uupdate(user, password,
 @user_argument
 @password_argument
 @click.option("--db", default=FILE_DB, required=False, hidden=True)
-def udelete(user, db):
+def udelete(user, password, db):
     """
     delete user command
     """
@@ -177,7 +177,6 @@ def udelete(user, db):
 
 
 @cli.command()
-@click.pass_context
 @click.option("--db", default=FILE_DB, required=False, hidden=True)
 def ushow(db):
     """
@@ -199,7 +198,7 @@ def ushow(db):
               default=None, required=False)
 @click.pass_context
 @click.option("--db", default=FILE_DB, required=False, hidden=True)
-def show(ctx, user, category, db):
+def show(ctx, user, password, category, db):
     """
     show logins command
     """
@@ -240,7 +239,7 @@ def get(user, password, login, name, db):
 @click.option('-l', "--login", prompt="Login", help="Provide login")
 @click.option('-n', "--name", prompt="Name", help='name', default='default')
 @click.option("--db", default=FILE_DB, required=False, hidden=True)
-def delete(user, login, name, db):
+def delete(user, password, login, name, db):
     """
     delete login and password command
     """
