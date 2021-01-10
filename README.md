@@ -159,8 +159,11 @@ logins
    ```   
 
    run the .msi installer in the 'dist' folder by double click
-   <br>  
-   <br>  
+   <br>
+   <br>
+   To uninstall pwdone, look in Apps & features Windows 
+   for an application like 'Python pwdone-1.0'
+   
 
 3. Backup and restore data
    <br>
