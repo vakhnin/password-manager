@@ -1,30 +1,22 @@
 # cli.py
 import os
 import re
-from logging import ERROR, INFO, WARNING
+from logging import ERROR, INFO
 
 import click
 import pyperclip
 
-from database_manager.models import FILE_USERS_DB, SQLAlchemyManager
+from database_manager.models import SQLAlchemyManager
 from log_manager.models import log_and_print
-from settings import DB_ROOT
+from settings import FILE_DB
 from units_manager.models import UnitsComposition
-
-
-def get_os_username():
-    if 'USERNAME' in os.environ and os.environ.get('USERNAME'):
-        return os.environ.get('USERNAME')
-    if 'USER' in os.environ and os.environ.get('USER'):
-        return os.environ.get('USER')
-    return None
 
 
 def validate_new_user(ctx, param, value):
     """
     Check new user name
     """
-    if not re.match('^[A-Za-z][A-Za-z0-9_]*$', value):
+    if not re.match('^[A-Za-z][A-Za-z0-9_-]*$', value):
         log_and_print('The user name must consist of English letters, '
                       'numbers, and underscores. Start with a letter', level=ERROR)
         exit(-1)
@@ -36,10 +28,14 @@ def validate_user(ctx, param, value):
     """
     Check user exists
     """
-    manager_obj = SQLAlchemyManager(FILE_USERS_DB, value)
+    manager_obj = SQLAlchemyManager(FILE_DB, value)
 
     if not manager_obj.user_obj.check_user():
         log_and_print(f'User named "{value}" not exists', level=ERROR)
+        exit(-1)
+    elif 'PASSWORD' in ctx.obj.keys() \
+            and not manager_obj.user_obj.check_user_password(ctx.obj['PASSWORD']):
+        log_and_print(f'Incorrect password for user named "{value}"', level=ERROR)
         exit(-1)
     else:
         ctx.obj['USER'] = value
@@ -48,10 +44,14 @@ def validate_user(ctx, param, value):
 
 def validate_password(ctx, param, value):
     """
-    Check user exists
+    Check password
     """
+    if 'USER' not in ctx.obj.keys():
+        ctx.obj['PASSWORD'] = value
+        return value
+
     user = ctx.obj['USER']
-    manager_obj = SQLAlchemyManager(FILE_USERS_DB, user)
+    manager_obj = SQLAlchemyManager(FILE_DB, user)
 
     if not manager_obj.user_obj.check_user_password(value):
         log_and_print(f'Incorrect password for user named "{user}"', level=ERROR)
@@ -60,25 +60,17 @@ def validate_password(ctx, param, value):
         return value
 
 
-def dangerous_warning(ctx, param, value):
-    """Предупреждение об опасности команды uupdate"""
-    log_and_print(f'The "uupdate" command is potentially dangerous.\n'
-                  f'It is strongly recommended to make a backup '
-                  f'of the "{DB_ROOT}" folder.', level=WARNING)
-    return value
-
-
 user_argument = click.option('--user', '-u', prompt="Username",
                              help="Provide your username",
                              callback=validate_user,
-                             default=get_os_username)
+                             default=os.getlogin)
 password_argument = click.option('--password', '-p', help="Provide your password",
                                  callback=validate_password,
                                  prompt=True, hide_input=True)
 
 
 @click.group()
-# @click.option('-a/-not-alias', help='print or not alias')
+# @click.option('-n/-not-name', help='print or not name')
 @click.option('-c/-not-category', help='print or not category')
 @click.option('-u/-not-url', help='print or not url')
 @click.pass_context
@@ -99,7 +91,7 @@ def cli(ctx, c, u):
     adding a new record in passwords DB:
     $ pwdone add
     or using options:
-    $ pwdone add -u user-name -l login-for-site -a record-name
+    $ pwdone add -u user-name -l login-for-site -n record-name
 
     \b
     show all user records:
@@ -115,7 +107,7 @@ def cli(ctx, c, u):
     """
     ctx.obj = {
         'FLAGS': {
-            'alias': True,
+            'name': True,
             'category': c,
             'url': u
         }
@@ -126,14 +118,15 @@ def cli(ctx, c, u):
 @click.option('--user', '-u', prompt="Username",
               help="Provide your username",
               callback=validate_new_user,
-              default=get_os_username)
+              default=os.getlogin)
 @click.option('--password', '-p', help="Provide your password",
               prompt=True, hide_input=True)
-def uadd(user, password):
+@click.option("--db", default=FILE_DB, required=False, hidden=True)
+def uadd(user, password, db):
     """
     add user command
     """
-    manager_obj = SQLAlchemyManager(FILE_USERS_DB, user)
+    manager_obj = SQLAlchemyManager(db, user)
 
     if manager_obj.user_obj.check_user():
         log_and_print(f'User named "{user}" already exists', level=ERROR)
@@ -152,56 +145,44 @@ def uadd(user, password):
               prompt="New password (Press 'Enter' for keep old password)",
               default='',
               help="Provide new password for user", hide_input=True)
-@click.option('--dangerous-warning-option', callback=dangerous_warning, required=False)
 @click.confirmation_option(prompt='Are you sure you want to update user data?')
+@click.option("--db", default=FILE_DB, required=False, hidden=True)
 def uupdate(user, password,
-            new_username, new_password, dangerous_warning_option):
+            new_username, new_password, db):
     """
     update username (and password) command
     """
-    manager_obj = SQLAlchemyManager(FILE_USERS_DB, user)
+    manager_obj = SQLAlchemyManager(db, user)
 
-    if not manager_obj.user_obj.check_user():
-        log_and_print(f'User named "{user}" not exists', level=ERROR)
-        return
-    elif not manager_obj.user_obj.check_user_password(password):
-        log_and_print(f'Incorrect password for user named "{user}"', level=ERROR)
-        return
-
-    if manager_obj.user_obj.check_user(new_username):
-        log_and_print(f'User named "{new_username}" already exists', level=ERROR)
+    new_password = None if new_password == '' else new_password
+    if manager_obj.user_obj.check_user(new_username) and not new_password:
+        log_and_print(f'User named "{new_username}" already exists '
+                      f'and no new password is given', level=ERROR)
     else:
-        new_password = None if new_password == '' else new_password
-        manager_obj.user_obj.update_user(password, new_username, new_password)
+        manager_obj.user_obj.update_user(db, password, new_username, new_password)
 
 
 @cli.command()
 @user_argument
 @password_argument
-def udelete(user, password):
+@click.option("--db", default=FILE_DB, required=False, hidden=True)
+def udelete(user, password, db):
     """
     delete user command
     """
-    manager_obj = SQLAlchemyManager(FILE_USERS_DB, user)
-
-    if not manager_obj.user_obj.check_user():
-        log_and_print(f'User named "{user}" not exists', level=ERROR)
-        return
-    elif not manager_obj.user_obj.check_user_password(password):
-        log_and_print(f'Incorrect password for user named "{user}"', level=ERROR)
-        return
+    manager_obj = SQLAlchemyManager(db, user)
 
     manager_obj.user_obj.del_user()
     log_and_print(f'User named "{user}" deleted', level=INFO)
 
 
 @cli.command()
-@click.pass_context
-def ushow(ctx):
+@click.option("--db", default=FILE_DB, required=False, hidden=True)
+def ushow(db):
     """
     show users command
     """
-    manager_obj = SQLAlchemyManager(FILE_USERS_DB)
+    manager_obj = SQLAlchemyManager(db)
 
     users = manager_obj.user_obj.all_users()
     for user in users:
@@ -216,18 +197,12 @@ def ushow(ctx):
                                        'skip for all logins, optional',
               default=None, required=False)
 @click.pass_context
-def show(ctx, user, password, category):
+@click.option("--db", default=FILE_DB, required=False, hidden=True)
+def show(ctx, user, password, category, db):
     """
     show logins command
     """
-    manager_obj = SQLAlchemyManager(FILE_USERS_DB, user)
-
-    if not manager_obj.user_obj.check_user():
-        log_and_print(f'User named "{user}" not exists', level=ERROR)
-        return
-    elif not manager_obj.user_obj.check_user_password(password):
-        log_and_print(f'Incorrect password for user named "{user}"', level=ERROR)
-        return
+    manager_obj = SQLAlchemyManager(db, user)
 
     logins = manager_obj.unit_obj.get_logins(category)
     units_composition_obj = UnitsComposition(logins)
@@ -241,53 +216,41 @@ def show(ctx, user, password, category):
 @user_argument
 @password_argument
 @click.option('-l', "--login", prompt="Login", help="Provide login")
-@click.option('-a', "--alias", prompt="Alias", help='alias', default='default')
-def get(user, password, login, alias):
+@click.option('-n', "--name", prompt="Name", help='name', default='default')
+@click.option("--db", default=FILE_DB, required=False, hidden=True)
+def get(user, password, login, name, db):
     """
     get password by login command
     """
-    manager_obj = SQLAlchemyManager(FILE_USERS_DB, user)
+    manager_obj = SQLAlchemyManager(db, user)
 
-    if not manager_obj.user_obj.check_user():
-        log_and_print(f'User named "{user}" not exists', level=ERROR)
-        return
-    elif not manager_obj.user_obj.check_user_password(password):
-        log_and_print(f'Incorrect password for user named "{user}"', level=ERROR)
-        return
-
-    if manager_obj.unit_obj.check_login(login, alias):
+    if manager_obj.unit_obj.check_login(login, name):
         pyperclip.copy(manager_obj.unit_obj
-                       .get_password(user, password, login, alias))
+                       .get_password(user, password, login, name))
         log_and_print(f'Password is placed on the clipboard', level=INFO)
     else:
-        log_and_print(f'login "{login}" with "{alias}"'
-                      f' alias not exists', level=ERROR)
+        log_and_print(f'login "{login}" with "{name}"'
+                      f' name not exists', level=ERROR)
 
 
 @cli.command()
 @user_argument
 @password_argument
 @click.option('-l', "--login", prompt="Login", help="Provide login")
-@click.option('-a', "--alias", prompt="Alias", help='alias', default='default')
-def delete(user, password, login, alias):
+@click.option('-n', "--name", prompt="Name", help='name', default='default')
+@click.option("--db", default=FILE_DB, required=False, hidden=True)
+def delete(user, password, login, name, db):
     """
     delete login and password command
     """
-    manager_obj = SQLAlchemyManager(FILE_USERS_DB, user)
+    manager_obj = SQLAlchemyManager(db, user)
 
-    if not manager_obj.user_obj.check_user():
-        log_and_print(f'User named "{user}" not exists', level=ERROR)
-        return
-    elif not manager_obj.user_obj.check_user_password(password):
-        log_and_print(f'Incorrect password for user named "{user}"', level=ERROR)
-        return
-
-    if manager_obj.unit_obj.check_login(login, alias):
-        manager_obj.unit_obj.delete_unit(login, alias)
+    if manager_obj.unit_obj.check_login(login, name):
+        manager_obj.unit_obj.delete_unit(login, name)
         log_and_print(f'Login "{login}" deleted', level=INFO)
     else:
-        log_and_print(f'login "{login}" with "{alias}"'
-                      f' alias not exists', level=ERROR)
+        log_and_print(f'login "{login}" with "{name}"'
+                      f' name not exists', level=ERROR)
 
 
 @cli.command()
@@ -296,30 +259,24 @@ def delete(user, password, login, alias):
 @click.option('-l', "--login", prompt="Login", help="Provide login")
 @click.option('-pl', '--password-for-login', prompt=True,
               help="Provide password for login", hide_input=True)
-@click.option('-a', "--alias", prompt="Alias", help='alias', default='default')
+@click.option('-n', "--name", prompt="Name", help='name', default='default')
 @click.option('-c', "--category", help='"default" or skip for default category, optional',
               default=None, required=False)
 @click.option('-ur', "--url", help='url, optional', default=None, required=False)
-def add(user, password, login, password_for_login, category, url, alias):
+@click.option("--db", default=FILE_DB, required=False, hidden=True)
+def add(user, password, login, password_for_login, category, url, name, db):
     """
     add login and password command
     """
-    manager_obj = SQLAlchemyManager(FILE_USERS_DB, user)
+    manager_obj = SQLAlchemyManager(db, user)
 
-    if not manager_obj.user_obj.check_user():
-        log_and_print(f'User named "{user}" not exists', level=ERROR)
-        return
-    elif not manager_obj.user_obj.check_user_password(password):
-        log_and_print(f'Incorrect password for user named "{user}"', level=ERROR)
-        return
-
-    if manager_obj.unit_obj.check_login(login, alias):
-        log_and_print(f'login "{login}" with "{alias}"'
-                      f' alias already exists', level=ERROR)
+    if manager_obj.unit_obj.check_login(login, name):
+        log_and_print(f'login "{login}" with "{name}"'
+                      f' name already exists', level=ERROR)
     else:
-        category = None if category == 'default' else category
+        category = 'default' if category is None else category
         manager_obj.unit_obj\
-            .add_unit(user, password, login, password_for_login, alias, category, url)
+            .add_unit(user, password, login, password_for_login, name, category, url)
         log_and_print(f'Login "{login}" added', level=INFO)
 
 
@@ -327,46 +284,39 @@ def add(user, password, login, password_for_login, category, url, alias):
 @user_argument
 @password_argument
 @click.option('-l', "--login", prompt="Login", help="Provide login")
-@click.option('-a', "--alias", prompt="Alias", help='alias', default='default')
+@click.option('-n', "--name", prompt="Name", help='name', default='default')
 @click.option('-nl', "--new-login", help='new login, optional',
               default=None, required=False)
-@click.option('-na', "--new-alias", help='"default" or skip for old alias, optional', required=False)
+@click.option('-nn', "--new-name", help='"default" or skip for old name, optional', required=False)
 @click.option('-pl', '--password-for-login',
               prompt="New password for login (Press 'Enter' for keep old password)",
               default='',
               help="Provide new password for login", hide_input=True)
-@click.option('-nc', "--new-category", help='"default" or skip for default category, optional',
+@click.option('-nc', "--new-category", help='"default" or skip for old category, optional',
               default=None, required=False)
 @click.option('-ur', "--url", help='url, optional', default=None, required=False)
-def update(user, password, login, alias,
-           new_login, new_alias, password_for_login, new_category, url):
+@click.option("--db", default=FILE_DB, required=False, hidden=True)
+def update(user, password, login, name,
+           new_login, new_name, password_for_login, new_category, url, db):
     """Update unit"""
 
-    manager_obj = SQLAlchemyManager(FILE_USERS_DB, user)
-
-    if not manager_obj.user_obj.check_user():
-        log_and_print(f'User named "{user}" not exists', level=ERROR)
-        return
-    elif not manager_obj.user_obj.check_user_password(password):
-        log_and_print(f'Incorrect password for user named "{user}"', level=ERROR)
-        return
+    manager_obj = SQLAlchemyManager(db, user)
 
     new_login = login if new_login is None else new_login
 
-    if not manager_obj.unit_obj.check_login(login, alias):
-        log_and_print(f'login "{login}" with "{alias}"'
-                      f' alias not exists', level=ERROR)
-    elif manager_obj.unit_obj.check_login(new_login, new_alias) \
-            and (login != new_login or alias != new_alias):
-        log_and_print(f'login "{login}" with "{alias}"'
-                      f' alias already exists', level=ERROR)
+    if not manager_obj.unit_obj.check_login(login, name):
+        log_and_print(f'login "{login}" with "{name}"'
+                      f' name not exists', level=ERROR)
+    elif manager_obj.unit_obj.check_login(new_login, new_name) \
+            and (login != new_login or name != new_name):
+        log_and_print(f'login "{login}" with "{name}"'
+                      f' name already exists', level=ERROR)
     else:
         password_for_login = None if password_for_login == '' else password_for_login
-        new_category = None if new_category == 'default' else new_category
         manager_obj.unit_obj\
-            .update_unit(user, password, login, alias,
+            .update_unit(user, password, login, name,
                          new_login, password_for_login,
-                         new_category, url, new_alias)
+                         new_category, url, new_name)
         log_and_print(f'Login "{login}" updated', level=INFO)
 
 

@@ -131,3 +131,4 @@ tmp.py
 db.sqlite
 
 pyproject.toml
+database.sqlite
