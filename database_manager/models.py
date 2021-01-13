@@ -171,22 +171,14 @@ class UnitManager:
 
         def make_logins_obj(units_list):
             """Выдача логинов, из списка"""
-            units_obj = {
-                "logins": [],
-                "category": [],
-                "url": [],
-                "name": []
-            }
-
+            units_obj = []
             if units_list:
-                for unit_ in units_list:
-                    units_obj['logins'].append(unit_.login)
-                    units_obj['category']\
-                        .append(unit_.category.category if unit_.category.category else 'default')
-                    units_obj['url']\
-                        .append(unit_.url if unit_.url else '')
-                    units_obj['name']\
-                        .append(unit_.name if unit_.name else '')
+                for unit in units_list:
+                    units_obj.append({
+                        'login':unit.login,
+                        'name':unit.name,
+                        'url':unit.url if unit.url else '',
+                        'category':unit.category.category})
             return units_obj
 
         if category:
