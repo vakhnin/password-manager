@@ -15,29 +15,29 @@ class UnitsComposition:
         отдаёт на выходе json, собрав его в зависимости от наших потребностей,
         которые возникнут по коду
     """
-    _data_obj = []
+    _data_obj = {}
 
     def __init__(self, data_obj=None):
         if data_obj is None:
-            data_obj = []
+            data_obj = {}
         self._data_obj = data_obj
 
     def prepare_data(self, data_obj=None):
         """Подготовка списка логинов"""
         if not data_obj:
             data_obj = self._data_obj
-        data_obj.insert(0, {'login': 'login', 'name':'name',
-                        'url':'url', 'category':'category'})
-        max_len = {}
-        for key in data_obj[0].keys():
-            max_len[key] = len(key)
-        for i in range(len(data_obj)):
-            for key, item in data_obj[i].items():
-                if len(item) > max_len[key]:
-                    max_len[key] = len(item)
-        for i in range(len(data_obj)):
-            for key in data_obj[0].keys():
-                data_obj[i][key] = data_obj[i][key].ljust(max_len[key]+1)
+        for key, lst in data_obj.items():
+            # Ищем максимальную длину строки в столбце
+            max_len = len(key)
+            for item in lst:
+                if len(item) > max_len:
+                    max_len = len(item)
+
+            # Добавляем пробелы в столбцы, для одинаковой длины столбцов
+            for i in range(len(lst)):
+                data_obj[key][i] = data_obj[key][i].ljust(max_len+1)
+            data_obj[key].insert(0, key.ljust(max_len+1))
+
         self._data_obj = data_obj
 
     def make_str_logins(self, flags=None, data_obj=None):
@@ -46,19 +46,17 @@ class UnitsComposition:
             flags = {}
         if not data_obj:
             data_obj = self._data_obj
-        flags['login'] = True
-        flags['name'] = True
 
         res_str = ""
         is_first_line = True
 
-        for i in range(len(data_obj)):
-            str_for_print = '|'
-            delimiter_str = '+'
-            for key in data_obj[i].keys():
+        for i in range(len(data_obj['logins'])):
+            str_for_print = data_obj['logins'][i]
+            delimiter_str = "-" * len(data_obj['logins'][i])
+            for key in data_obj.keys():
                 if key in flags.keys() and flags[key]:
-                    str_for_print += ' ' + data_obj[i][key] + '|'
-                    delimiter_str += '-' + '-' * len(data_obj[i][key]) + '+'
+                    str_for_print += '| ' + data_obj[key][i]
+                    delimiter_str += '+-' + '-' * len(data_obj[key][i])
             res_str += str_for_print + '\n'
             if is_first_line:
                 res_str += delimiter_str + '\n'
