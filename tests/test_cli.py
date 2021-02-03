@@ -1,9 +1,11 @@
 # python -m unittest
-import unittest
 import pathlib
+import unittest
+
 from click.testing import CliRunner
-from cli import cli
+
 import database_manager.models as models_db
+from cli import cli
 
 
 class TestCli(unittest.TestCase):
@@ -60,4 +62,4 @@ class TestCli(unittest.TestCase):
         # Нужно всем неуспешным завершениям проставить exit(-1), как в этом коммите
         res_str = result.output.split('\n')  # Делим вывод построчно
         # Проверяем нижнюю строку на соответсвии тексту ошибки
-        self.assertEqual(res_str[-2], f'Error: User named "{self._login_user}" already exists')
+        self.assertEqual(res_str[-2], f'ERROR: User named "{self._login_user}" already exists')
