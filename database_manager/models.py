@@ -34,31 +34,19 @@ class Unit(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(ForeignKey('users.id', ondelete="CASCADE"))
     login = Column(String, nullable=False)
-    url = Column(String)
     name = Column(String, nullable=False)
-    category_id = Column(ForeignKey('categories.id', ondelete="CASCADE"))
+    category = Column(String, nullable=False)
+    url = Column(String)
+    description = Column(String)
     password = Column(String, nullable=False)
     login_name = UniqueConstraint(user_id, login, name)
-    category = relationship("Category", back_populates="units")
     user = relationship("User", back_populates="units")
 
-    def __init__(self, login, password, url=None, name='default'):
+    def __init__(self, login, password, url=None, name='default', category='default'):
         self.login = login
         self.password = password
         self.url = url
         self.name = name
-
-
-class Category(Base):
-    """Определение таблицы units"""
-    __tablename__ = 'categories'
-    id = Column(Integer, primary_key=True)
-    category = Column(String, unique=True, nullable=False)
-    units = relationship("Unit",
-                         back_populates="category",
-                         cascade="all, delete-orphan")
-
-    def __init__(self, category):
         self.category = category
 
 
@@ -181,8 +169,7 @@ class UnitManager:
             if units_list:
                 for unit_ in units_list:
                     units_obj['logins'].append(unit_.login)
-                    units_obj['category']\
-                        .append(unit_.category.category if unit_.category.category else 'default')
+                    units_obj['category'].append(unit_.category)
                     units_obj['url']\
                         .append(unit_.url if unit_.url else '')
                     units_obj['name']\
@@ -191,8 +178,8 @@ class UnitManager:
 
         if category:
             units = self._session.query(Unit)\
-                .filter(Unit.user.has(User.user == self._user)
-                        & Unit.category.has(Category.category == category)).all()
+                .filter(Unit.user.has(User.user == self._user
+                                      & User.category == category)).all()
             return make_logins_obj(units)
         else:
             units = self._session.query(Unit)\
@@ -207,12 +194,8 @@ class UnitManager:
 
     def get_category(self, category):
         """Выдаем категорию, если есть, иначе создаем"""
-        category_obj = self._session.query(Category)\
-            .filter(Category.category == category).first()
-        if category_obj:
-            return category_obj
-        else:
-            return Category(category=category)
+        return self._session.query(Unit)\
+            .filter(Unit.category == category).first()
 
     def get_user(self):
         """Выдаем пользователя"""
@@ -222,9 +205,9 @@ class UnitManager:
                  category='default', url=None):
         """Добавление unit"""
         secret_obj = get_secret_obj(user, password)
-        unit_for_add = Unit(login, secret_obj.encrypt(password_for_login), url, name)
+        unit_for_add = Unit(login,
+                            secret_obj.encrypt(password_for_login), url, name, category)
         self._session.add(unit_for_add)
-        unit_for_add.category = self.get_category(category)
         unit_for_add.user = self.get_user()
         self._session.commit()
 
@@ -249,12 +232,9 @@ class UnitManager:
             update_dict['url'] = url
         if new_name:
             update_dict['name'] = new_name
-
         if new_category:
-            self._session.query(Unit)\
-                .filter(Unit.user.has(User.user == self._user)
-                        & (Unit.login == login) & (Unit.name == name))\
-                .first().category = self.get_category(new_category)
+            update_dict['category'] = new_category
+
         self._session.query(Unit)\
             .filter(Unit.user.has(User.user == self._user)
                     & (Unit.login == login) & (Unit.name == name))\
