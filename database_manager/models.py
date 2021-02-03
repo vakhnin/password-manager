@@ -178,8 +178,8 @@ class UnitManager:
 
         if category:
             units = self._session.query(Unit)\
-                .filter(Unit.user.has(User.user == self._user
-                                      & User.category == category)).all()
+                .filter(Unit.user.has(User.user == self._user)
+                        & (Unit.category == category)).all()
             return make_logins_obj(units)
         else:
             units = self._session.query(Unit)\
