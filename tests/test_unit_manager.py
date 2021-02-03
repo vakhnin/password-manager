@@ -35,7 +35,6 @@ class TestUnitManager(unittest.TestCase):
                                  tables=[
                                      Base.metadata.tables["users"],
                                      Base.metadata.tables["units"],
-                                     Base.metadata.tables["categories"]
                                  ])
 
         self._session_for_user = sessionmaker(bind=engine)()
@@ -159,6 +158,7 @@ class TestUnitManager(unittest.TestCase):
             extending functionality of dict class for dictionary of units
             """
             def __init__(self):
+                super().__init__()
                 self['logins'] = []
                 self['name'] = []
                 self['category'] = []
