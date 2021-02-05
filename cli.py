@@ -130,7 +130,6 @@ def uadd(ctx, user, password):
               prompt="New password (Press 'Enter' for keep old password)",
               default='',
               help="Provide new password for user", hide_input=True)
-@click.confirmation_option(prompt='Are you sure you want to update user data?')
 @click.pass_context
 def uupdate(ctx, user, password,
             new_username, new_password):
@@ -172,6 +171,33 @@ def ushow(ctx):
     users = manager_obj.user_obj.all_users()
     for user in users:
         print(user)
+
+
+@cli.command()
+@user_argument
+@password_argument
+@click.option('-l', "--login", prompt="Login", help="Provide login")
+@click.option('-n', "--name", prompt="Name", help='name', default='default')
+@click.option('-pl', '--password-for-login', prompt=True,
+              help="Provide password for login", hide_input=True)
+@click.option('-c', "--category", help='"default" or skip for default category, optional',
+              default=None, required=False)
+@click.option('-ur', "--url", help='url, optional', default=None, required=False)
+@click.pass_context
+def add(ctx, user, password, login,
+        password_for_login, category, url, name):
+    """
+    add login and password command
+    """
+    manager_obj = SQLAlchemyManager(ctx.obj['DB'], user)
+
+    if manager_obj.unit_obj.check_login(login, name):
+        print(f'login "{login}" with "{name}" name already exists')
+    else:
+        category = 'default' if category is None else category
+        manager_obj.unit_obj\
+            .add_unit(user, password, login, password_for_login, name, category, url)
+        print(f'Login "{login}" added')
 
 
 @cli.command()
@@ -231,33 +257,6 @@ def delete(ctx, user, password, login, name):
         print(f'Login "{login}" deleted')
     else:
         print(f'login "{login}" with "{name}" name not exists')
-
-
-@cli.command()
-@user_argument
-@password_argument
-@click.option('-l', "--login", prompt="Login", help="Provide login")
-@click.option('-pl', '--password-for-login', prompt=True,
-              help="Provide password for login", hide_input=True)
-@click.option('-n', "--name", prompt="Name", help='name', default='default')
-@click.option('-c', "--category", help='"default" or skip for default category, optional',
-              default=None, required=False)
-@click.option('-ur', "--url", help='url, optional', default=None, required=False)
-@click.pass_context
-def add(ctx, user, password, login,
-        password_for_login, category, url, name):
-    """
-    add login and password command
-    """
-    manager_obj = SQLAlchemyManager(ctx.obj['DB'], user)
-
-    if manager_obj.unit_obj.check_login(login, name):
-        print(f'login "{login}" with "{name}" name already exists')
-    else:
-        category = 'default' if category is None else category
-        manager_obj.unit_obj\
-            .add_unit(user, password, login, password_for_login, name, category, url)
-        print(f'Login "{login}" added')
 
 
 @cli.command()
