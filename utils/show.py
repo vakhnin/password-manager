@@ -1,7 +1,4 @@
-import datetime as dt
-
-
-class UnitsComposition:
+class ShowUtils:
     """Класс компоновки юнитов на выдачу
     
     Пока общими словами описываю данные, т.к. сопоставление точек соприкосновения
@@ -61,24 +58,3 @@ class UnitsComposition:
                 is_first_line = False
 
         return res_str.strip()
-
-
-class TimeoutController:
-    """Класс проверки истечения времени активной сессии
-    
-    IN:
-        Получаем на вход объект БД с атрибутом времени посещения
-    OUT:
-        Если delta между текущим временем и полученным в атрибуте БД больше
-        _default_time_session, то возвращаем False; если меньше, то возвращаем
-        True и запрашиваем обновление времени в БД по этому объекту
-    """
-    # _default_time_session = TIME_SESSION_CLOSE
-
-    def check_time_permission(self, check_datetime):
-        """
-        проверка дельты между переданным datetime и текущим,
-        возвращаем True, если дельта меньше дефолтного времени, отведённого на длительность сессии, иначе False
-        """
-        # return dt.datetime.today() - check_datetime \
-        #     < dt.timedelta(seconds=self._default_time_session)

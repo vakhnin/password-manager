@@ -6,7 +6,7 @@ import pyperclip
 
 from database_manager.models import SQLAlchemyManager
 from settings import FILE_DB
-from units_manager.models import UnitsComposition
+from utils.show import ShowUtils
 
 
 def validate_user(ctx, param, value):
@@ -214,7 +214,7 @@ def show(ctx, user, password, category):
     manager_obj = SQLAlchemyManager(ctx.obj['DB'], user)
 
     logins = manager_obj.unit_obj.get_logins(category)
-    units_composition_obj = UnitsComposition(logins)
+    units_composition_obj = ShowUtils(logins)
     units_composition_obj.prepare_data()
     res_str = units_composition_obj.make_str_logins(ctx.obj['FLAGS'])
     print(res_str)
