@@ -97,16 +97,15 @@ class UserManager:
         """
         if not new_password:
             new_password = password
-        new_manager_obj = SQLAlchemyManager(db, self._user)
-        logins = new_manager_obj.unit_obj.get_logins()
-        logins_list = logins.get('logins')
-        name_list = logins.get('name')
-        for i in range(len(logins_list)):
-            password_for_login = new_manager_obj.unit_obj.get_password(self._user, password, logins_list[i],
-                                                                       name_list[i])
-            new_manager_obj.unit_obj \
-                .update_unit(new_user, new_password,
-                             logins_list[i], password_for_login=password_for_login, name=name_list[i])
+
+        manager_obj = SQLAlchemyManager(db, self._user)
+        for unit in manager_obj.unit_obj.get_logins():
+            password_for_login =\
+                manager_obj.unit_obj.get_password(
+                    self._user, password, unit.login, unit.name)
+            manager_obj.unit_obj \
+                .update_unit(new_user, new_password, unit.login,
+                             password_for_login=password_for_login, name=unit.name)
 
         if new_password:
             secret_password = new_user + new_password
@@ -114,7 +113,8 @@ class UserManager:
             secret_password = new_user + password
         pass_hash = get_hash(secret_password.encode("utf-8"))
         self._session.query(User) \
-            .filter(User.user == self._user).update({"user": new_user, "password": pass_hash})
+            .filter(User.user == self._user)\
+            .update({"user": new_user, "password": pass_hash})
 
         self._session.commit()
         print(f'User "{self._user}" updated. New username is "{new_user}"')

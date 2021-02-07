@@ -125,7 +125,7 @@ def uadd(ctx, user, password):
 @cli.command()
 @user_argument
 @password_argument
-@click.option('-nu', '--new-username',
+@click.option('-nu', '--new-user',
               prompt="New username", help="Provide new username")
 @click.option('-np', '--new-password',
               prompt="New password (Press 'Enter' for keep old password)",
@@ -133,18 +133,22 @@ def uadd(ctx, user, password):
               help="Provide new password for user", hide_input=True)
 @click.pass_context
 def uupdate(ctx, user, password,
-            new_username, new_password):
+            new_user, new_password):
     """
     update username (and password) command
     """
     manager_obj = SQLAlchemyManager(ctx.obj['DB'], user)
 
     new_password = None if new_password == '' else new_password
-    if manager_obj.user_obj.check_user(new_username) and not new_password:
-        print(f'ERROR: User named "{new_username}" already exists '
-              f'and no new password is given')
+
+    if user == new_user and not new_password:
+        print(f'User "{user}" not updated. Nothing for change.')
+    elif manager_obj.user_obj.check_user(new_user) \
+            and user != new_user:
+        print(f'ERROR: User named "{new_user}" already exists')
     else:
-        manager_obj.user_obj.update_user(ctx.obj['DB'], password, new_username, new_password)
+        manager_obj.user_obj\
+            .update_user(ctx.obj['DB'], password, new_user, new_password)
 
 
 @cli.command()
