@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship, sessionmaker
 
 from encryption_manager.models import get_hash, get_secret_obj
 from settings import FILE_DB
+from utils.show import UnitData
 
 Base = declarative_base()
 
@@ -155,21 +156,17 @@ class UnitManager:
 
         def make_logins_obj(units_list):
             """Выдача логинов, из списка"""
-            units_obj = {
-                "logins": [],
-                "category": [],
-                "url": [],
-                "name": []
-            }
+            units_obj = []
 
             if units_list:
-                for unit_ in units_list:
-                    units_obj['logins'].append(unit_.login)
-                    units_obj['category'].append(unit_.category)
-                    units_obj['url']\
-                        .append(unit_.url if unit_.url else '')
-                    units_obj['name']\
-                        .append(unit_.name if unit_.name else '')
+                for unit in units_list:
+
+                    units_obj.append(UnitData(
+                        unit.login,
+                        unit.name,
+                        unit.category,
+                        unit.url if unit.url else '',
+                    ))
             return units_obj
 
         if category:

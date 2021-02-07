@@ -1,58 +1,68 @@
+from typing import List
+
+
+class UnitData:
+    login: str
+    name: str
+    category: str
+    url: str
+
+    def __init__(self, login='', name='', category='', url=''):
+        self.login = login
+        self.name = name
+        self.category = category
+        self.url = url
+
+    def set(self, key, value):
+        self.__setattr__(key, value)
+
+
 class ShowUtils:
-    """Класс компоновки юнитов на выдачу
-    
-    Пока общими словами описываю данные, т.к. сопоставление точек соприкосновения
-    мы ещё не делали
-
-    IN: 
-        Получает на вход выгруженные данные из БД
-    OUT:
-        отдаёт на выходе json, собрав его в зависимости от наших потребностей,
-        которые возникнут по коду
     """
-    _data_obj = {}
+    Обработка юнитов
+    """
+    @staticmethod
+    def extend_fields(units_list: List[UnitData]):
+        """Подготовка списка юнитов"""
+        max_len_fields = UnitData().__dict__
+        for key in max_len_fields.keys():
+            max_len_fields[key] = len(key)
 
-    def __init__(self, data_obj=None):
-        if data_obj is None:
-            data_obj = {}
-        self._data_obj = data_obj
+        for unit in units_list:
+            for key, value in unit.__dict__.items():
+                if len(value) > max_len_fields[key]:
+                    max_len_fields[key] = len(value)
 
-    def prepare_data(self, data_obj=None):
-        """Подготовка списка логинов"""
-        if not data_obj:
-            data_obj = self._data_obj
-        for key, lst in data_obj.items():
-            # Ищем максимальную длину строки в столбце
-            max_len = len(key)
-            for item in lst:
-                if len(item) > max_len:
-                    max_len = len(item)
+        for i, unit in enumerate(units_list):
+            for key, value in unit.__dict__.items():
+                units_list[i].set(
+                    key, value.ljust(max_len_fields[key] + 1))
 
-            # Добавляем пробелы в столбцы, для одинаковой длины столбцов
-            for i in range(len(lst)):
-                data_obj[key][i] = data_obj[key][i].ljust(max_len+1)
-            data_obj[key].insert(0, key.ljust(max_len+1))
+        return units_list
 
-        self._data_obj = data_obj
-
-    def make_str_logins(self, flags=None, data_obj=None):
+    @staticmethod
+    def make_str_units(units_list: List[UnitData], flags):
         """Печатем логины с флагами"""
-        if not flags:
-            flags = {}
-        if not data_obj:
-            data_obj = self._data_obj
+        if len(units_list) < 1:
+            return ''
 
-        res_str = ""
+        res_str = ''
         is_first_line = True
+        delimiter_str = ''
 
-        for i in range(len(data_obj['logins'])):
-            str_for_print = data_obj['logins'][i]
-            delimiter_str = "-" * len(data_obj['logins'][i])
-            for key in data_obj.keys():
+        title = UnitData()
+        for key, value in units_list[0].__dict__.items():
+            title.set(key, key.ljust(len(value)))
+            delimiter_str += '+-' + '-' * len(value)
+        units_list.insert(0, title)
+        delimiter_str += '+'
+
+        for unit in units_list:
+            str_for_print = ''
+            for key, value in unit.__dict__.items():
                 if key in flags.keys() and flags[key]:
-                    str_for_print += '| ' + data_obj[key][i]
-                    delimiter_str += '+-' + '-' * len(data_obj[key][i])
-            res_str += str_for_print + '\n'
+                    str_for_print += '| ' + value
+            res_str += str_for_print + '|\n'
             if is_first_line:
                 res_str += delimiter_str + '\n'
                 is_first_line = False

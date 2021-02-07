@@ -92,6 +92,7 @@ def cli(ctx, c, u, db):
     """
     ctx.obj = {
         'FLAGS': {
+            'login': True,
             'name': True,
             'category': c,
             'url': u
@@ -213,10 +214,9 @@ def show(ctx, user, password, category):
     """
     manager_obj = SQLAlchemyManager(ctx.obj['DB'], user)
 
-    logins = manager_obj.unit_obj.get_logins(category)
-    units_composition_obj = ShowUtils(logins)
-    units_composition_obj.prepare_data()
-    res_str = units_composition_obj.make_str_logins(ctx.obj['FLAGS'])
+    units = manager_obj.unit_obj.get_logins(category)
+    units = ShowUtils.extend_fields(units)
+    res_str = ShowUtils.make_str_units(units, ctx.obj['FLAGS'])
     print(res_str)
 
 
