@@ -16,6 +16,17 @@ class UnitData:
     def set(self, key, value):
         self.__setattr__(key, value)
 
+    def __str__(self):
+        return self.__dict__
+
+    def __eq__(self, other):
+        if isinstance(other, UnitData):
+            return (self.login == other.login and
+                    self.name == other.name and
+                    self.category == other.category and
+                    self.url == other.url)
+        return NotImplemented
+
 
 class ShowUtils:
     """

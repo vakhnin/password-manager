@@ -7,6 +7,7 @@ from sqlalchemy.orm import sessionmaker
 
 from database_manager.models import Base, UnitManager, UserManager
 from encryption_manager.models import get_secret_obj
+from utils.show import UnitData
 
 
 class TestUnitManager(unittest.TestCase):
@@ -171,12 +172,12 @@ class TestUnitManager(unittest.TestCase):
                 self['url'].append(url)
 
         # create three dictionaries for collections of units with different categories
-        units_default_category = UnitsObj()
-        units_category1 = UnitsObj()
-        units_category2 = UnitsObj()
+        units_default_category = []
+        units_category1 = []
+        units_category2 = []
 
         # union of created dictionaries
-        units_all = UnitsObj()
+        units_all = []
 
         # create three collections of units with different categories with adding them to DB and dictionaries
         unit_obj = UnitManager(self._session_for_user, self._test_user)
@@ -187,8 +188,8 @@ class TestUnitManager(unittest.TestCase):
                 self._test_user, self._test_pwd_user,
                 test_login, test_pwd_login
             )
-            units_default_category.append(test_login)
-            units_all.append(test_login)
+            units_default_category.append(UnitData(test_login, 'default', 'default'))
+            units_all.append(UnitData(test_login, 'default', 'default'))
 
         for i in '456':
             test_login = 'test-login-' + i
@@ -200,8 +201,8 @@ class TestUnitManager(unittest.TestCase):
                 self._test_user, self._test_pwd_user,
                 test_login, test_pwd_login, test_name, category=test_category, url=test_url
             )
-            units_category1.append(test_login, test_name, test_category, test_url)
-            units_all.append(test_login, test_name, test_category, test_url)
+            units_category1.append(UnitData(test_login, test_name, test_category, test_url))
+            units_all.append(UnitData(test_login, test_name, test_category, test_url))
 
         for i in '789':
             test_login = 'test-login-' + i
@@ -213,8 +214,8 @@ class TestUnitManager(unittest.TestCase):
                 self._test_user, self._test_pwd_user,
                 test_login, test_pwd_login, test_name, category=test_category, url=test_url
             )
-            units_category2.append(test_login, test_name, test_category, test_url)
-            units_all.append(test_login, test_name, test_category, test_url)
+            units_category2.append(UnitData(test_login, test_name, test_category, test_url))
+            units_all.append(UnitData(test_login, test_name, test_category, test_url))
 
         # check the equivalence of dictionary and result of get_logins method for all units
         self.assertEqual(units_all, unit_obj.get_logins())
