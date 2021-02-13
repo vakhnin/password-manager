@@ -3,7 +3,7 @@ from sqlalchemy import (Column, ForeignKey, Integer, String, UniqueConstraint,
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 
-from encryption_manager.models import get_hash, get_secret_obj
+from utils.crypt import get_hash, get_secret_obj
 from settings import FILE_DB
 from utils.show import UnitData
 

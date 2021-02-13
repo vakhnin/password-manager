@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from database_manager.models import Base, UnitManager, UserManager
-from encryption_manager.models import get_secret_obj
+from utils.crypt import get_secret_obj
 from utils.show import UnitData
 
 

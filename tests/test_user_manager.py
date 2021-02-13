@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from database_manager.models import Base, UserManager
-from encryption_manager.models import get_hash
+from utils.crypt import get_hash
 
 
 class TestUserManager(unittest.TestCase):
