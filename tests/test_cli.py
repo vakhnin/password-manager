@@ -4,7 +4,7 @@ import unittest
 
 from click.testing import CliRunner
 
-import database_manager.models as models_db
+import database_manager.manager as models_db
 from cli import cli
 
 

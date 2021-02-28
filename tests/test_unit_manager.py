@@ -5,7 +5,7 @@ import unittest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from database_manager.models import Base, UnitManager, UserManager
+from database_manager.manager import Base, UnitManager, UserManager
 from utils.crypt import get_secret_obj
 from utils.show import UnitData
 
@@ -32,11 +32,7 @@ class TestUnitManager(unittest.TestCase):
         # Создание файла БД, если его нет
         if not os.path.isdir(self.dir_path):
             os.makedirs(self.dir_path)
-        Base.metadata.create_all(engine,
-                                 tables=[
-                                     Base.metadata.tables["users"],
-                                     Base.metadata.tables["units"],
-                                 ])
+        Base.metadata.create_all(engine)
 
         self._session_for_user = sessionmaker(bind=engine)()
         

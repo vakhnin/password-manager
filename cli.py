@@ -4,7 +4,7 @@ import os
 import click
 import pyperclip
 
-from database_manager.models import SQLAlchemyManager
+from database_manager.manager import SQLAlchemyManager
 from settings import FILE_DB
 from utils.show import ShowUtils
 
