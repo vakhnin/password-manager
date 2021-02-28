@@ -64,7 +64,8 @@ class ShowUtils:
         title = UnitData()
         for key, value in units_list[0].__dict__.items():
             title.set(key, key.ljust(len(value)))
-            delimiter_str += '+-' + '-' * len(value)
+            if key in flags.keys() and flags[key]:
+                delimiter_str += '+-' + '-' * len(value)
         units_list.insert(0, title)
         delimiter_str += '+'
 
