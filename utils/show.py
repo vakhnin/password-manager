@@ -32,6 +32,7 @@ class ShowUtils:
     """
     Обработка юнитов
     """
+
     @staticmethod
     def extend_fields(units_list: List[UnitData]):
         """Подготовка списка юнитов"""

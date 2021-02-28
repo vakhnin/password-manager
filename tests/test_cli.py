@@ -22,19 +22,19 @@ class TestCli(unittest.TestCase):
         cls.runner = CliRunner()
         # ручная проверка и создание тестовых директорий с тестовыми БД
         if not pathlib.Path.exists(cls._path_project):
-            pathlib.Path.mkdir(cls._path_project)   
-        # создание тестовой БД пользователей
+            pathlib.Path.mkdir(cls._path_project)
+            # создание тестовой БД пользователей
         cls._file_user_db = cls._path_project / 'test_users.sqlite'
         # инициация менеджера управления тестовыми БД
         cls._test_BD = models_db.SQLAlchemyManager(
             file_db=cls._file_user_db, user=cls._login_user
-        )        
+        )
 
     @classmethod
     def tearDownClass(cls):
         """Очистка сгенерированных тестовых данных"""
         pathlib.Path.unlink(cls._path_project / 'test_users.sqlite')
-    
+
     def test_uadd(self):
         """
         Test uadd command

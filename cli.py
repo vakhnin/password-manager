@@ -13,6 +13,7 @@ def validate_user(ctx, param, value):
     """
     Check user exists
     """
+    _ = param
     manager_obj = SQLAlchemyManager(ctx.obj['DB'], value)
 
     if not manager_obj.user_obj.check_user():
@@ -31,6 +32,7 @@ def validate_password(ctx, param, value):
     """
     Check password
     """
+    _ = param
     if 'USER' not in ctx.obj.keys():
         ctx.obj['PASSWORD'] = value
         return value
@@ -147,7 +149,7 @@ def uupdate(ctx, user, password,
             and user != new_user:
         print(f'ERROR: User named "{new_user}" already exists')
     else:
-        manager_obj.user_obj\
+        manager_obj.user_obj \
             .update_user(ctx.obj['DB'], password, new_user, new_password)
 
 
@@ -159,6 +161,7 @@ def udelete(ctx, user, password):
     """
     delete user command
     """
+    _ = password
     manager_obj = SQLAlchemyManager(ctx.obj['DB'], user)
 
     manager_obj.user_obj.del_user()
@@ -200,7 +203,7 @@ def add(ctx, user, password, login,
         print(f'login "{login}" with "{name}" name already exists')
     else:
         category = 'default' if category is None else category
-        manager_obj.unit_obj\
+        manager_obj.unit_obj \
             .add_unit(user, password, login, password_for_login, name, category, url)
         print(f'Login "{login}" added')
 
@@ -216,6 +219,7 @@ def show(ctx, user, password, category):
     """
     show logins command
     """
+    _ = password
     manager_obj = SQLAlchemyManager(ctx.obj['DB'], user)
 
     units = manager_obj.unit_obj.get_logins(category)
@@ -254,6 +258,7 @@ def delete(ctx, user, password, login, name):
     """
     delete login and password command
     """
+    _ = password
     manager_obj = SQLAlchemyManager(ctx.obj['DB'], user)
 
     if manager_obj.unit_obj.check_login(login, name):
@@ -294,7 +299,7 @@ def update(ctx, user, password, login, name,
         print(f'login "{login}" with "{name}" name already exists')
     else:
         password_for_login = None if password_for_login == '' else password_for_login
-        manager_obj.unit_obj\
+        manager_obj.unit_obj \
             .update_unit(user, password, login, name,
                          new_login, password_for_login,
                          new_category, url, new_name)

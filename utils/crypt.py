@@ -22,6 +22,7 @@ class AESCipher(object):
     A classical AES Cipher. Can use any size of data and any size of password thanks to padding.
     Also ensure the coherence and the type of the data with a unicode to byte converter.
     """
+
     def __init__(self, key):
         self.bs = 32
         self.key = hashlib.sha256(AESCipher.str_to_bytes(key)).digest()
@@ -38,7 +39,7 @@ class AESCipher(object):
 
     @staticmethod
     def _unpad(s):
-        return s[:-ord(s[len(s)-1:])]
+        return s[:-ord(s[len(s) - 1:])]
 
     def encrypt(self, raw):
         raw = self._pad(AESCipher.str_to_bytes(raw))

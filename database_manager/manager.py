@@ -1,9 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from database_manager.models import User, Unit, Base
-from utils.crypt import get_hash, get_secret_obj
+from database_manager.models import Base, Unit, User
 from settings import FILE_DB
+from utils.crypt import get_hash, get_secret_obj
 from utils.show import UnitData
 
 
@@ -59,7 +59,7 @@ class UserManager:
 
         manager_obj = SQLAlchemyManager(db, self._user)
         for unit in manager_obj.unit_obj.get_logins():
-            password_for_login =\
+            password_for_login = \
                 manager_obj.unit_obj.get_password(
                     self._user, password, unit.login, unit.name)
             manager_obj.unit_obj \
@@ -72,7 +72,7 @@ class UserManager:
             secret_password = new_user + password
         pass_hash = get_hash(secret_password.encode("utf-8"))
         self._session.query(User) \
-            .filter(User.user == self._user)\
+            .filter(User.user == self._user) \
             .update({"user": new_user, "password": pass_hash})
 
         self._session.commit()
@@ -83,7 +83,7 @@ class UserManager:
         delete user from BD
         """
         self._session.query(Unit) \
-            .filter(Unit.user.has(User.user == self._user))\
+            .filter(Unit.user.has(User.user == self._user)) \
             .delete(synchronize_session='fetch')
         self._session.query(User) \
             .filter(User.user == self._user).delete()
@@ -119,7 +119,6 @@ class UnitManager:
 
             if units_list:
                 for unit in units_list:
-
                     units_obj.append(UnitData(
                         unit.login,
                         unit.name,
@@ -129,24 +128,24 @@ class UnitManager:
             return units_obj
 
         if category:
-            units = self._session.query(Unit)\
+            units = self._session.query(Unit) \
                 .filter(Unit.user.has(User.user == self._user)
                         & (Unit.category == category)).all()
             return make_logins_obj(units)
         else:
-            units = self._session.query(Unit)\
+            units = self._session.query(Unit) \
                 .filter(Unit.user.has(User.user == self._user)).all()
             return make_logins_obj(units)
 
     def check_login(self, login, name):
         """Проверка существования логина"""
-        return self._session.query(Unit)\
+        return self._session.query(Unit) \
             .filter(Unit.user.has(User.user == self._user) & (Unit.login == login)
                     & (Unit.name == name)).all()
 
     def get_category(self, category):
         """Выдаем категорию, если есть, иначе создаем"""
-        return self._session.query(Unit)\
+        return self._session.query(Unit) \
             .filter(Unit.category == category).first()
 
     def get_user(self):
@@ -166,7 +165,7 @@ class UnitManager:
     def get_password(self, user, password, login, name):
         """Получение пароля"""
         secret_obj = get_secret_obj(user, password)
-        unit_obj = self._session.query(Unit)\
+        unit_obj = self._session.query(Unit) \
             .filter(Unit.user.has(User.user == self._user) &
                     (Unit.login == login) & (Unit.name == name)).first()
         return secret_obj.decrypt(unit_obj.password)
@@ -187,9 +186,9 @@ class UnitManager:
         if new_category:
             update_dict['category'] = new_category
 
-        self._session.query(Unit)\
+        self._session.query(Unit) \
             .filter(Unit.user.has(User.user == self._user)
-                    & (Unit.login == login) & (Unit.name == name))\
+                    & (Unit.login == login) & (Unit.name == name)) \
             .update(update_dict, synchronize_session='fetch')
         self._session.commit()
 
@@ -197,7 +196,7 @@ class UnitManager:
         """Удаление unit"""
         self._session.query(Unit) \
             .filter(Unit.user.has(User.user == self._user)
-                    & (Unit.login == login) & (Unit.name == name))\
+                    & (Unit.login == login) & (Unit.name == name)) \
             .delete(synchronize_session='fetch')
         self._session.commit()
 

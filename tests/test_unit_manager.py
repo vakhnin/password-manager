@@ -35,11 +35,11 @@ class TestUnitManager(unittest.TestCase):
         Base.metadata.create_all(engine)
 
         self._session_for_user = sessionmaker(bind=engine)()
-        
+
         # Добавление тестового пользователя
         user_obj = UserManager(self._session_for_user, self._test_user)
         user_obj.add_user(self._test_pwd_user)
-        
+
         # Инициализация sqlite3
         self._conn_sqlite = sqlite3.connect(self.file_path)
         self._cursor_sqlite = self._conn_sqlite.cursor()
@@ -70,18 +70,18 @@ class TestUnitManager(unittest.TestCase):
         sql = "SELECT login, password FROM units WHERE login = ? and name = ?"
         self._cursor_sqlite.execute(sql, ([self._test_login, 'default']))
         result = self._cursor_sqlite.fetchall()
-        
+
         # check that the result is only one line
         self.assertEqual(1, len(result))
-        
+
         # check that 'login' field is correct
         self.assertEqual(self._test_login, result[0][0])
-        
+
         # check that encrypted password for login is written correctly
         secret_obj = get_secret_obj(self._test_user, self._test_pwd_user)
         encrypted_pass = secret_obj.encrypt(self._test_pwd_login)
         self.assertEqual(secret_obj.decrypt(encrypted_pass), secret_obj.decrypt(result[0][1]))
-        
+
         # сheck that exeption is occur when adding a unit that already exists
         exception_occur = False
         try:
@@ -150,10 +150,12 @@ class TestUnitManager(unittest.TestCase):
         """
         check for get_logins
         """
+
         class UnitsObj(dict):
             """
             extending functionality of dict class for dictionary of units
             """
+
             def __init__(self):
                 super().__init__()
                 self['logins'] = []
