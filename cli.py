@@ -151,6 +151,7 @@ def uupdate(ctx, user, password,
     else:
         manager_obj.user_obj \
             .update_user(ctx.obj['DB'], password, new_user, new_password)
+        print(f'User "{user}" updated. New username is "{new_user}"')
 
 
 @cli.command()

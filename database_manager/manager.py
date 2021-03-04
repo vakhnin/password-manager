@@ -76,7 +76,6 @@ class UserManager:
             .update({"user": new_user, "password": pass_hash})
 
         self._session.commit()
-        print(f'User "{self._user}" updated. New username is "{new_user}"')
 
     def del_user(self):
         """
