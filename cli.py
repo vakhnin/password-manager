@@ -2,7 +2,7 @@
 import os
 
 import click
-import pyperclip
+from tkinter import Tk
 
 from database_manager.manager import SQLAlchemyManager
 from settings import FILE_DB
@@ -242,8 +242,13 @@ def get(ctx, user, password, login, name):
     manager_obj = SQLAlchemyManager(ctx.obj['DB'], user)
 
     if manager_obj.unit_obj.check_login(login, name):
-        pyperclip.copy(manager_obj.unit_obj
-                       .get_password(user, password, login, name))
+        tk_obj = Tk()
+        tk_obj.withdraw()
+        tk_obj.clipboard_clear()
+        tk_obj.clipboard_append(manager_obj.unit_obj
+                                .get_password(user, password, login, name))
+        tk_obj.update()
+        tk_obj.destroy()
         print(f'Password is placed on the clipboard')
     else:
         print(f'login "{login}" with "{name}" name not exists')
