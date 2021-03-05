@@ -115,6 +115,9 @@ logins
             ```
          - Run bash --login for login mode because ~/.profile 
            is executed for login shells.
+           ```
+           $ bash --login
+           ```
            <br>
     <br>      
 
