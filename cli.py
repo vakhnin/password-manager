@@ -1,8 +1,8 @@
 # cli.py
 import os
+from tkinter import Tk
 
 import click
-from tkinter import Tk
 
 from database_manager.manager import SQLAlchemyManager
 from settings import FILE_DB
