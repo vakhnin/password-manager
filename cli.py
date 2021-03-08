@@ -5,7 +5,7 @@ from tkinter import Tk
 import click
 
 from database_manager.manager import SQLAlchemyManager
-from settings import FILE_DB
+from utils.settings import FILE_DB
 from utils.show import ShowUtils
 
 

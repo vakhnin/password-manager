@@ -2,8 +2,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from database_manager.models import Base, Unit, User
-from settings import FILE_DB
 from utils.crypt import get_hash, get_secret_obj
+from utils.settings import FILE_DB
 from utils.show import UnitData
 
 
