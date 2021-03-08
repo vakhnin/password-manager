@@ -8,10 +8,15 @@ from setuptools import setup
 
 setup(
     name='pwdone',
-    version='1.1',
+    version='1.2',
     py_modules=['cli'],
+    test_suite='tests',
     install_requires=[
-        'Click',
+        'click',
+        'sqlalchemy',
+        'tk',
+        'pycryptodomex',
+        'pycryptodome',
     ],
     entry_points='''
         [console_scripts]
