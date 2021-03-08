@@ -1,5 +1,5 @@
 # python -m unittest
-import pathlib
+import os
 import unittest
 
 from click.testing import CliRunner
@@ -11,20 +11,23 @@ from cli import cli
 class TestCli(unittest.TestCase):
     _login_user = 'temp'
     _password_user = 'temp1234!@#$'
-    _path_project = pathlib.Path.cwd() / 'tests'
+    _path_project = os.path.dirname(os.path.abspath(__file__))
 
     @classmethod
     def setUpClass(cls):
         """Инициация тестовой базы данных"""
-        if pathlib.Path.exists(cls._path_project / 'test_users.sqlite'):
-            pathlib.Path.unlink(cls._path_project / 'test_users.sqlite')
+        if os.path.isfile(
+                cls._path_project + os.sep + 'test_users.sqlite'):
+            os.remove(
+                cls._path_project + os.sep + 'test_users.sqlite')
         # инициация runner через которого будем обращаться к cli
         cls.runner = CliRunner()
         # ручная проверка и создание тестовых директорий с тестовыми БД
-        if not pathlib.Path.exists(cls._path_project):
-            pathlib.Path.mkdir(cls._path_project)
+        if not os.path.exists(cls._path_project):
+            os.mkdir(cls._path_project)
             # создание тестовой БД пользователей
-        cls._file_user_db = cls._path_project / 'test_users.sqlite'
+        cls._file_user_db = cls._path_project \
+                            + os.sep + 'test_users.sqlite'
         # инициация менеджера управления тестовыми БД
         cls._test_BD = models_db.SQLAlchemyManager(
             file_db=cls._file_user_db, user=cls._login_user
@@ -33,7 +36,8 @@ class TestCli(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         """Очистка сгенерированных тестовых данных"""
-        pathlib.Path.unlink(cls._path_project / 'test_users.sqlite')
+        os.remove(
+            cls._path_project + os.sep + 'test_users.sqlite')
 
     def test_uadd(self):
         """

@@ -1,3 +1,4 @@
-import pathlib
+import os
 
-FILE_DB = pathlib.Path(__file__).parent / 'database.sqlite'
+FILE_DB = os.path.dirname(os.path.abspath(__file__)) \
+          + os.sep + 'database.sqlite'
