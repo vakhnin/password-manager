@@ -13,15 +13,17 @@ setup(
     test_suite='tests',
     packages=find_packages(),
     install_requires=[
+        'tk',
+        'pathlib',
         'click',
         'sqlalchemy',
-        'tk',
         'pycryptodomex',
         'pycryptodome',
     ],
     zip_safe=False,
-    entry_points='''
-        [console_scripts]
-        pwdone=cli:cli
-    ''',
+    entry_points = {
+        "console_scripts": [
+            "pwdone = cli:cli",
+        ]
+    }
 )
