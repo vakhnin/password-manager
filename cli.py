@@ -1,8 +1,8 @@
 # cli.py
 import os
-from tkinter import Tk
 
 import click
+import pyperclip
 
 from database_manager.manager import SQLAlchemyManager
 from utils.settings import FILE_DB
@@ -242,13 +242,8 @@ def get(ctx, user, password, login, name):
     manager_obj = SQLAlchemyManager(ctx.obj['DB'], user)
 
     if manager_obj.unit_obj.check_login(login, name):
-        tk_obj = Tk()
-        tk_obj.withdraw()
-        tk_obj.clipboard_clear()
-        tk_obj.clipboard_append(manager_obj.unit_obj
-                                .get_password(user, password, login, name))
-        tk_obj.update()
-        tk_obj.destroy()
+        pyperclip.copy(manager_obj.unit_obj
+                       .get_password(user, password, login, name))
         print(f'Password is placed on the clipboard')
     else:
         print(f'login "{login}" with "{name}" name not exists')
@@ -311,12 +306,6 @@ def update(ctx, user, password, login, name,
                          new_category, url, new_name)
         print(f'Login "{login}" updated')
 
-
-@cli.command()
-def where():
-    """show where DB file"""
-    print(FILE_DB)
-    
 
 if __name__ == '__main__':
     cli()
