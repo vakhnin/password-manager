@@ -13,7 +13,7 @@ setup(
     test_suite='tests',
     packages=find_packages(),
     install_requires=[
-        'tk',
+        'pyperclip',
         'pathlib',
         'click',
         'sqlalchemy',
