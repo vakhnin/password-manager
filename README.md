@@ -8,7 +8,7 @@ logins
 ### Contents
 1\. Common commands
 
-2\. Installing the utility
+2\. Installing and unistall the utility
 
 3\. Backup and restore data
 <br>
@@ -92,41 +92,24 @@ logins
        $ sudo apt upgrade
        $ sudo apt install python3-pip
        $ pip3 --version
-       ```
+       ```       
        <br>
-       install pipenv:
+       install pwdone:
        
        ```
-       pip3 install --user pipenv
+       $ sudo apt install -y xclip
+       $ git clone https://github.com/vakhnin/pwdone.git
+       $ cd pwdone
+       $ pip3 install --user .
+       $ echo -e "export PATH=\"$HOME/.local/bin:$PATH\"" >> ~/.bashrc
+       $ source ~/.bashrc
+       ```     
+       <br>
+       uninstall pwdone:
+       
        ```
-       if you see a warning like this
+       $ pip3 uninstall -y pwdone
        ```
-       WARNING: The script virtualenv is installed 
-       in '/home/user-name/.local/bin' which is not on PATH.
-       ```
-       follow this:
-         - Open ~/.profile file.
-         - Check if ~/.local/bin path exists in that file.
-         - If not add these following lines:
-            ```
-            # set PATH so it includes user's private bin if it exists
-            if [ -d "$HOME/.local/bin" ] ; then
-               PATH="$HOME/.local/bin:$PATH"
-            ```
-         - Run bash --login for login mode because ~/.profile 
-           is executed for login shells.
-           ```
-           $ bash --login
-           ```
-           <br>
-    <br>      
-
-    install pwdone:
-    ```
-    $ cd pwdone-folder
-    $ pipenv install -e .
-    $ pipenv shell
-    ```
     <br>                 
 
     2. Installing on Windows
@@ -142,6 +125,13 @@ logins
    check pip3:
    ```
    $ pip3 --version
+   ```       
+   <br>
+   clone pwdone
+   
+   ```
+   $ git clone https://github.com/vakhnin/pwdone.git
+   $ cd pwdone
    ```
    install pipenv:
    
@@ -151,8 +141,7 @@ logins
 
    install pwdone:
    ```
-   $ cd pwdone-folder
-   $ pipenv install -e .
+   $ pipenv install
    $ pipenv shell
    ```   
 
@@ -175,3 +164,8 @@ logins
    You can simply copy the database.sqlite file for 
    backup and replace the database.sqlite file with 
    the one you previously saved to restore all data.
+   
+   Show where is BD file:
+   ```
+   $ pwdone where
+   ```   
