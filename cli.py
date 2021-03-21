@@ -330,5 +330,11 @@ def update(ctx, user, password, login, name,
         print(f'Login "{login}" updated')
 
 
+@cli.command()
+def where():
+    """show where DB file"""
+    print(FILE_DB)
+
+
 if __name__ == '__main__':
     cli()
