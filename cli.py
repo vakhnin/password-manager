@@ -1,5 +1,8 @@
 # cli.py
 import os
+import platform
+import subprocess
+from subprocess import Popen
 
 import click
 import pyperclip
@@ -101,6 +104,15 @@ def cli(ctx, c, u, db):
         },
         'DB': db,
     }
+    if 'Linux' in platform.platform():
+        xclip_subprocess = Popen(['which', 'xclip'],
+                                 stderr=subprocess.DEVNULL,
+                                 stdout=subprocess.DEVNULL)
+        if xclip_subprocess.wait(timeout=2):
+            print('Command \'xclip\' not found, '
+                  'but can be installed with:')
+            print('sudo apt install xclip')
+            exit(-1)
 
 
 @cli.command()
@@ -242,8 +254,19 @@ def get(ctx, user, password, login, name):
     manager_obj = SQLAlchemyManager(ctx.obj['DB'], user)
 
     if manager_obj.unit_obj.check_login(login, name):
-        pyperclip.copy(manager_obj.unit_obj
-                       .get_password(user, password, login, name))
+        password = manager_obj.unit_obj\
+            .get_password(user, password, login, name)
+        pyperclip.copy(password)
+
+        if 'Linux' in platform.platform():
+            xclip_subprocess = Popen(
+                ['xclip', '-selection', 'primary', '-f'],
+                stdin=subprocess.PIPE, stdout=subprocess.DEVNULL)
+            xclip_subprocess.communicate(input=(password.encode()))
+            xclip_subprocess = Popen(
+                ['xclip', '-selection', 'clipboard', '-f'],
+                stdin=subprocess.PIPE, stdout=subprocess.DEVNULL)
+            xclip_subprocess.communicate(input=(password.encode()))
         print(f'Password is placed on the clipboard')
     else:
         print(f'login "{login}" with "{name}" name not exists')

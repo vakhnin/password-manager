@@ -21,7 +21,7 @@ setup(
         'pycryptodome',
     ],
     zip_safe=False,
-    entry_points = {
+    entry_points={
         "console_scripts": [
             "pwdone = cli:cli",
         ]
