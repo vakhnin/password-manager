@@ -112,49 +112,32 @@ logins
        ```
     <br>                 
 
-    2. Installing on Windows
+    2. Installing on Windows   
+        <br>   
+        the utility requires python 3.8 or higher<br> 
+        check version python:
+        ```
+        > python --version
+        ```
+      
+        check pip3:
+        ```
+        > pip3 --version
+        ```       
+        <br>
    
-   <br>
-   
-   the utility requires python 3.8 or higher<br> 
-   check version python:
-   ```
-   $ python --version
-   ```
-   
-   check pip3:
-   ```
-   $ pip3 --version
-   ```       
-   <br>
-   clone pwdone
-   
-   ```
-   $ git clone https://github.com/vakhnin/pwdone.git
-   $ cd pwdone
-   ```
-   install pipenv:
-   
-   ```
-   pip3 install pipenv
-   ```    
-
-   install pwdone:
-   ```
-   $ pipenv install
-   $ pipenv shell
-   ```   
-
-   making .msi installer for Windows:
-   ```
-   $ python setup.py bdist --format=msi
-   ```   
-
-   run the .msi installer in the 'dist' folder by double click
-   <br>
-   <br>
-   To uninstall pwdone, look in Apps & features Windows 
-   for an application like 'Python pwdone-1.0'
+         install pwdone:
+         ```
+         > git clone https://github.com/vakhnin/pwdone.git
+         > cd pwdone
+         pwdone> pip3 install .
+         ```   
+         <br>
+         uninstall pwdone:  
+       
+         ```
+         > pip uninstall -y pwdone
+         ```
    
 
 3. Backup and restore data
