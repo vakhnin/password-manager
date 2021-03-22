@@ -61,11 +61,8 @@ logins
    ```
 
 2. Installing the utility
-
-   <br>
-
     1. Installing on Ubuntu
-       <br>   
+       
        the utility requires python 3.8 or higher
 
        check version python:
@@ -91,7 +88,7 @@ logins
        uninstall pwdone:       
        ```
        $ pip3 uninstall -y pwdone
-       $ pip3 uninstall -y -r requirements.txt
+       $ pip3 uninstall -y -r uninstall_list.txt
        ```              
 
     2. Installing on Windows  
@@ -114,7 +111,7 @@ logins
          uninstall pwdone:        
          ```
          pwdone> pip uninstall -y pwdone
-         pwdone> pip uninstall -y -r requirements.txt
+         pwdone> pip uninstall -y -r uninstall_list.txt
          ```
        
 3. Backup and restore data
