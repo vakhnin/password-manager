@@ -4,17 +4,26 @@
 # Создание установщика для Windows
 # $ python setup.py bdist --format=msi
 # Установщик в папке dist
-from setuptools import setup
+from setuptools import find_packages, setup
 
 setup(
     name='pwdone',
-    version='1.1',
+    version='1.2',
     py_modules=['cli'],
+    test_suite='tests',
+    packages=find_packages(),
     install_requires=[
-        'Click',
+        'pyperclip',
+        'pathlib',
+        'click',
+        'sqlalchemy',
+        'pycryptodomex',
+        'pycryptodome',
     ],
-    entry_points='''
-        [console_scripts]
-        pwdone=cli:cli
-    ''',
+    zip_safe=False,
+    entry_points={
+        "console_scripts": [
+            "pwdone = cli:cli",
+        ]
+    }
 )

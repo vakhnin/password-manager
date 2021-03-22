@@ -5,8 +5,8 @@ import unittest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from database_manager.models import Base, UserManager
-from encryption_manager.models import get_hash
+from database_manager.manager import Base, UserManager
+from utils.crypt import get_hash
 
 
 class TestUserManager(unittest.TestCase):
@@ -26,11 +26,7 @@ class TestUserManager(unittest.TestCase):
         # Создание файла БД, если его нет
         if not os.path.isdir(self.dir_path):
             os.makedirs(self.dir_path)
-        Base.metadata.create_all(engine,
-                                 tables=[
-                                     Base.metadata.tables["users"],
-                                     Base.metadata.tables["units"]
-                                 ])
+        Base.metadata.create_all(engine)
 
         self._session_for_user = sessionmaker(bind=engine)()
 
@@ -94,16 +90,16 @@ class TestUserManager(unittest.TestCase):
         # check that the check_user method confirms user existence in BD
         user_exist = user_obj.check_user()
         self.assertEqual(True, user_exist)
-        
+
         # check that the check_user method confirms the absence of a user that hasn't been added to BD
         sql = "SELECT * FROM users WHERE user = ?"
         self._cursor_sqlite.execute(sql, (['non-existent-user']))
         result = self._cursor_sqlite.fetchall()
         self.assertEqual([], result)  # user 'non-existent-user' isn't exists in BD
-        
+
         user_exist = user_obj.check_user('non-existent-user')
         self.assertEqual(False, user_exist)
-        
+
     def test_check_user_password(self):
         """
         check for check_user_password
@@ -120,7 +116,7 @@ class TestUserManager(unittest.TestCase):
         # check that the check_user_password method doesn't confirm incorrect password
         pass_is_correct = user_obj.check_user_password('some-incorrect-password')
         self.assertEqual(False, pass_is_correct)
-        
+
     def test_del_user(self):
         """
         check for del_user
@@ -153,7 +149,7 @@ class TestUserManager(unittest.TestCase):
         # check the equivalence of the list of users with the data from the all_users method
         users_list_from_BD = user_obj.all_users()
         self.assertEqual(users_list, users_list_from_BD)
-        
+
 
 if __name__ == '__main__':
     unittest.main()

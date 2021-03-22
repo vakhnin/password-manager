@@ -1,7 +1,7 @@
 import random
 import unittest
 
-from encryption_manager.models import AESCipher, get_hash
+from utils.crypt import AESCipher, get_hash
 
 PASSWORDCHARS = '+-/*!&$#?=@<>abcdefghijklnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'
 STRCHARS = ' abcdefghijklnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'
