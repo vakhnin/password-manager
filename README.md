@@ -110,8 +110,8 @@ logins
          ```  
          uninstall pwdone:        
          ```
-         pwdone> pip uninstall -y pwdone
-         pwdone> pip uninstall -y -r uninstall_list.txt
+         pwdone> pip3 uninstall -y pwdone
+         pwdone> pip3 uninstall -y -r uninstall_list.txt
          ```
        
 3. Backup and restore data
