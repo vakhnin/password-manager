@@ -11,24 +11,17 @@ logins
 2\. Installing and unistall the utility
 
 3\. Backup and restore data
-<br>
-<br>
-
 1. Common commands
-   <br>
-   <br>
-
+   
    help on using the utility:
    ```
    $ pwdone --help
    ```
-   <br>   
-
+   
    more detailed help on using utility commands:
    ```
    $ pwdone [command] --help
-   ```
-   <br>   
+   ```  
 
    adding a new user:
    ```
@@ -37,8 +30,7 @@ logins
    or using options:
    ```
    $ pwdone uadd -u user-name
-   ``` 
-   <br>      
+   ```      
 
    adding a new record in passwords DB:
    ```
@@ -47,14 +39,12 @@ logins
    or using options:
    ```
    $ pwdone add -u user-name -l login-for-site -n record-name
-   ```
-   <br>   
+   ```  
 
    show all user records:
    ```
    $ pwdone show
-   ```
-   <br>   
+   ```  
 
    get the password of record to the clipboard:
    ```
@@ -63,14 +53,12 @@ logins
    or using options:
    ```
    $ pwdone get -n record-name
-   ```
-   <br>   
+   ```  
 
    full list of command options:
    ```
    $ pwdone [command] --help
    ```
-   <br>  
 
 2. Installing the utility
 
@@ -84,18 +72,14 @@ logins
        ```
        $ python3 --version
        ```
-       <br>
-       install pip3:
-       
+       install pip3:       
        ```
        $ sudo apt update
        $ sudo apt upgrade
        $ sudo apt install python3-pip
        $ pip3 --version
-       ```       
-       <br>
-       install pwdone:
-       
+       ``` 
+       install pwdone:       
        ```
        $ sudo apt install -y xclip
        $ git clone https://github.com/vakhnin/pwdone.git
@@ -103,43 +87,36 @@ logins
        $ pip3 install --user .
        $ echo -e "export PATH=\"$HOME/.local/bin:$PATH\"" >> ~/.bashrc
        $ source ~/.bashrc
-       ```     
-       <br>
-       uninstall pwdone:
-       
+       ``` 
+       uninstall pwdone:       
        ```
        $ pip3 uninstall -y pwdone
-       ```
-    <br>                 
+       $ pip3 uninstall -y -r requirements.txt
+       ```              
 
-    2. Installing on Windows   
-        <br>   
+    2. Installing on Windows  
+       
         the utility requires python 3.8 or higher<br> 
         check version python:
         ```
         > python --version
-        ```
-      
+        ```      
         check pip3:
         ```
         > pip3 --version
-        ```       
-        <br>
-   
+        ```     
          install pwdone:
          ```
          > git clone https://github.com/vakhnin/pwdone.git
          > cd pwdone
          pwdone> pip3 install .
-         ```   
-         <br>
-         uninstall pwdone:  
+         ```  
+         uninstall pwdone:        
+         ```
+         pwdone> pip uninstall -y pwdone
+         pwdone> pip uninstall -y -r requirements.txt
+         ```
        
-         ```
-         > pip uninstall -y pwdone
-         ```
-   
-
 3. Backup and restore data
    <br>
    <br>

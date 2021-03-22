@@ -1,0 +1,6 @@
+pyperclip
+pathlib
+click
+sqlalchemy
+pycryptodomex
+pycryptodome
