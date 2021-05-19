@@ -62,7 +62,11 @@ logins
 
 2. Installing the utility
     1. Installing on Ubuntu
-       
+       <br/>
+       <br/>
+       pwdone works in the X Window System
+       <br/>
+       <br/>
        the utility requires python 3.8 or higher
 
        check version python:
